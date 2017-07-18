@@ -17,7 +17,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 
-from .users.api import UserViewSet
+from .users.api import UserViewSet, profile_view
 from .cameras.api import ServerViewSet, CameraViewSet, CameraGroupViewSet
 
 router = DefaultRouter(trailing_slash=True)
@@ -29,5 +29,6 @@ router.register(r'camera_groups', CameraGroupViewSet)
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api/', include(router.urls)),
+    url(r'^accounts/profile/', profile_view),
     url(r'^api/rest-auth/', include('rest_auth.urls')),
 ]
