@@ -131,6 +131,6 @@ STATIC_URL = '/static/'
 AUTH_USER_MODEL = 'users.User'
 
 try:
-    from students.settings_local import *
+    from theorema.settings_local import *
 except ImportError as exc:
     __import__('warnings').warn("Can't load local settings: {}".format(str(exc)))
