@@ -11,6 +11,7 @@ class User(AbstractUser):
     tab_settings = models.BooleanField(default=True)
     tab_cameras = models.BooleanField(default=True)
 
+'''
 # https://stackoverflow.com/questions/26786512/how-to-see-if-a-field-changed-in-model-save-method
 @receiver(models.signals.pre_save, sender=User)
 def hash_pass(sender, instance, **kwargs):
@@ -20,3 +21,4 @@ def hash_pass(sender, instance, **kwargs):
             instance.set_password(instance.password)
     except sender.DoesNotExist:
         instance.set_password(instance.password)
+'''
