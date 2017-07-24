@@ -19,12 +19,14 @@ from rest_framework.routers import DefaultRouter
 
 from .users.api import UserViewSet, profile_view
 from .cameras.api import ServerViewSet, CameraViewSet, CameraGroupViewSet
+from .orgs.api import OrganizationViewSet
 
 router = DefaultRouter(trailing_slash=True)
 router.register(r'users', UserViewSet)
 router.register(r'servers', ServerViewSet)
 router.register(r'cameras', CameraViewSet)
 router.register(r'camera_groups', CameraGroupViewSet)
+router.register(r'organizations', OrganizationViewSet)
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),

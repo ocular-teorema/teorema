@@ -1,9 +1,11 @@
 from django.db import models
 from django.core.validators import RegexValidator
+from theorema.orgs.models import Organization
 
 class Server(models.Model):
     name = models.CharField(max_length=100)
     address = models.GenericIPAddressField()
+    organization = models.ForeignKey(Organization)
 
 
 class CameraGroup(models.Model):
@@ -38,6 +40,12 @@ class Camera(models.Model):
     compress_level = models.SmallIntegerField(default=1)
     is_active = models.BooleanField(default=True)
     port = models.IntegerField()
-    group = models.ForeignKey(CameraGroup)
+    camera_groups = models.ManyToManyField('CameraGroup', related_name='cameras', through='Camera2CameraGroup')
+    server = models.ForeignKey(Server)
+
+
+class Camera2CameraGroup(models.Model):
+    camera = models.ForeignKey(CameraGroup)
+    camera_group = models.ForeignKey(Camera)
 
 
