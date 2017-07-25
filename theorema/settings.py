@@ -64,7 +64,7 @@ ROOT_URLCONF = 'theorema.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'theorema/templates'), os.path.join(BASE_DIR, 'theorema-frontend/dist/index')],
+        'DIRS': [os.path.join(BASE_DIR, 'theorema/templates'), os.path.join(BASE_DIR, 'theorema-frontend/dist')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -142,9 +142,9 @@ PROJECT_STATIC_ROOT = os.path.join(BASE_DIR, 'theorema-frontend/dist/static')
 STATIC_ROOT = os.path.join(ROOT, 'static_collect/')
 STATIC_URL = '/static/'
 
-#STATICFILES_DIRS = (
-#    PROJECT_STATIC_ROOT,
-#)
+STATICFILES_DIRS = (
+    PROJECT_STATIC_ROOT,
+)
 
 
 MEDIA_ROOT = os.path.join(ROOT, 'media/')
