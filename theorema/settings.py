@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'theorema.users',
     'theorema.cameras',
     'theorema.orgs',
+    'theorema.other',
 ]
 
 MIDDLEWARE = [
@@ -63,7 +64,7 @@ ROOT_URLCONF = 'theorema.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'theorema/templates'), os.path.join(BASE_DIR, 'theorema-frontend/dist/index')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -137,7 +138,7 @@ STATIC_URL = '/static/'
 AUTH_USER_MODEL = 'users.User'
 
 ROOT = os.path.dirname(os.path.realpath(__file__))
-# PROJECT_STATIC_ROOT = os.path.join(BASE_DIR, 'theorema-frontend/dist/static')
+PROJECT_STATIC_ROOT = os.path.join(BASE_DIR, 'theorema-frontend/dist/static')
 STATIC_ROOT = os.path.join(ROOT, 'static_collect/')
 STATIC_URL = '/static/'
 
