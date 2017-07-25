@@ -16,7 +16,7 @@ class CameraGroupSerializer(serializers.ModelSerializer):
         )
 
 class CameraSerializer(M2MHelperSerializer):
-    camera_group = serializers.CharField(required=False)
+    camera_group = serializers.JSONField(required=False)
     class Meta:
         model = Camera
         fields = (
