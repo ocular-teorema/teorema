@@ -10,7 +10,7 @@ class Server(models.Model):
 
 class CameraGroup(models.Model):
     name = models.CharField(max_length=100, unique=True)
-
+    organization = models.ForeignKey(Organization)    
     
 CameraAnalysisTypes = [
     (1, 'Full'),

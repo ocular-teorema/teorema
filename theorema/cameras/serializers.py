@@ -29,7 +29,7 @@ class CameraSerializer(M2MHelperSerializer):
         if isinstance(validated_data['camera_group'], int):
             validated_data['camera_group'] = CameraGroup.objects.get(id=int(validated_data['camera_group']))
         else:
-            camera_group = CameraGroup(name=validated_data['camera_group'])
+            camera_group = CameraGroup(name=validated_data['camera_group'], organization=validated_data['organization'])
             camera_group.save()
             validated_data['camera_group'] = camera_group
         return super().create(validated_data)
@@ -38,7 +38,7 @@ class CameraSerializer(M2MHelperSerializer):
         if isinstance(validated_data['camera_group'], int):
             validated_data['camera_group'] = CameraGroup.objects.get(id=int(validated_data['camera_group']))
         else:
-            camera_group = CameraGroup(name=validated_data['camera_group'])
+            camera_group = CameraGroup(name=validated_data['camera_group'], organization=validated_data['organization'])
             camera_group.save()
             validated_data['camera_group'] = camera_group
         return super().update(camera, validated_data)
