@@ -26,25 +26,21 @@ class CameraSerializer(M2MHelperSerializer):
         )
 
     def create(self, validated_data):
-        try:
-            int(validated_data['camera_group'])
-        except ValueError:
+        if isinstance(validated_data['camera_group'], int):
+            validated_data['camera_group'] = CameraGroup.objects.get(id=int(validated_data['camera_group']))
+        else:
             camera_group = CameraGroup(name=validated_data['camera_group'])
             camera_group.save()
             validated_data['camera_group'] = camera_group
-        else:
-            validated_data['camera_group'] = CameraGroup.objects.get(id=int(validated_data['camera_group']))
         return super().create(validated_data)
 
     def update(self, camera, validated_data):
-        try:
-            int(validated_data['camera_group'])
-        except ValueError:
+        if isinstance(validated_data['camera_group'], int):
+            validated_data['camera_group'] = CameraGroup.objects.get(id=int(validated_data['camera_group']))
+        else:
             camera_group = CameraGroup(name=validated_data['camera_group'])
             camera_group.save()
             validated_data['camera_group'] = camera_group
-        else:
-            validated_data['camera_group'] = CameraGroup.objects.get(id=int(validated_data['camera_group']))
         return super().update(camera, validated_data)
 
     def to_representation(self, camera):
