@@ -45,5 +45,5 @@ class CameraSerializer(M2MHelperSerializer):
 
     def to_representation(self, camera):
         res = super().to_representation(camera)
-        res['camera_group'] = camera.camera_group.id
+        res['camera_group'] = CameraGroupSerializer().to_representation(camera.camera_group)
         return res
