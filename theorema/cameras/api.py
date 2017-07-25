@@ -7,6 +7,14 @@ class ServerViewSet(ModelViewSet):
     queryset = Server.objects.all()
     serializer_class = ServerSerializer
 
+    def get_queryset(self):
+        if not self.request.user.is_staff:
+            return self.queryset.filter(organization=self.request.user.organization)
+        param = self.request.query_params.get('organization', None)
+        if param is not None:
+            return self.queryset.filter(organization__id=param)
+        return self.queryset
+
 
 class CameraViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -15,12 +23,13 @@ class CameraViewSet(ModelViewSet):
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            return self.queryset.filter(server__organization=self.request.user.organization)
+            return self.queryset.filter(organization=self.request.user.organization)
         param = self.request.query_params.get('organization', None)
         if param is not None:
-            return self.queryset.filter(server__organization__id=param)
+            return self.queryset.filter(organization__id=param)
         return self.queryset
         
+
 class CameraGroupViewSet(ModelViewSet):
     queryset = CameraGroup.objects.all()
     serializer_class = CameraGroupSerializer
