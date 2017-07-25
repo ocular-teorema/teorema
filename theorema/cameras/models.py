@@ -27,10 +27,7 @@ CameraResolutions = [
     (6, '4K'),
 ]
 
-alnum = RegexValidator(r'^[0-9a-zA-Z]*$', 'Only English letters and digits are allowed')
-
 class Camera(models.Model):
-    cam = models.CharField(max_length=100, validators=[alnum], unique=True)
     name = models.CharField(max_length=100)
     address = models.CharField(max_length=400)
     fps = models.SmallIntegerField(default=10)
@@ -39,9 +36,9 @@ class Camera(models.Model):
     storage_life = models.IntegerField(default=7)
     compress_level = models.SmallIntegerField(default=1)
     is_active = models.BooleanField(default=True)
-    port = models.IntegerField()
-    camera_groups = models.ManyToManyField('CameraGroup', related_name='cameras', through='Camera2CameraGroup')
+    camera_group = models.ForeignKey(CameraGroup)
     server = models.ForeignKey(Server)
+    organization = models.ForeignKey(Organization)
 
 
 class Camera2CameraGroup(models.Model):

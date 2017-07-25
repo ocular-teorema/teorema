@@ -19,6 +19,7 @@ class CameraSerializer(M2MHelperSerializer):
     class Meta:
         model = Camera
         fields = (
-                'id', 'cam', 'name', 'address', 'fps', 'analysis', 'resolution',
-                'storage_life', 'compress_level', 'is_active', 'port', 'server',
+                'id', 'name', 'address', 'fps', 'analysis', 'resolution',
+                'storage_life', 'compress_level', 'is_active', 'server',
+                'camera_group', 'organization',
         )
