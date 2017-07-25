@@ -16,6 +16,7 @@ class CameraGroupSerializer(serializers.ModelSerializer):
         )
 
 class CameraSerializer(M2MHelperSerializer):
+    camera_group = serializers.CharField(required=False)
     class Meta:
         model = Camera
         fields = (
@@ -23,3 +24,30 @@ class CameraSerializer(M2MHelperSerializer):
                 'storage_life', 'compress_level', 'is_active', 'server',
                 'camera_group', 'organization',
         )
+
+    def create(self, validated_data):
+        try:
+            int(validated_data['camera_group'])
+        except ValueError:
+            camera_group = CameraGroup(name=validated_data['camera_group'])
+            camera_group.save()
+            validated_data['camera_group'] = camera_group
+        else:
+            validated_data['camera_group'] = CameraGroup.objects.get(id=int(validated_data['camera_group']))
+        return super().create(validated_data)
+
+    def update(self, camera, validated_data):
+        try:
+            int(validated_data['camera_group'])
+        except ValueError:
+            camera_group = CameraGroup(name=validated_data['camera_group'])
+            camera_group.save()
+            validated_data['camera_group'] = camera_group
+        else:
+            validated_data['camera_group'] = CameraGroup.objects.get(id=int(validated_data['camera_group']))
+        return super().update(camera, validated_data)
+
+    def to_representation(self, camera):
+        res = super().to_representation(camera)
+        res['camera_group'] = camera.camera_group.id
+        return res
