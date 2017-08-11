@@ -9,7 +9,7 @@ class User(AbstractUser):
     fio = models.CharField(max_length=300)
     is_organization_admin = models.BooleanField(default=False)
     organization = models.ForeignKey(Organization, null=True)
-    cameras_access = JSONField()
+    cameras_access = JSONField(null=True)
 
 # https://stackoverflow.com/questions/26786512/how-to-see-if-a-field-changed-in-model-save-method
 @receiver(models.signals.pre_save, sender=User)
