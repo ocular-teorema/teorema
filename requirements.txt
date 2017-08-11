@@ -14,3 +14,4 @@ requests-oauthlib==0.8.0
 six==1.10.0
 urllib3==1.21.1
 psycopg2==2.7.2
+Flask==0.12.2
