@@ -1,4 +1,4 @@
 CAMDIR = '/home/egor/processInstances'
-ARCHDIR = '/home/VideoArchive'
+ARCHDIR = '/home/egor/VideoArchive'
 CONFIG_NAME = 'theorem.conf'
 DBDIR = 'DB'
