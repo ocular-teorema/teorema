@@ -20,7 +20,7 @@ from rest_framework.routers import DefaultRouter
 from .users.api import UserViewSet, profile_view
 from .cameras.api import ServerViewSet, CameraViewSet, CameraGroupViewSet
 from .orgs.api import OrganizationViewSet
-from .other.views import index, login
+from .other.views import index, login, stat
 
 
 router = DefaultRouter(trailing_slash=True)
@@ -35,6 +35,7 @@ urlpatterns = [
     url(r'^api/', include(router.urls)),
     url(r'^accounts/profile/', profile_view),
     url(r'^api/rest-auth/', include('rest_auth.urls')),
+    url(r'stat/', stat),
 ]
 
 

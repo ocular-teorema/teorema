@@ -1,4 +1,8 @@
+import requests
+import json
+import random
 from rest_framework import serializers
+from rest_framework.exceptions import APIException
 from .models import Server, Camera, CameraGroup
 from theorema.m2mhelper import M2MHelperSerializer
 
@@ -22,8 +26,11 @@ class CameraSerializer(M2MHelperSerializer):
         fields = (
                 'id', 'name', 'address', 'fps', 'analysis', 'resolution',
                 'storage_life', 'compress_level', 'is_active', 'server',
-                'camera_group', 'organization',
+                'camera_group', 'organization', 'port',
         )
+        extra_kwargs = {
+            'port': {'read_only': True}
+        }
 
     def create(self, validated_data):
         if isinstance(validated_data['camera_group'], int):
@@ -32,15 +39,45 @@ class CameraSerializer(M2MHelperSerializer):
             camera_group = CameraGroup(name=validated_data['camera_group'], organization=validated_data['organization'])
             camera_group.save()
             validated_data['camera_group'] = camera_group
-        return super().create(validated_data)
+        # TODO check if port already used
+        validated_data['port'] = random.randrange(15000, 16000)
+        result = super().create(validated_data)
+
+        try:
+            worker_data = {k:v for k,v in validated_data.items()}
+            worker_data.pop('server')
+            worker_data.pop('camera_group')
+            worker_data.pop('organization')
+            worker_data['id'] = result.id
+            raw_response = requests.post('http://{}:5000'.format(validated_data['server'].address), json=worker_data)
+            worker_response = json.loads(raw_response.content.decode())
+        except Exception as e:
+            raise APIException(code=400, detail={'message': str(e)})
+        if worker_response['status']:
+            raise APIException(code=400, detail={'message': worker_response['message']})
+        return result
 
     def update(self, camera, validated_data):
+        try:
+            worker_data = {k:v for k,v in validated_data.items()}
+            worker_data.pop('server')
+            worker_data.pop('camera_group')
+            worker_data.pop('organization')
+            worker_data['id'] = camera.id
+            raw_response = requests.patch('http://{}:5000'.format(validated_data['server'].address), json=worker_data)
+            worker_response = json.loads(raw_response.content.decode())
+        except Exception as e:
+            raise APIException(code=400, detail={'message': str(e)})
+        if worker_response['status']:
+            raise APIException(code=400, detail={'message': worker_response['message']})
+
         if isinstance(validated_data['camera_group'], int):
             validated_data['camera_group'] = CameraGroup.objects.get(id=int(validated_data['camera_group']))
         else:
             camera_group = CameraGroup(name=validated_data['camera_group'], organization=validated_data['organization'])
             camera_group.save()
             validated_data['camera_group'] = camera_group
+
         return super().update(camera, validated_data)
 
     def to_representation(self, camera):

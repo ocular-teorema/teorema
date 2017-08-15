@@ -39,6 +39,7 @@ class Camera(models.Model):
     camera_group = models.ForeignKey(CameraGroup)
     server = models.ForeignKey(Server)
     organization = models.ForeignKey(Organization)
+    port = models.IntegerField()
 
 
 class Camera2CameraGroup(models.Model):
