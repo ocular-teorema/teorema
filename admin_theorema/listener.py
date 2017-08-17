@@ -64,7 +64,6 @@ class ControlPi(Thread):
 
     @with_lock
     def check_processes(self):
-        print('zzzz')
         for cam, cam_info in all_cams_info.items():
             if cam_info['is_active'] and process_died(cam_info['process']):
                 cam_info['process'] = launch_process(COMMAND, os.path.join(CAMDIR, cam))
