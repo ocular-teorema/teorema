@@ -3,8 +3,8 @@ from rest_framework.decorators import api_view
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import User
-from .serializers import UserSerializer
+from .models import User, CamSet
+from .serializers import UserSerializer, CamSetSerializer
 from theorema.cameras.models import Camera, CameraGroup
 from theorema.cameras.serializers import CameraSerializer, CameraGroupSerializer
 
@@ -64,3 +64,10 @@ def user_cameras(request):
             group_repr['cameras'].append(camera_repr)
         result['groups'].append(group_repr)
     return Response(result)
+
+
+class CamSetViewSet(ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    queryset = CamSet.objects.all()
+    serializer_class = CamSetSerializer
+

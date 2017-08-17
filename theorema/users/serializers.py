@@ -1,6 +1,6 @@
 from django.http import HttpResponseForbidden
 from rest_framework import serializers
-from .models import User
+from .models import User, CamSet
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,3 +15,17 @@ class UserSerializer(serializers.ModelSerializer):
             'is_staff': {'read_only': True},
         }
 
+
+class CamSetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CamSet
+        fields = (
+                'id', 'user', 'name', 'cameras',
+        )
+        extra_kwargs = {
+            'user': {'read_only': True}
+        }
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)

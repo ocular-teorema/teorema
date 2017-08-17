@@ -20,3 +20,11 @@ def hash_pass(sender, instance, **kwargs):
             instance.set_password(instance.password)
     except sender.DoesNotExist:
         instance.set_password(instance.password)
+
+
+class CamSet(models.Model):
+    user = models.ForeignKey(User)
+    name = models.CharField(max_length=500)
+    cameras = JSONField(null=True)
+
+
