@@ -17,7 +17,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 
-from .users.api import UserViewSet, profile_view, user_cameras
+from .users.api import UserViewSet, profile_view, user_cameras, CamSetViewSet
 from .cameras.api import ServerViewSet, CameraViewSet, CameraGroupViewSet
 from .orgs.api import OrganizationViewSet
 from .other.views import index, login, stat
@@ -29,6 +29,7 @@ router.register(r'servers', ServerViewSet)
 router.register(r'cameras', CameraViewSet)
 router.register(r'camera_groups', CameraGroupViewSet)
 router.register(r'organizations', OrganizationViewSet)
+router.register(r'camsets', CamSetViewSet)
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),

@@ -1,3 +1,5 @@
+import sys
+import traceback
 import os
 import shutil
 from threading import Lock, Thread
@@ -30,6 +32,7 @@ def get_saved_cams():
     return [f for f in os.listdir(CAMDIR) if not os.path.isfile(os.path.join(CAMDIR, f))]
 
 def save_cam_state(numeric_id, **kwargs):
+    print('saving cam state')
     with open(os.path.join(get_cam_path(numeric_id), ADDITIONAL_CONFIG), 'w') as f:
         f.write(json.dumps(kwargs))
 
@@ -46,7 +49,7 @@ def stop_cam(numeric_id):
 def with_lock(func):
     def result(*args, **kwargs):
         with lock:
-            func(*args, **kwargs)
+            return func(*args, **kwargs)
     return result
 
 
@@ -57,7 +60,7 @@ class ControlPi(Thread):
                 self.check_processes()
                 time.sleep(LAG)
             except Exception as e:
-                print(str(e))
+                print('\n'.join(traceback.format_exception(*sys.exc_info())))
 
     @with_lock
     def check_processes(self):
@@ -78,15 +81,18 @@ class Cam(Resource):
         cam_path = get_cam_path(req['id'])
         try:
             os.makedirs(os.path.join(cam_path, DBDIR))
+            print('---saving config---')
             save_config(req['id'], req)
             is_active = req.get('is_active', 1)
             save_cam_state(req['id'], is_active=is_active)
             all_cams_info['cam'+req['id']] = {
                 'is_active': is_active,
-                'process' = launch_process(COMMAND, os.path.join(CAMDIR, 'cam'+req['id'])) if is_active else None,
+                'process': launch_process(COMMAND, os.path.join(CAMDIR, 'cam'+req['id'])) if is_active else None,
             }
         except Exception as e:
-            return {'status': 1, 'message': str(e)}
+            print('----ecxepction---')
+            print('\n'.join(traceback.format_exception(*sys.exc_info())))
+            return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
         return {'status': 0}
 
     @with_lock
@@ -98,7 +104,7 @@ class Cam(Resource):
             all_cams_info.pop('cam'+req['id'])
             shutil.rmtree(cam_path)
         except Exception as e:
-            return {'status': 1, 'message': str(e)}
+            return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
         return {'status': 0}
 
     @with_lock
@@ -111,7 +117,7 @@ class Cam(Resource):
             stop_cam(req['id'])
             save_cam_state(req['id'], is_active=req.get('is_active', 1))
         except Exception as e:
-            return {'status': 1, 'message': str(e)}
+            return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
         return {'status': 0}
 
 
@@ -125,7 +131,7 @@ class Stat(Resource):
                 'status': 0
             }
         except Exception as e:
-            return {'status': 1, 'message': str(e)}
+            return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
 
 
 @with_lock
