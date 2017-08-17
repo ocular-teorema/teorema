@@ -12,10 +12,14 @@ from settings import *
 app = Flask(__name__)
 api = Api(app)
 
+def get_cam_saved_state(numeric_id):
+    f = open(os.path.join(get_cam_path(numeric_id), ADDITIONAL_CONFIG))
+    result = bool(int(f.read()[0]))
+    f.close()
+    return result
 
-def get_cam_path(req):
-    return os.path.join(CAMDIR, 'cam'+str(req['id']))
-
+def get_cam_path(numeric_id):
+    return os.path.join(CAMDIR, 'cam'+str(numeric_id))
 
 def get_filesystem_info():
         # man df
@@ -51,14 +55,14 @@ def stop_cam(numeric_id):
 class Cam(Resource):
     def post(self):
         req = request.get_json()
-        cam_path = get_cam_path(req)
+        cam_path = get_cam_path(req['id'])
         try:
             os.makedirs(os.path.join(cam_path, DBDIR))
             f = open(os.path.join(cam_path, CONFIG_NAME), 'w')
             f.write('\n'.join(['{}={}'.format(k, v) for k, v in req.items()]))
             f.close()
             f = open(os.path.join(cam_path, ADDITIONAL_CONFIG), 'w')
-            f.write(req['is_active'])
+            f.write(req.get('is_active', '1'))
             f.close()
         except Exception as e:
             return {'status': 1, 'message': str(e)}
@@ -66,7 +70,7 @@ class Cam(Resource):
 
     def delete(self):
         req = request.get_json()
-        cam_path = get_cam_path(req)
+        cam_path = get_cam_path(req['id'])
         try:
             stop_cam(req['id'])
             all_cams_info.pop('cam'+req['id'])
@@ -77,13 +81,13 @@ class Cam(Resource):
 
     def patch(self):
         req = request.get_json()
-        cam_path = get_cam_path(req)
+        cam_path = get_cam_path(req['id'])
         stop_cam(req['id'])
         try:
             f = open(os.path.join(cam_path, CONFIG_NAME), 'w')
 
             f.close()
-            if req['is_active']:        
+            if req['is_active']:
                 start_cam(req['id'])
             else:
                 stop_cam(req['id'])
@@ -101,7 +105,7 @@ class Stat(Resource):
             }
         except Exception as e:
             return {'status': 1, 'message': str(e)}
-            
+
 
 api.add_resource(Cam, '/')
 api.add_resource(Stat, '/stat')

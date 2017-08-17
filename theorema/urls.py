@@ -17,7 +17,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 
-from .users.api import UserViewSet, profile_view
+from .users.api import UserViewSet, profile_view, user_cameras
 from .cameras.api import ServerViewSet, CameraViewSet, CameraGroupViewSet
 from .orgs.api import OrganizationViewSet
 from .other.views import index, login, stat
@@ -36,6 +36,7 @@ urlpatterns = [
     url(r'^accounts/profile/', profile_view),
     url(r'^api/rest-auth/', include('rest_auth.urls')),
     url(r'stat/', stat),
+    url(r'user_cameras/', user_cameras),
 ]
 
 

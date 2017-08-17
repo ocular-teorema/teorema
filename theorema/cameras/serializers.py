@@ -52,9 +52,9 @@ class CameraSerializer(M2MHelperSerializer):
             raw_response = requests.post('http://{}:5000'.format(validated_data['server'].address), json=worker_data)
             worker_response = json.loads(raw_response.content.decode())
         except Exception as e:
-            raise APIException(code=400, detail={'message': str(e)})
+            raise APIException(code=400, detail={'status': 1, 'message': str(e)})
         if worker_response['status']:
-            raise APIException(code=400, detail={'message': worker_response['message']})
+            raise APIException(code=400, detail={'status': 1, 'message': worker_response['message']})
         return result
 
     def update(self, camera, validated_data):
@@ -80,7 +80,10 @@ class CameraSerializer(M2MHelperSerializer):
 
         return super().update(camera, validated_data)
 
-    def to_representation(self, camera):
+    def to_representation(self, camera, with_group=True):
         res = super().to_representation(camera)
-        res['camera_group'] = CameraGroupSerializer().to_representation(camera.camera_group)
+        if with_group:
+            res['camera_group'] = CameraGroupSerializer().to_representation(camera.camera_group)
+        else:
+            res.pop('camera_group')
         return res
