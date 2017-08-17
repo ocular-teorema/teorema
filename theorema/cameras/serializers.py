@@ -49,7 +49,7 @@ class CameraSerializer(M2MHelperSerializer):
             worker_data.pop('camera_group')
             worker_data.pop('organization')
             worker_data['id'] = result.id
-            raw_response = requests.post('http://{}:5000'.format(validated_data['server'].address), json=worker_data)
+            raw_response = requests.post('http://{}:5005'.format(validated_data['server'].address), json=worker_data)
             worker_response = json.loads(raw_response.content.decode())
         except Exception as e:
             raise APIException(code=400, detail={'status': 1, 'message': str(e)})
@@ -64,7 +64,7 @@ class CameraSerializer(M2MHelperSerializer):
             worker_data.pop('camera_group')
             worker_data.pop('organization')
             worker_data['id'] = camera.id
-            raw_response = requests.patch('http://{}:5000'.format(validated_data['server'].address), json=worker_data)
+            raw_response = requests.patch('http://{}:5005'.format(validated_data['server'].address), json=worker_data)
             worker_response = json.loads(raw_response.content.decode())
         except Exception as e:
             raise APIException(code=400, detail={'message': str(e)})
