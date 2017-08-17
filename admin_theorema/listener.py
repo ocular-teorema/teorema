@@ -84,9 +84,9 @@ class Cam(Resource):
             save_config(req['id'], req)
             is_active = req.get('is_active', 1)
             save_cam_state(req['id'], is_active=is_active)
-            all_cams_info['cam'+req['id']] = {
+            all_cams_info['cam'+str(req['id'])] = {
                 'is_active': is_active,
-                'process': launch_process(COMMAND, os.path.join(CAMDIR, 'cam'+req['id'])) if is_active else None,
+                'process': launch_process(COMMAND, os.path.join(CAMDIR, 'cam'+str(req['id']))) if is_active else None,
             }
         except Exception as e:
             print('----ecxepction---')

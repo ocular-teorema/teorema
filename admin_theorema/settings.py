@@ -1,5 +1,4 @@
 CAMDIR = '/home/_processInstances'
-ARCHDIR = '/home/_VideoArchive'
 CONFIG_NAME = 'theorem.conf'
 DBDIR = 'DB'
 COMMAND = '/usr/bin/processInstance'
@@ -9,7 +8,7 @@ LAG = 2
 
 
 TEMPLATE = """[General]
-HttpPort=
+HttpPort={port}
 
 [AnalysisParams]
 Diff%20Threshold=18
@@ -35,7 +34,7 @@ Camera%20name={name}
 Input%20Stream%20Url={address}
 Output%20Url=rtmp://localhost:1935/videoanalytic/cam{id}
 
-Archive%20Path={archdir}
+Archive%20Path=/home/_VideoArchive
 Database%20Path=DB/video_analytics
 Output%20Stream%20Bitrate=32
 
@@ -51,3 +50,4 @@ Notification%20smtp%20login=
 Notification%20smtp%20password=
 Notification%20start%20time=00:00:00
 Notification%20syserr%20email="""
+
