@@ -26,7 +26,9 @@ class CameraSerializer(M2MHelperSerializer):
         fields = (
                 'id', 'name', 'address', 'fps', 'analysis', 'resolution',
                 'storage_life', 'compress_level', 'is_active', 'server',
-                'camera_group', 'organization', 'port',
+                'camera_group', 'organization', 'port', 'notify_email', 
+                'notify_phone', 'notify_events', 'notify_time_start',
+                'notify_time_stop', 'notify_alert_level',
         )
         extra_kwargs = {
             'port': {'read_only': True}
@@ -86,4 +88,8 @@ class CameraSerializer(M2MHelperSerializer):
             res['camera_group'] = CameraGroupSerializer().to_representation(camera.camera_group)
         else:
             res.pop('camera_group')
+        if not self.context['request'].user.is_staff or not self.context['request'].user.is_organization_admin:
+            for key in list(res.keys()):
+                if key.startswith('notify'):
+                    res.pop(key)
         return res

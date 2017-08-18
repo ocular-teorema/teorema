@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import RegexValidator
+from django.contrib.postgres.fields import JSONField
 from theorema.orgs.models import Organization
 
 class Server(models.Model):
@@ -40,7 +41,12 @@ class Camera(models.Model):
     server = models.ForeignKey(Server)
     organization = models.ForeignKey(Organization)
     port = models.IntegerField()
-
+    notify_email = models.CharField(max_length=500, null=True)
+    notify_phone = models.CharField(max_length=20, null=True)
+    notify_events = JSONField()
+    notify_time_start = models.TimeField()
+    notify_time_stop = models.TimeField()
+    notify_alert_level = models.SmallIntegerField()
 
 class Camera2CameraGroup(models.Model):
     camera = models.ForeignKey(CameraGroup)
