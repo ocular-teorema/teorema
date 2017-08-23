@@ -1,3 +1,5 @@
+import traceback
+import sys
 import requests
 import json
 import random
@@ -28,7 +30,8 @@ class CameraSerializer(M2MHelperSerializer):
                 'storage_life', 'compress_level', 'is_active', 'server',
                 'camera_group', 'organization', 'port', 'notify_email', 
                 'notify_phone', 'notify_events', 'notify_time_start',
-                'notify_time_stop', 'notify_alert_level',
+                'notify_time_stop', 'notify_alert_level', 'notify_send_email',
+                'notify_send_sms',
         )
         extra_kwargs = {
             'port': {'read_only': True}
@@ -51,11 +54,13 @@ class CameraSerializer(M2MHelperSerializer):
             worker_data.pop('camera_group')
             worker_data.pop('organization')
             worker_data['id'] = result.id
+            worker_data['notify_time_start'] = str(worker_data['notify_time_start'])
+            worker_data['notify_time_stop'] = str(worker_data['notify_time_stop'])
             raw_response = requests.post('http://{}:5005'.format(validated_data['server'].address), json=worker_data)
             worker_response = json.loads(raw_response.content.decode())
         except Exception as e:
             result.delete()
-            raise APIException(code=400, detail={'status': 1, 'message': str(e)})
+            raise APIException(code=400, detail={'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))})
         if worker_response['status']:
             result.delete()
             raise APIException(code=400, detail={'status': 1, 'message': worker_response['message']})
@@ -90,7 +95,7 @@ class CameraSerializer(M2MHelperSerializer):
             res['camera_group'] = CameraGroupSerializer().to_representation(camera.camera_group)
         else:
             res.pop('camera_group')
-        if not self.context['request'].user.is_staff or not self.context['request'].user.is_organization_admin:
+        if not self.context['request'].user.is_staff and not self.context['request'].user.is_organization_admin:
             for key in list(res.keys()):
                 if key.startswith('notify'):
                     res.pop(key)
