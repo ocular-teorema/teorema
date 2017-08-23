@@ -36,7 +36,7 @@ class CameraViewSet(ModelViewSet):
         try:
             worker_data={'id': pk}
             camera = Camera.objects.get(id=pk)
-            raw_response = requests.delete('http://{}:5000'.format(camera.server.address), json=worker_data)
+            raw_response = requests.delete('http://{}:5005'.format(camera.server.address), json=worker_data)
             worker_response = json.loads(raw_response. content.decode())
         except Exception as e:
             raise APIException(code=400,               detail={'message': str(e)})
