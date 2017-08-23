@@ -20,7 +20,7 @@ class CamSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = CamSet
         fields = (
-                'id', 'user', 'name', 'cameras',
+                'id', 'user', 'name', 'cameras', 'mode',
         )
         extra_kwargs = {
             'user': {'read_only': True}

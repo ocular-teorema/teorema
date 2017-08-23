@@ -47,6 +47,9 @@ class Camera(models.Model):
     notify_time_start = models.TimeField()
     notify_time_stop = models.TimeField()
     notify_alert_level = models.SmallIntegerField()
+    notify_send_email = models.BooleanField(default=False)
+    notify_send_sms = models.BooleanField(default=False)
+
 
 class Camera2CameraGroup(models.Model):
     camera = models.ForeignKey(CameraGroup)
