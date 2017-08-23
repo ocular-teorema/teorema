@@ -54,8 +54,10 @@ class CameraSerializer(M2MHelperSerializer):
             raw_response = requests.post('http://{}:5005'.format(validated_data['server'].address), json=worker_data)
             worker_response = json.loads(raw_response.content.decode())
         except Exception as e:
+            result.delete()
             raise APIException(code=400, detail={'status': 1, 'message': str(e)})
         if worker_response['status']:
+            result.delete()
             raise APIException(code=400, detail={'status': 1, 'message': worker_response['message']})
         return result
 
