@@ -54,8 +54,8 @@ class CameraSerializer(M2MHelperSerializer):
             worker_data.pop('camera_group')
             worker_data.pop('organization')
             worker_data['id'] = result.id
-            worker_data['notify_time_start'] = str(worker_data['notify_time_start'])
-            worker_data['notify_time_stop'] = str(worker_data['notify_time_stop'])
+            worker_data['notify_time_start'] = str(worker_data.get('notify_time_start', '00:00:00'))
+            worker_data['notify_time_stop'] = str(worker_data.get('notify_time_stop', '00:00:00'))
             raw_response = requests.post('http://{}:5005'.format(validated_data['server'].address), json=worker_data)
             worker_response = json.loads(raw_response.content.decode())
         except Exception as e:
@@ -72,7 +72,10 @@ class CameraSerializer(M2MHelperSerializer):
             worker_data.pop('server')
             worker_data.pop('camera_group')
             worker_data.pop('organization')
+            worker_data['notify_time_start'] = str(worker_data.get('notify_time_start', '00:00:00'))
+            worker_data['notify_time_stop'] = str(worker_data.get('notify_time_stop', '00:00:00'))
             worker_data['id'] = camera.id
+            worker_data['port'] = camera.port
             raw_response = requests.patch('http://{}:5005'.format(validated_data['server'].address), json=worker_data)
             worker_response = json.loads(raw_response.content.decode())
         except Exception as e:

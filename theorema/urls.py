@@ -20,7 +20,7 @@ from rest_framework.routers import DefaultRouter
 from .users.api import UserViewSet, profile_view, user_cameras, CamSetViewSet
 from .cameras.api import ServerViewSet, CameraViewSet, CameraGroupViewSet
 from .orgs.api import OrganizationViewSet
-from .other.views import index, login, stat
+from .other.views import index, login, stat, video
 
 
 router = DefaultRouter(trailing_slash=True)
@@ -42,4 +42,5 @@ urlpatterns = [
 
 
 urlpatterns += url(r'^login', login),
+urlpatterns += url(r'^video.html', video),
 urlpatterns += url(r'^/*', index, name='all'),

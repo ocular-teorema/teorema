@@ -1,3 +1,4 @@
+import datetime
 from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.postgres.fields import JSONField
@@ -43,10 +44,10 @@ class Camera(models.Model):
     port = models.IntegerField()
     notify_email = models.CharField(max_length=500, null=True)
     notify_phone = models.CharField(max_length=20, null=True)
-    notify_events = JSONField()
-    notify_time_start = models.TimeField()
-    notify_time_stop = models.TimeField()
-    notify_alert_level = models.SmallIntegerField()
+    notify_events = JSONField(default={})
+    notify_time_start = models.TimeField(default=datetime.time(0,0))
+    notify_time_stop = models.TimeField(default=datetime.time(0,0))
+    notify_alert_level = models.SmallIntegerField(default=1)
     notify_send_email = models.BooleanField(default=False)
     notify_send_sms = models.BooleanField(default=False)
 

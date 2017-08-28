@@ -59,7 +59,7 @@ def user_cameras(request):
         group_repr['cameras'] = []
         for camera_object in cameras_objects:
             camera_repr = camera_serializer.to_representation(camera_object, with_group=False)
-            camera_repr['output_url'] = 'rtmp://{}:1935/vascaled/'.format(camera_object.server.address)
+            camera_repr['output_url'] = 'rtmp://{}:1935/videoanalytic/'.format(camera_object.server.address)
             camera_repr['events_url'] = 'http://{}:{}/'.format(camera_object.server.address, camera_object.port)
             group_repr['cameras'].append(camera_repr)
         result['groups'].append(group_repr)

@@ -32,7 +32,6 @@ def get_saved_cams():
     return [f for f in os.listdir(CAMDIR) if not os.path.isfile(os.path.join(CAMDIR, f))]
 
 def save_cam_state(numeric_id, **kwargs):
-    print('saving cam state')
     with open(os.path.join(get_cam_path(numeric_id), ADDITIONAL_CONFIG), 'w') as f:
         f.write(json.dumps(kwargs))
 
@@ -40,11 +39,10 @@ def process_died(process):
     return process is None or process.poll() is not None
 
 def stop_cam(numeric_id):
-    all_cams_info['cam'+str(numeric_id)].is_active = False
     process = all_cams_info['cam'+str(numeric_id)].get('process')
     if process:
         process.kill()
-        all_cams_info['cam'+str(numeric_id)].pop('process')
+        process.poll() # prevent zomdie if patched to !is_active
 
 def with_lock(func):
     def result(*args, **kwargs):
@@ -67,11 +65,24 @@ class ControlPi(Thread):
         for cam, cam_info in all_cams_info.items():
             if cam_info['is_active'] and process_died(cam_info['process']):
                 cam_info['process'] = launch_process(COMMAND, os.path.join(CAMDIR, cam))
-        
+
 
 def save_config(numeric_id, req):
     with open(os.path.join(get_cam_path(numeric_id), CONFIG_NAME), 'w') as f:
-        f.write(TEMPLATE.format(**req))
+        f.write(TEMPLATE.format(
+            port = req['port'],
+            id = req['id'],
+            name = req['name'],
+            address = req['address'],
+            fps = req['fps'],
+            storage_life = req['storage_life'],
+            compress_level = req['compress_level'] + 27,
+            downscale_coeff = [0.5, 0.3, 0.25, 0.15, 0.15, 0.15][req['resolution'] - 1],
+            global_scale = [1.0, 1.0, 1.0, 1.0, 0.5, 0.25][req['resolution'] - 1],
+            motion_analysis = 'true' if req['analysis'] > 2 else 'false',
+            diff_analysis = 'true' if req['analysis'] > 1 else 'false'
+        ))
+
 
 class Cam(Resource):
     @with_lock
@@ -80,7 +91,6 @@ class Cam(Resource):
         cam_path = get_cam_path(req['id'])
         try:
             os.makedirs(os.path.join(cam_path, DBDIR))
-            print('---saving config---')
             save_config(req['id'], req)
             is_active = req.get('is_active', 1)
             save_cam_state(req['id'], is_active=is_active)
@@ -89,7 +99,6 @@ class Cam(Resource):
                 'process': launch_process(COMMAND, os.path.join(CAMDIR, 'cam'+str(req['id']))) if is_active else None,
             }
         except Exception as e:
-            print('----ecxepction---')
             print('\n'.join(traceback.format_exception(*sys.exc_info())))
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
         return {'status': 0}
@@ -100,7 +109,7 @@ class Cam(Resource):
         cam_path = get_cam_path(req['id'])
         try:
             stop_cam(req['id'])
-            all_cams_info.pop('cam'+req['id'])
+            all_cams_info.pop('cam'+str(req['id']))
             shutil.rmtree(cam_path)
         except Exception as e:
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
@@ -110,11 +119,11 @@ class Cam(Resource):
     def patch(self):
         req = request.get_json()
         cam_path = get_cam_path(req['id'])
-        stop_cam(req['id'])
         try:
             save_config(req['id'], req)
-            stop_cam(req['id'])
             save_cam_state(req['id'], is_active=req.get('is_active', 1))
+            all_cams_info['cam'+str(req['id'])]['is_active'] = req.get('is_active', 1)
+            stop_cam(req['id'])
         except Exception as e:
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
         return {'status': 0}

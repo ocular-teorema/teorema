@@ -16,7 +16,7 @@ Bg%20threshold=15
 Fg%20Threshold=50
 Motion%20Threshold=0.2
 Total%20Threshold=0.08
-Downscale%20Coeff=0.15
+Downscale%20Coeff={downscale_coeff}
 Experimental=false
 Valid%20motion%20bin%20height=8
 Use%20virtual%20date=false
@@ -24,8 +24,8 @@ DebugImageIndex=0
 Debug%20objects=false
 Produce%20Debug=false
 
-Motion%20based%20analysis=false
-Difference%20based%20analysis=true
+Motion%20based%20analysis={motion_analysis}
+Difference%20based%20analysis={diff_analysis}
 
 [PipelineParams]
 
@@ -36,9 +36,9 @@ Output%20Url=rtmp://localhost:1935/videoanalytic/cam{id}
 
 Archive%20Path=/home/_VideoArchive
 Database%20Path=DB/video_analytics
-Output%20Stream%20Bitrate=32
+Output%20Stream%20Bitrate={compress_level}
 
-Global%20Scale=1
+Global%20Scale={global_scale}
 fps={fps}
 statisticPeriodDays={storage_life}
 Processing%20Interval%20Sec=600
