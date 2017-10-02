@@ -149,7 +149,7 @@ STATICFILES_DIRS = (
 
 MEDIA_ROOT = os.path.join(ROOT, 'media/')
 MEDIA_URL = '/media/'
-
+ARCHDIR = '/home/_VideoArchive/'
 
 try:
     from theorema.settings_local import *

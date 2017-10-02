@@ -5,8 +5,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import APIException
 from .models import Server, Camera, CameraGroup
 from .serializers import ServerSerializer, CameraSerializer, CameraGroupSerializer
+from theorema.other.cache_fix import CacheFixViewSet
 
-class ServerViewSet(ModelViewSet):
+class ServerViewSet(CacheFixViewSet):
     queryset = Server.objects.all()
     serializer_class = ServerSerializer
 
@@ -19,7 +20,7 @@ class ServerViewSet(ModelViewSet):
         return self.queryset
 
 
-class CameraViewSet(ModelViewSet):
+class CameraViewSet(CacheFixViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Camera.objects.all()
     serializer_class = CameraSerializer
@@ -45,7 +46,7 @@ class CameraViewSet(ModelViewSet):
         return super().destroy(request, pk)
 
 
-class CameraGroupViewSet(ModelViewSet):
+class CameraGroupViewSet(CacheFixViewSet):
     queryset = CameraGroup.objects.all()
     serializer_class = CameraGroupSerializer
 

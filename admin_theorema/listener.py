@@ -23,7 +23,7 @@ def get_cam_path(numeric_id):
 
 def get_filesystem_info():
     # man df
-    return Popen(['df', ARCHDIR], stdout=PIPE).communicate()[0].decode().split()[-5:-2]
+    return Popen(['df', '/home/_VideoArchive'], stdout=PIPE).communicate()[0].decode().split()[-5:-2]
 
 def launch_process(command, cwd):
     return Popen(command.split(), cwd=cwd)
@@ -132,7 +132,6 @@ class Cam(Resource):
 
 class Stat(Resource):
     def get(request):
-        print(all_cams_info)
         try:
             return {
                 'message': get_filesystem_info(),

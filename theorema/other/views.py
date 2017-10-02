@@ -20,6 +20,6 @@ def video(request):
 def stat(request):
     server = Server.objects.get(id=request.GET['server'])
     try:
-        return JsonResponse(json.loads(requests.get('http://{}:5000/stat'.format(server.address)).content.decode()))
+        return JsonResponse(json.loads(requests.get('http://{}:5005/stat'.format(server.address)).content.decode()))
     except Exception as e:
         return JsonResponse({'status': 1, 'message': str(e)})
