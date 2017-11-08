@@ -58,6 +58,7 @@ class CameraSerializer(M2MHelperSerializer):
             worker_data['notify_time_stop'] = str(worker_data.get('notify_time_stop', '00:00:00'))
             raw_response = requests.post('http://{}:5005'.format(validated_data['server'].address), json=worker_data)
             worker_response = json.loads(raw_response.content.decode())
+            print('create worker_response:', worker_response)
         except Exception as e:
             result.delete()
             raise APIException(code=400, detail={'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))})

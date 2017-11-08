@@ -91,6 +91,7 @@ class Cam(Resource):
         cam_path = get_cam_path(req['id'])
         try:
             os.makedirs(os.path.join(cam_path, DBDIR))
+            shutil.copy('/home/theoremg/runEnv/DB/video_analytics', os.path.join(cam_path, DBDIR, 'video_analytics'))
             save_config(req['id'], req)
             is_active = req.get('is_active', 1)
             save_cam_state(req['id'], is_active=is_active)
@@ -151,6 +152,8 @@ def launch_cameras():
             all_cams_info[cam]['process'] = launch_process(COMMAND, os.path.join(CAMDIR, cam))
         else:
             all_cams_info[cam]['process'] = None
+
+os.system('killall processInstance')
 
 
 lock = Lock()
