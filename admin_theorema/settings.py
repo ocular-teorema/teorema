@@ -6,7 +6,6 @@ ADDITIONAL_CONFIG = 'conf.conf'
 LAG = 2
 
 
-
 TEMPLATE = """[General]
 HttpPort={port}
 

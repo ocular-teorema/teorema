@@ -40,7 +40,10 @@ def user_cameras(request):
         user_groups = request.user.cameras_access.get('groups', [])
     groups_ids = [x['group'] for x in user_groups]
     if not groups_ids:
-        groups_objects = CameraGroup.objects.filter(organization=request.user.organization)
+        if request.user.is_staff:
+            groups_objects = CameraGroup.objects.all()
+        else:
+            groups_objects = CameraGroup.objects.filter(organization=request.user.organization)
     else:
         groups_objects = CameraGroup.objects.filter(id__in=groups_ids)
     camera_group_serializer = CameraGroupSerializer()
