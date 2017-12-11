@@ -32,6 +32,7 @@ Pipeline%20Name=cam{id}
 Camera%20name={name}
 Input%20Stream%20Url={address}
 Output%20Url=rtmp://localhost:1935/videoanalytic/cam{id}
+Source%20Output%20Url=rtmp://localhost:1935/vasrc/cam{id}
 
 Archive%20Path=/home/_VideoArchive
 Database%20Path=DB/video_analytics
