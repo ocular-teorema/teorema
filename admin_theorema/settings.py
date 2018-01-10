@@ -40,7 +40,7 @@ Output%20Stream%20Bitrate={compress_level}
 
 Global%20Scale={global_scale}
 fps={fps}
-statisticPeriodDays={storage_life}
+statisticPeriodDays=14
 Processing%20Interval%20Sec=600
 Statistic%20Interval%20Sec=600
 
@@ -49,5 +49,5 @@ Notification%20smtp%20address=
 Notification%20smtp%20login=
 Notification%20smtp%20password=
 Notification%20start%20time=00:00:00
-Notification%20syserr%20email="""
-
+Notification%20syserr%20email=
+storage_life={storage_life} """

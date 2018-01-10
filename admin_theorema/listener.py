@@ -11,7 +11,7 @@ from flask_restful import Resource, Api
 
 
 from settings import *
-
+from admin_theorema.celery import delete_cam
 
 def get_cam_saved_state(numeric_id):
     with open(os.path.join(get_cam_path(numeric_id), ADDITIONAL_CONFIG), 'r') as f:
@@ -110,9 +110,9 @@ class Cam(Resource):
         req = request.get_json()
         cam_path = get_cam_path(req['id'])
         try:
-            stop_cam(req['id'])
-            all_cams_info.pop('cam'+str(req['id']))
-            shutil.rmtree(cam_path)
+            #stop_cam(req['id'])
+            #all_cams_info.pop('cam' + str(req['id']))
+            delete_cam.apply_async((cam_path, req['id'],))
         except Exception as e:
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
         return {'status': 0}
