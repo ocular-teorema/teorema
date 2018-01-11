@@ -9,9 +9,9 @@ from subprocess import Popen, PIPE
 from flask import Flask, request
 from flask_restful import Resource, Api
 
-
+from celery import Celery
 from settings import *
-from admin_theorema.celery import delete_cam
+
 
 def get_cam_saved_state(numeric_id):
     with open(os.path.join(get_cam_path(numeric_id), ADDITIONAL_CONFIG), 'r') as f:
@@ -23,10 +23,10 @@ def get_cam_path(numeric_id):
 
 def get_filesystem_info():
     # man df
-    return Popen(['df', '/home/_VideoArchive'], stdout=PIPE).communicate()[0].decode().split()[-5:-2]
+    return Popen(['df', '/home/_VideoArchive'], stdout=PIPE, stderr=PIPE).communicate()[0].decode().split()[-5:-2]
 
 def launch_process(command, cwd):
-    return Popen(command.split(), cwd=cwd)
+    return Popen(command.split(), cwd=cwd, stdout=PIPE, stderr=PIPE)
 
 def get_saved_cams():
     return [f for f in os.listdir(CAMDIR) if not os.path.isfile(os.path.join(CAMDIR, f))]
@@ -110,9 +110,9 @@ class Cam(Resource):
         req = request.get_json()
         cam_path = get_cam_path(req['id'])
         try:
-            #stop_cam(req['id'])
-            #all_cams_info.pop('cam' + str(req['id']))
-            delete_cam.apply_async((cam_path, req['id'],))
+            stop_cam(req['id'])
+            all_cams_info.pop('cam' + str(req['id']))
+            delete_cam_path.apply_async((cam_path,))
         except Exception as e:
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
         return {'status': 0}
@@ -169,6 +169,37 @@ app = Flask(__name__)
 api = Api(app)
 api.add_resource(Cam, '/')
 api.add_resource(Stat, '/stat')
+
+
+app.config.update(
+    CELERY_BROKER_URL='amqp://teorema:teorema@0.0.0.0:5672//',
+    CELERY_RESULT_BACKEND='amqp://teorema:teorema@0.0.0.0:5672//'
+)
+
+
+def make_celery(app):
+    celery = Celery(app.import_name, backend=app.config['CELERY_RESULT_BACKEND'],
+                    broker=app.config['CELERY_BROKER_URL'])
+    celery.conf.update(app.config)
+    TaskBase = celery.Task
+
+    class ContextTask(TaskBase):
+        abstract = True
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return TaskBase.__call__(self, *args, **kwargs)
+    celery.Task = ContextTask
+    return celery
+
+celery = make_celery(app)
+
+
+@celery.task(bind=True, name = 'delete_cam')
+def delete_cam_path(self, cam_path):
+
+    shutil.rmtree(cam_path)
+
+    print('Камера Успешно удалена')
 
 # this dont work properly with background thread. use EXPORT FLASK_APP=listener.py && flask run
 #if __name__ == '__main__':

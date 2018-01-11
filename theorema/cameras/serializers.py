@@ -13,6 +13,15 @@ class ServerSerializer(serializers.ModelSerializer):
         model = Server
         fields = ('id', 'name', 'address', 'organization')
 
+    def create(self, validated_data):
+        result = super().create(validated_data)
+        try:
+            raw_response = requests.post('http://{}:5005'.format(validated_data['address']), timeout=5)
+        except Exception as e:
+            result.delete()
+            raise APIException(code=400, detail={'status': 1, 'message': str(e)})
+        return result
+
 
 class CameraGroupSerializer(serializers.ModelSerializer):
     class Meta:
