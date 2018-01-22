@@ -10,8 +10,8 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         result = super().create(validated_data)
-        user = User.objects.get(id=self.context['request'].user.id)
-        if not user.organization:
+        if not self.context['request'].user.organization:
+            user = User.objects.get(id=self.context['request'].user.id)
             user.organization = result
             user.save()
         else:
