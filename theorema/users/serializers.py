@@ -1,6 +1,7 @@
 from django.http import HttpResponseForbidden
 from rest_framework import serializers
 from .models import User, CamSet
+from rest_framework.exceptions import APIException
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,7 +17,9 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        pass
+        if validated_data['is_organization_admin'] and User.objects.filter(organization=validated_data['organization'], is_organization_admin=True).exists():
+            raise APIException(code=400, detail={'status': 1, 'message': 'too much'})
+        return super().create(validated_data)
 
 
 class CamSetSerializer(serializers.ModelSerializer):

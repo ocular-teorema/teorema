@@ -6,10 +6,13 @@ from rest_framework.exceptions import APIException
 from .models import Server, Camera, CameraGroup
 from .serializers import ServerSerializer, CameraSerializer, CameraGroupSerializer
 from theorema.other.cache_fix import CacheFixViewSet
+from theorema.permissions import ReadOnly
+
 
 class ServerViewSet(CacheFixViewSet):
     queryset = Server.objects.all()
     serializer_class = ServerSerializer
+    permission_classes = (ReadOnly, )
 
     def get_queryset(self):
         if not self.request.user.is_staff:
@@ -57,4 +60,3 @@ class CameraGroupViewSet(CacheFixViewSet):
         if param is not None:
             return self.queryset.filter(organization__id=param)
         return self.queryset
-        
