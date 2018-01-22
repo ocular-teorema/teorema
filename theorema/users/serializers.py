@@ -15,6 +15,9 @@ class UserSerializer(serializers.ModelSerializer):
             'is_staff': {'read_only': True},
         }
 
+    def create(self, validated_data):
+        pass
+
 
 class CamSetSerializer(serializers.ModelSerializer):
     class Meta:
