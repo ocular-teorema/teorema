@@ -160,9 +160,10 @@ os.system('killall processInstance')
 lock = Lock()
 
 all_cams_info = {}
-launch_cameras()
+if 'celery' not in sys.argv[0]:
+    launch_cameras()
 
-ControlPi().start()
+    ControlPi().start()
 
 
 app = Flask(__name__)
