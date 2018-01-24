@@ -75,4 +75,3 @@ class CamSetViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = CamSet.objects.all()
     serializer_class = CamSetSerializer
-

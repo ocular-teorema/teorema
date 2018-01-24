@@ -7,6 +7,7 @@ from .models import Server, Camera, CameraGroup
 from .serializers import ServerSerializer, CameraSerializer, CameraGroupSerializer
 from theorema.other.cache_fix import CacheFixViewSet
 from theorema.permissions import ReadOnly
+from theorema.users.models import CamSet
 
 
 class ServerViewSet(CacheFixViewSet):
@@ -42,6 +43,10 @@ class CameraViewSet(CacheFixViewSet):
             camera = Camera.objects.get(id=pk)
             raw_response = requests.delete('http://{}:5005'.format(camera.server.address), json=worker_data)
             worker_response = json.loads(raw_response. content.decode())
+            for camset in CamSet.objects.all():
+                if camera.id in camset.cameras:
+                    camset.cameras.remove(camera.id)
+                    camset.save()
         except Exception as e:
             raise APIException(code=400,               detail={'message': str(e)})
         if worker_response['status']:
