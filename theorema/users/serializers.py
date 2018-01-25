@@ -16,10 +16,11 @@ class UserSerializer(serializers.ModelSerializer):
             'is_staff': {'read_only': True},
         }
 
-    def create(self, validated_data):
-        if validated_data['is_organization_admin'] and User.objects.filter(organization=validated_data['organization'], is_organization_admin=True).exists():
+    def save(self):
+        if self.validated_data['is_organization_admin'] and \
+                User.objects.filter(organization=self.validated_data['organization'], is_organization_admin=True).exists():
             raise APIException(code=400, detail={'status': 1, 'message': 'too much'})
-        return super().create(validated_data)
+        return super().save()
 
 
 class CamSetSerializer(serializers.ModelSerializer):

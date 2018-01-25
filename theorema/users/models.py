@@ -5,6 +5,7 @@ from django.contrib.postgres.fields import JSONField
 from theorema.orgs.models import Organization
 from theorema.cameras.models import CameraGroup
 
+
 class User(AbstractUser):
     fio = models.CharField(max_length=300)
     is_organization_admin = models.BooleanField(default=False)
@@ -24,6 +25,7 @@ def hash_pass(sender, instance, **kwargs):
     except sender.DoesNotExist:
         instance.set_password(instance.password)
 '''
+
 
 class CamSet(models.Model):
     user = models.ForeignKey(User)

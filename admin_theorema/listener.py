@@ -154,8 +154,7 @@ def launch_cameras():
         else:
             all_cams_info[cam]['process'] = None
 
-os.system('killall processInstance')
-
+os.system('kill `pidof processInstance`')
 
 lock = Lock()
 
