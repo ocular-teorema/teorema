@@ -13,7 +13,7 @@ from theorema.users.models import CamSet
 class ServerViewSet(CacheFixViewSet):
     queryset = Server.objects.all()
     serializer_class = ServerSerializer
-    permission_classes = (ReadOnly, )
+    permission_classes = (IsAuthenticated, )
 
     def get_queryset(self):
         if not self.request.user.is_staff:
