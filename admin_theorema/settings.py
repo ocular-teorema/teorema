@@ -50,4 +50,5 @@ Notification%20smtp%20login=
 Notification%20smtp%20password=
 Notification%20start%20time=00:00:00
 Notification%20syserr%20email=
-storage_life={storage_life} """
+storage_life={storage_life}
+indefinitely={indefinitely} """
