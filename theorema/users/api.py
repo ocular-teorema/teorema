@@ -75,8 +75,3 @@ class CamSetViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = CamSet.objects.all()
     serializer_class = CamSetSerializer
-
-    def get_queryset(self):
-        if not self.request.user.is_staff:
-            return self.queryset.filter(user=self.request.user)
-        return self.queryset
