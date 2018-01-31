@@ -50,6 +50,7 @@ class Camera(models.Model):
     notify_alert_level = models.SmallIntegerField(default=1)
     notify_send_email = models.BooleanField(default=False)
     notify_send_sms = models.BooleanField(default=False)
+    indefinitely = models.BooleanField(default=False)
 
 
 class Camera2CameraGroup(models.Model):

@@ -1,0 +1,83 @@
+[
+  {
+    "name": "cam26",
+    "statisticsPort": "6782",
+    "title": "Камера #1",
+    "category": "Подъезд"
+  }, {
+    "name": "cam25",
+    "statisticsPort": 6781,
+    "title": "Камера #2",
+    "category": "Парковка"
+  }, {
+    "name": "cam31",
+    "statisticsPort": "6784",
+    "title": "Камера #3",
+    "category": "Подъезд"
+  }, {
+    "name": "cam30",
+    "statisticsPort": 6783,
+    "title": "Камера #4",
+    "category": "Вход"
+  }, {
+    "name": "cam26",
+    "statisticsPort": 6782,
+    "title": "Камера #5",
+    "category": "Первый этаж"
+  }, {
+    "name": "cam25",
+    "statisticsPort": 6781,
+    "title": "Камера #6",
+    "category": "Вход"
+  }, {
+    "name": "cam31",
+    "statisticsPort": 6784,
+    "title": "Камера #7",
+    "category": "Парковка"
+  }, {
+    "name": "cam30",
+    "statisticsPort": 6783,
+    "title": "Камера #8",
+    "category": "Подъезд"
+  }, {
+    "name": "cam26",
+    "statisticsPort": 6782,
+    "title": "Камера #9",
+    "category": "Первый этаж"
+  }, {
+    "name": "cam25",
+    "statisticsPort": 6781,
+    "title": "Камера #10",
+    "category": "Вход"
+  }, {
+    "name": "cam31",
+    "statisticsPort": 6784,
+    "title": "Камера #11",
+    "category": "Парковка"
+  }, {
+    "name": "cam30",
+    "statisticsPort": 6783,
+    "title": "Камера #12",
+    "category": "Подъезд"
+  }, {
+    "name": "cam26",
+    "statisticsPort": 6782,
+    "title": "Камера #13",
+    "category": "Первый этаж"
+  }, {
+    "name": "cam25",
+    "statisticsPort": 6781,
+    "title": "Камера #14",
+    "category": "Парковка"
+  }, {
+    "name": "cam31",
+    "statisticsPort": 6784,
+    "title": "Камера #15",
+    "category": "Вход"
+  }, {
+    "name": "cam30",
+    "statisticsPort": 6783,
+    "title": "Камера #16",
+    "category": "Первый этаж"
+  }
+]

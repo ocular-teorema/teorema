@@ -1,0 +1,138 @@
+<section class="main">
+    <div class="container clearfix">
+        <div class="slider-main"
+             ng-class="{
+                 'single-mode': currentQuadrator.mode == 0,
+                 'two-mode':  currentQuadrator.mode == 1,
+                 'four-mode':  currentQuadrator.mode == 2,
+                 'many-mode':  currentQuadrator.mode == 3,
+                 'five-mode':  currentQuadrator.mode == 4,
+                 'super-mode':  currentQuadrator.mode == 5
+             }">
+
+            <div ng-repeat="(index, camera) in currentQuadrator.cameras track by $index"
+                 class="camera-stream-container"
+                 ng-class="{active: camera.showedCategories}">
+
+                <div ng-include="'/static/templates/elements/categories.html'" class="cameras-categories-block"></div>
+
+                <div class="camera-preview-container" ng-class="{'camera-alert': camera.visibleEvent && (camera.visibleEvent.type == 'start')}">
+                    <div class="pan-zoom-frame">
+                        <div class="video-player-container" ng-pan-zoom="{mode: currentQuadrator.mode}">
+                            <div ng-video-player="{streamMode: streamMode, mode: currentQuadrator.mode, camera: camera, id: 'camera-preview-' + $index, index: $index}"></div>
+                        </div>
+                        <!-- div class="camera-mask-preview"
+                             ng-click="(zoomedCamera == camera) ? hideCameraPreview() : showCameraPreview(camera)"
+                             ng-class="{'out-preview': zoomedCamera == camera}"
+                        ></div -->
+                    </div>
+
+
+                    <div class="camera-event-buttons" ng-if="camera.visibleEvent.type == 'start'">
+                        <button class="camera-event-btn" ng-click="securityReaction(1, camera)">
+                            <img src="/static/images/buttons/attention.svg"/>
+                        </button>
+                        <button class="camera-event-btn" ng-click="securityReaction(0, camera)">
+                            <img src="/static/images/buttons/skip.svg"/>
+                        </button>
+                    </div>
+
+                    <div class="camera-event-buttons"
+                         ng-if="camera.visibleEvent.type == 'end'">
+                        <a href="#" class="camera-event-btn" ng-click="openEvent(camera.visibleEvent, camera)">
+                            <img src="/static/images/buttons/repeat.svg"/>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slider-main-tools">
+            <div class="view-box">
+                <ul class="events-legend">
+                    <li>
+                        <div class="events-legend-image">
+                            <img src="/static/images/buttons/attention.svg"/>
+                        </div>
+                        <div class="events-legend-text">Запомнить</div>
+                    </li>
+                    <li>
+                        <div class="events-legend-image">
+                            <img src="/static/images/buttons/skip.svg"/>
+                        </div>
+                        <div class="events-legend-text">Ложно</div>
+                    </li>
+                    <li>
+                        <div class="events-legend-image">
+                            <img src="/static/images/buttons/repeat.svg"/>
+                        </div>
+                        <div class="events-legend-text">Пересмотреть<br/>событие</div>
+                    </li>
+                </ul>
+            </div><br/>
+
+            <div class="time-box">
+                <div class="time-box-date">
+                    {{ date | date : 'dd.MM.yyyy' }}<span>{{ daysOfWeek[date.getDay()] }}</span>
+                </div>
+                <div class="time-box-time">{{ date | date : 'HH:mm:ss' }}</div>
+            </div>
+            <div class="view-box">
+                <ul>
+                    <li>
+                        <a ng-click="setViewMode(0)" ng-class="{'active': currentQuadrator.mode == 0}" class="onestream"></a>
+                    </li>
+                    <li>
+                        <a ng-click="setViewMode(2)" ng-class="{'active': currentQuadrator.mode == 2}" class="fourstreams"></a>
+                    </li>
+                    <li>
+                        <a ng-click="setViewMode(3)" ng-class="{'active': currentQuadrator.mode == 3}" class="manystreams"></a>
+                    </li>
+                    <li>
+                        <a ng-click="setViewMode(4)" ng-class="{'active': currentQuadrator.mode == 4}" class="fivestreams"></a>
+                    </li>
+                    <li>
+                        <a ng-click="setViewMode(5)" ng-class="{'active': currentQuadrator.mode == 5}" class="supermode"></a>
+                    </li>
+                </ul>
+            </div><br/>
+            <div class="btn-tools" ng-click=setFullScreenMode()>
+                Развернуть <img src="/static/images/304.svg"/>
+            </div>
+            <div class="camera-choose-box">
+                <span class="title-collection">Набор камер</span>
+                <div class="cameras-select-container">
+                    <div
+                            ng-select
+                            ng-model="camerasCollection"
+                            ng-model-list="camerasCollectionList"
+                            ng-select-options="quadratorsSelectParams"
+                    ></div>
+                    <div
+                            ng-select
+                            ng-model="quadratorsEditModel"
+                            ng-model-list="getQuadratorsEditList()"
+                            ng-select-options="{label: 'label', class: 'settings-select select-1'}"
+                    ></div>
+                </div>
+            </div>
+
+            <div class="camera-choose-box">
+                <span class="title-collection">Уровень опасности</span>
+                <div ng-select
+                     ng-model-list="displayingList"
+                     ng-select-options="{class: 'select-1', label: 'label', value: 'value'}"
+                     ng-model="confidence"></div>
+            </div>
+
+
+            <div class="camera-choose-box">
+                <span class="title-collection">Режим видеопотока</span>
+                <div ng-select
+                     ng-model-list="streamModeList"
+                     ng-select-options="{class: 'select-1', label: 'label', value: 'value'}"
+                     ng-model="streamMode"></div>
+            </div>
+
+        </div>
+    </div>
+</section>

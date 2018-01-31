@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="44px" height="44px" viewBox="0 0 44 44" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>repeat_big</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="12.6922607%" y1="-63.9160156%" x2="73.5677083%" y2="107.051595%" id="linearGradient-1">
+            <stop stop-color="#06DFFE" offset="0%"></stop>
+            <stop stop-color="#3A8DF9" offset="60.225623%"></stop>
+            <stop stop-color="#5C56F5" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="repeat_big">
+            <path d="M21.8210449,43.6420898 C33.8724759,43.6420898 43.6420898,33.8724759 43.6420898,21.8210449 C43.6420898,9.76961399 33.8724759,0 21.8210449,0 C9.76961399,0 0,9.76961399 0,21.8210449 C0,33.8724759 9.76961399,43.6420898 21.8210449,43.6420898 Z" id="Oval-1-Copy" fill="url(#linearGradient-1)" transform="translate(21.821045, 21.821045) rotate(90.000000) translate(-21.821045, -21.821045) "></path>
+            <path d="M23.0799514,15.2747314 L23.0799514,10.9105225 L17.5722357,16.3657837 L23.0799514,21.8210449 L23.0799514,17.4568359 C26.7150437,17.4568359 29.6892102,20.402677 29.6892102,24.0031494 C29.6892102,27.6036218 26.7150437,30.5494629 23.0799514,30.5494629 C19.444859,30.5494629 16.4706926,27.6036218 16.4706926,24.0031494 L14.2676063,24.0031494 C14.2676063,28.8037793 18.2331616,32.7315674 23.0799514,32.7315674 C27.9267411,32.7315674 31.8922964,28.8037793 31.8922964,24.0031494 C31.8922964,19.2025195 27.9267411,15.2747314 23.0799514,15.2747314 Z" id="Shape" fill="#FFFFFF" fill-rule="nonzero"></path>
+        </g>
+    </g>
+</svg>

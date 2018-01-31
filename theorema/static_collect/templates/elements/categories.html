@@ -1,0 +1,29 @@
+<div class="cameras-categories-container">
+    <span class="camera-name"
+          ng-click="showCameraCategories(camera)">
+        <span class="camera-name-title with-analize-icon {{camera['analysis-icon']}}">
+            <span class="camera-name-title-text" title="{{ camera.group.name }} - {{ camera.name }}">
+                {{ currentQuadrator.mode == 3 ? camera.group.name.slice(0, 4) : camera.group.name }} - {{ camera.name }}</span>
+        </span>
+    </span>
+    <div class="cameras-categories-list" ng-if="camera.showedCategories">
+        <ul class="categories-drop-list">
+            <li ng-repeat="group in userCameras.groups"
+                class="categories-drop-item"
+                ng-click="showCategoryInCatalog(group)"
+                ng-class="{'active-group': group.active}">
+                <span class="categories-drop-item-name">{{group.name}}</span>
+                <ul class="categories-drop-cameras-list">
+                    <li ng-repeat="cameraItem in group.cameras"
+                        ng-class="{ 'camera-used': usedCamerasOfQuadrator.indexOf(cameraItem.id) > -1 }"
+                        ng-click="setCamera(cameraItem, camera)"
+                    >
+                        <span class="categories-drop-cameras-item-name with-analize-icon {{cameraItem['analysis-icon']}}">
+                            {{cameraItem.name}}
+                        </span>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>
