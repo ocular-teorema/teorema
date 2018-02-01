@@ -65,7 +65,6 @@ class CameraSerializer(M2MHelperSerializer):
             worker_data['id'] = result.id
             worker_data['notify_time_start'] = str(worker_data.get('notify_time_start', '00:00:00'))
             worker_data['notify_time_stop'] = str(worker_data.get('notify_time_stop', '00:00:00'))
-            worker_data['indefinitely'] = result.indefinitely
             raw_response = requests.post('http://{}:5005'.format(validated_data['server'].address), json=worker_data)
             worker_response = json.loads(raw_response.content.decode())
             print('create worker_response:', worker_response)
@@ -87,7 +86,6 @@ class CameraSerializer(M2MHelperSerializer):
             worker_data['notify_time_stop'] = str(worker_data.get('notify_time_stop', '00:00:00'))
             worker_data['id'] = camera.id
             worker_data['port'] = camera.port
-            worker_data['indefinitely']=camera.indefinitely
             raw_response = requests.patch('http://{}:5005'.format(validated_data['server'].address), json=worker_data)
             worker_response = json.loads(raw_response.content.decode())
         except Exception as e:

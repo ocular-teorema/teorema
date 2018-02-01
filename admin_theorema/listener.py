@@ -81,7 +81,8 @@ def save_config(numeric_id, req):
 #            global_scale = [1.0, 1.0, 1.0, 1.0, 0.5, 0.25][req['resolution'] - 1],
             global_scale = [0.5, 0.5, 0.5, 0.5, 0.25, 0.125][req['resolution'] - 1],
             motion_analysis = 'true' if req['analysis'] > 2 else 'false',
-            diff_analysis = 'true' if req['analysis'] > 1 else 'false'
+            diff_analysis = 'true' if req['analysis'] > 1 else 'false',
+            indefinitely='true' if req['indefinitely']  else 'false'
         ))
 
 
