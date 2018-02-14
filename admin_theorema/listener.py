@@ -66,6 +66,8 @@ class ControlPi(Thread):
         for cam, cam_info in all_cams_info.items():
             if cam_info['is_active'] and process_died(cam_info['process']):
                 cam_info['process'] = launch_process(COMMAND, os.path.join(CAMDIR, cam))
+        check_cam(all_cams_info)
+
 
 
 def save_config(numeric_id, req):
@@ -196,13 +198,6 @@ def make_celery(app):
 
 celery = make_celery(app)
 
-
-@celery.on_after_configure.connect
-def setup_periodic_tasks(sender, **kwargs):
-    # Calls reverse_messages every 60 seconds.
-    sender.add_periodic_task(60.0, check_cam, name='check')
-
-
 @celery.task(bind=True, name = 'delete_cam')
 def delete_cam_path(self, cam_path):
 
@@ -210,8 +205,8 @@ def delete_cam_path(self, cam_path):
 
     print('Камера Успешно удалена')
 
-@celery.task(bind=True, name = 'check_cam')
-def check_cam(self):
+
+def check_cam(all_cams_info):
     for cam in get_saved_cams():
         if all_cams_info[cam]['is_active']:
             print(cam)
@@ -224,7 +219,7 @@ def check_cam(self):
                     stop_cam(cam[3:])
                     launch_process(COMMAND, os.path.join(CAMDIR, cam))
                     print('{} was restarted'.format(cam))
-        print('{} works fine'.format(cam))
+    print('{} works fine'.format('all'))
 
 
 
