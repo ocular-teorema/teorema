@@ -8,6 +8,7 @@ import json
 from subprocess import Popen, PIPE
 from flask import Flask, request
 from flask_restful import Resource, Api
+import socket
 
 from celery import Celery
 from settings import *
@@ -192,7 +193,14 @@ def make_celery(app):
     celery.Task = ContextTask
     return celery
 
+
 celery = make_celery(app)
+
+
+@celery.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    # Calls reverse_messages every 60 seconds.
+    sender.add_periodic_task(60.0, check_cam, name='check')
 
 
 @celery.task(bind=True, name = 'delete_cam')
@@ -201,6 +209,26 @@ def delete_cam_path(self, cam_path):
     shutil.rmtree(cam_path)
 
     print('Камера Успешно удалена')
+
+@celery.task(bind=True, name = 'check_cam')
+def check_cam(self):
+    for cam in get_saved_cams():
+        if all_cams_info[cam]['is_active']:
+            print(cam)
+            print(all_cams_info[cam]['is_active'])
+            file = get_cam_path(cam[3:]) + '/theorem.conf'
+            with open(file, 'r') as f:
+                port = f.readlines()[1][9:]
+                sock = socket.socket()
+                if sock.connect_ex(('127.0.0.1', int(port))) == 0:
+                    stop_cam(cam[3:])
+                    launch_process(COMMAND, os.path.join(CAMDIR, cam))
+                    print('{} was restarted'.format(cam))
+        print('{} works fine'.format(cam))
+
+
+
+
 
 # this dont work properly with background thread. use EXPORT FLASK_APP=listener.py && flask run
 #if __name__ == '__main__':
