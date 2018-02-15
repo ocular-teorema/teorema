@@ -57,6 +57,7 @@ class ControlPi(Thread):
         while True:
             try:
                 self.check_processes()
+                self.check_cam()
                 time.sleep(LAG)
             except Exception as e:
                 print('\n'.join(traceback.format_exception(*sys.exc_info())))
@@ -66,7 +67,23 @@ class ControlPi(Thread):
         for cam, cam_info in all_cams_info.items():
             if cam_info['is_active'] and process_died(cam_info['process']):
                 cam_info['process'] = launch_process(COMMAND, os.path.join(CAMDIR, cam))
-        check_cam(all_cams_info)
+    @with_lock
+    def check_cam(self):
+        for cam in get_saved_cams():
+            #print(cam)
+            if all_cams_info[cam]['is_active']:
+                file = get_cam_path(cam[3:]) + '/theorem.conf'
+                #print(file)
+                with open(file, 'r') as f:
+                    port = f.readlines()[1][9:]
+                    #print(port)
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    if sock.connect_ex(('127.0.0.1', int(port))) != 0:
+                        print(cam+'down')
+                        stop_cam(cam[3:])
+                        launch_process(COMMAND, os.path.join(CAMDIR, cam))
+                        print('{} was restarted'.format(cam))
+                    sock.close()        
 
 
 
@@ -205,7 +222,7 @@ def delete_cam_path(self, cam_path):
 
     print('Камера Успешно удалена')
 
-
+'''
 def check_cam(all_cams_info):
     for cam in get_saved_cams():
         if all_cams_info[cam]['is_active']:
@@ -220,7 +237,7 @@ def check_cam(all_cams_info):
                     launch_process(COMMAND, os.path.join(CAMDIR, cam))
                     print('{} was restarted'.format(cam))
     print('{} works fine'.format('all'))
-
+'''
 
 
 
