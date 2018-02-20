@@ -68,8 +68,8 @@ def user_cameras(request):
             camera_repr['events_url'] = 'http://{}:{}/'.format(camera_object.server.address, camera_object.port)
 
             camera_repr['http_output_url'] = 'http://{}:8080/videoanalytic/{}/index.m3u8'.format(camera_object.server.address, camera_object.id)
-            camera_repr['http_output_vascaled_url'] = 'rtmp://{}:8080/vascaled/{}/index.m3u8'.format(camera_object.server.address, camera_object.id)
-            camera_repr['http_output_vasrc_url'] = 'rtmp://{}:8080/vasrc/index.m3u8'.format(camera_object.server.address, camera_object.id)
+            camera_repr['http_output_vascaled_url'] = 'http://{}:8080/vascaled/{}/index.m3u8'.format(camera_object.server.address, camera_object.id)
+            camera_repr['http_output_vasrc_url'] = 'http://{}:8080/vasrc/index.m3u8'.format(camera_object.server.address, camera_object.id)
             group_repr['cameras'].append(camera_repr)
         result['groups'].append(group_repr)
     return Response(result)
