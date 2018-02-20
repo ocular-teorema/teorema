@@ -9,6 +9,8 @@ from subprocess import Popen, PIPE
 from flask import Flask, request
 from flask_restful import Resource, Api
 import socket
+import datetime
+import requests
 
 from celery import Celery
 from settings import *
@@ -57,8 +59,8 @@ class ControlPi(Thread):
         while True:
             try:
                 self.check_processes()
-                self.check_cam()
-                time.sleep(LAG)
+#                self.check_cam()
+                time.sleep(2)
             except Exception as e:
                 print('\n'.join(traceback.format_exception(*sys.exc_info())))
 
@@ -67,24 +69,25 @@ class ControlPi(Thread):
         for cam, cam_info in all_cams_info.items():
             if cam_info['is_active'] and process_died(cam_info['process']):
                 cam_info['process'] = launch_process(COMMAND, os.path.join(CAMDIR, cam))
+
     @with_lock
     def check_cam(self):
         for cam in get_saved_cams():
-            #print(cam)
+            print('worked!')
             if all_cams_info[cam]['is_active']:
                 file = get_cam_path(cam[3:]) + '/theorem.conf'
                 #print(file)
                 with open(file, 'r') as f:
-                    port = f.readlines()[1][9:]
-                    #print(port)
-                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    if sock.connect_ex(('127.0.0.1', int(port))) != 0:
-                        print(cam+'down')
-                        stop_cam(cam[3:])
-                        launch_process(COMMAND, os.path.join(CAMDIR, cam))
+                    port = f.readlines()[1][9:].splitlines()
+                    print(datetime.datetime.now())
+                    try:
+                        requests.get("http://127.0.0.1:{}".format(port[0]), timeout=10)
+                    except:
+                        print(cam, 'down')
+                        process = all_cams_info[str(cam)].get('process')
+                        os.system('kill ' + str(process.pid))
                         print('{} was restarted'.format(cam))
-                    sock.close()        
-
+                        print(datetime.datetime.now())
 
 
 def save_config(numeric_id, req):
