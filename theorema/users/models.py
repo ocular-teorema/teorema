@@ -4,13 +4,15 @@ from django.dispatch import receiver
 from django.contrib.postgres.fields import JSONField
 from theorema.orgs.models import Organization
 from theorema.cameras.models import CameraGroup
-
+import pytz
 
 class User(AbstractUser):
     fio = models.CharField(max_length=300, blank=True)
     is_organization_admin = models.BooleanField(default=False)
     organization = models.ForeignKey(Organization, null=True)
     cameras_access = JSONField(null=True)
+    phone=models.CharField(max_length=30, blank=True)
+    timezone = models.CharField(max_length=256, blank=True)
 
 # https://stackoverflow.com/questions/26786512/how-to-see-if-a-field-changed-in-model-save-method
 @receiver(models.signals.pre_save, sender=User)

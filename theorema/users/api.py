@@ -14,6 +14,7 @@ class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer
 
     def get_queryset(self):
+        print(self.queryset)
         if self.request.user.is_staff:
             param = self.request.query_params.get('organization', None)
             if param is not None:
