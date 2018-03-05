@@ -3,11 +3,16 @@ import json
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import APIException
-from .models import Server, Camera, CameraGroup
-from .serializers import ServerSerializer, CameraSerializer, CameraGroupSerializer
+from .models import Server, Camera, CameraGroup, NotificationCamera
+from .serializers import ServerSerializer, CameraSerializer, NotificationSerializer, CameraGroupSerializer
 from theorema.other.cache_fix import CacheFixViewSet
 from theorema.permissions import ReadOnly
 from theorema.users.models import CamSet
+
+class NotificationViewSet(CacheFixViewSet):
+    queryset = NotificationCamera.objects.all()
+    serializer_class = NotificationSerializer
+    permission_classes = (IsAuthenticated, )
 
 
 class ServerViewSet(CacheFixViewSet):

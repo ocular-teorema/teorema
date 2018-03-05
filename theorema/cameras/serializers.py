@@ -5,7 +5,7 @@ import json
 import random
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
-from .models import Server, Camera, CameraGroup
+from .models import Server, Camera, CameraGroup, NotificationCamera
 from theorema.m2mhelper import M2MHelperSerializer
 
 class ServerSerializer(serializers.ModelSerializer):
@@ -29,6 +29,15 @@ class CameraGroupSerializer(serializers.ModelSerializer):
         fields = (
                 'id', 'name'
         )
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotificationCamera
+        fields = ('id', 'user', 'camera', 'notify_events', 'notify_time_start',
+                  'notify_time_stop', 'notify_alert_level')
+
+
 
 class CameraSerializer(M2MHelperSerializer):
     camera_group = serializers.JSONField(required=False)
