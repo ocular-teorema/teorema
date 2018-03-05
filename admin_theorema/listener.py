@@ -42,11 +42,20 @@ def process_died(process):
     return process is None or process.poll() is not None
 
 def stop_cam(numeric_id):
+    
     process = all_cams_info['cam'+str(numeric_id)].get('process')
+    print(process)
     if process:
+        '''
         process.kill()
         process.poll() # prevent zomdie if patched to !is_active
-
+        '''
+        print(all_cams_info)
+        print(process.pid)
+#       maybe this will work
+#        os.kill(process.pid, 15)
+        os.system('kill {}'.format(process.pid))
+ 
 def with_lock(func):
     def result(*args, **kwargs):
         with lock:
@@ -145,6 +154,7 @@ class Cam(Resource):
     def patch(self):
         req = request.get_json()
         cam_path = get_cam_path(req['id'])
+        print(cam_path)
         try:
             save_config(req['id'], req)
             save_cam_state(req['id'], is_active=req.get('is_active', 1))
