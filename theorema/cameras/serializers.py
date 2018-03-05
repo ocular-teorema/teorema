@@ -34,7 +34,7 @@ class CameraGroupSerializer(serializers.ModelSerializer):
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = NotificationCamera
-        fields = ('id', 'user', 'camera', 'notify_events', 'notify_time_start',
+        fields = ('id', 'user', 'camera', 'camera_group', 'notify_events', 'notify_time_start',
                   'notify_time_stop', 'notify_alert_level')
 
 

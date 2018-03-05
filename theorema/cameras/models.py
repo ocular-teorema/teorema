@@ -59,8 +59,9 @@ class Camera2CameraGroup(models.Model):
 
 
 class NotificationCamera(models.Model):
-    user = models.ForeignKey('users.User')
-    camera = models.ForeignKey(Camera)
+    user = models.ManyToManyField('users.User')
+    camera = JSONField(null=True)
+    camera_group =JSONField(null=True)
     notify_events = JSONField(default={})
     notify_time_start = models.TimeField(default=datetime.time(0,0))
     notify_time_stop = models.TimeField(default=datetime.time(0,0))
