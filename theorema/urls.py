@@ -18,7 +18,7 @@ from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 
 from .users.api import UserViewSet, profile_view, user_cameras, CamSetViewSet
-from .cameras.api import ServerViewSet, CameraViewSet, CameraGroupViewSet, NotificationViewSet
+from .cameras.api import ServerViewSet, CameraViewSet, CameraGroupViewSet,NotificationViewSet
 from .orgs.api import OrganizationViewSet
 from .other.views import index, login, stat, video
 

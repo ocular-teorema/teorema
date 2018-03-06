@@ -4,7 +4,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import APIException
 from .models import Server, Camera, CameraGroup, NotificationCamera
-from .serializers import ServerSerializer, CameraSerializer, NotificationSerializer, CameraGroupSerializer
+from .serializers import ServerSerializer, CameraSerializer,CameraGroupSerializer, NotificationSerializer
 from theorema.other.cache_fix import CacheFixViewSet
 from theorema.permissions import ReadOnly
 from theorema.users.models import CamSet
@@ -14,6 +14,10 @@ class NotificationViewSet(CacheFixViewSet):
     serializer_class = NotificationSerializer
     permission_classes = (IsAuthenticated, )
 
+    def get_queryset(self):
+        if not self.request.user.is_staff:
+            return self.queryset.filter(organization=self.request.user.organization)
+        return self.queryset
 
 class ServerViewSet(CacheFixViewSet):
     queryset = Server.objects.all()
