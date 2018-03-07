@@ -5,7 +5,7 @@ import json
 import random
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
-from .models import Server, Camera, CameraGroup,NotificationCamera
+from .models import Server, Camera, CameraGroup, NotificationCamera
 from theorema.m2mhelper import M2MHelperSerializer
 
 class ServerSerializer(serializers.ModelSerializer):
