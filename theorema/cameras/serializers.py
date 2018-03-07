@@ -65,8 +65,9 @@ class CameraSerializer(M2MHelperSerializer):
             camera_group = CameraGroup(name=validated_data['camera_group'], organization=validated_data['organization'])
             camera_group.save()
             validated_data['camera_group'] = camera_group
-        # TODO check if port already used
-        validated_data['port'] = random.randrange(15000, 16000)
+        used_ports = [el.port for el in Camera.objects.all()]
+
+        validated_data['port'] = random.choice([el for el in range(15000, 16000) if el not in used_ports])
         result = super().create(validated_data)
 
         try:
