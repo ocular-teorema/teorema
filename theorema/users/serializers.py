@@ -17,12 +17,13 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def save(self):
-        result = super().save()
+        # result = super().save()
         if self.validated_data['is_organization_admin'] and \
                 User.objects.filter(organization=self.validated_data['organization'], is_organization_admin=True).count() > 1:
-            result.delete()
+            # result.delete()
             raise APIException(code=400, detail={'status': 1, 'message': 'too much'})
-        return result
+        #if self.validated_data['password']:
+        return super().save()
         
 
 
