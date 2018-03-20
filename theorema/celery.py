@@ -2,7 +2,10 @@ import os
 from celery import Celery
 import datetime
 import subprocess
-import re 
+import re
+import pytz
+
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'theorema.settings')
 app = Celery('theorema')
 
@@ -32,18 +35,18 @@ def send_message(self):
   }
     from theorema.cameras.models import NotificationCamera, Camera
     from theorema.users.models import User
-    active_notifications=NotificationCamera.objects.filter(notify_time_start__lt = datetime.datetime.now().time(), notify_time_stop__gt = datetime.datetime.now().time())
+    current_timezone=pytz.timezone('EU/Moscow')
+    active_notifications=NotificationCamera.objects.filter(notify_time_start__lt = datetime.datetime.now(current_timezone).time(), notify_time_stop__gt = datetime.datetime.now().time())
+    all_notifications=NotificationCamera.objects.all()
     notifications={}
-    if active_notifications:
-        for notification in active_notifications:
+    if all_notifications:
+        for notification in all_notifications:
             for camera in notification.camera:
                 cam = Camera.objects.get(id=int(camera))
                 if cam.id not in notifications.keys() and cam.analysis>1:
                     pid = subprocess.getoutput('lsof -i | grep {}'.format(cam.port)).split()[1]
                     stdout = subprocess.getoutput('timeout 2 cat /proc/{}/fd/1'.format(pid))
                     if stdout:
-                        #notifications[cam.id] = [el for el in stdout.split('\n') if 'Event started' in el and 'CamInfoEventMessage' in el]
-                        #for notify in notifications[cam.id]
                         stdout = [el for el in stdout.split('\n') if 'Event started' in el and 'CamInfoEventMessage' in el]
                         events=''
                         for el in stdout:
@@ -55,7 +58,8 @@ def send_message(self):
                             events += str
                         print('end')
                         notifications[cam.id] = events
-            for user in notification.users.all():
-                message=''.join([value for key,value in notifications.items() if key in notification.camera and value and int(re.search(r"(?<=Уровень события: )\w+", value).group(0)) > notification.notify_alert_level])
-                print(user.username, message)
-        print(notifications)
+        if active_notifications:
+            for notification in active_notifications:
+                for user in notification.users.all():
+                    message=''.join([value for key,value in notifications.items() if key in notification.camera and value and int(re.search(r"(?<=Уровень события: )\w+", value).group(0)) > notification.notify_alert_level])
+                    print(user.username, notifications)
