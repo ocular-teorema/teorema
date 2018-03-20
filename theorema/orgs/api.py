@@ -7,4 +7,3 @@ class OrganizationViewSet(ModelViewSet):
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
 
-

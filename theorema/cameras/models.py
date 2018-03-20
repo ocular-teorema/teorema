@@ -4,10 +4,16 @@ from django.core.validators import RegexValidator
 from django.contrib.postgres.fields import JSONField
 from theorema.orgs.models import Organization
 
+SERVER_TYPES = [
+    ('full', 'full'),
+    ('analysis', 'analysis'),
+    ('storage', 'storage')
+]
 class Server(models.Model):
     name = models.CharField(max_length=100)
     address = models.GenericIPAddressField()
     organization = models.ForeignKey(Organization)
+    type = models.CharField(choices=SERVER_TYPES, default='full', max_length=8)
 
 
 class CameraGroup(models.Model):

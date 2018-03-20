@@ -17,9 +17,8 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-#        if self.validated_data['is_organization_admin'] and User.objects.filter(organization=self.validated_data['organization'], is_organization_admin=True).count() > 1:
-#            raise APIException(code=400, detail={'status': 1, 'message': 'too much'})
         return super().create(validated_data)
+
         
 
 
