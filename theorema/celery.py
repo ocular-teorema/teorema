@@ -4,6 +4,7 @@ import datetime
 import subprocess
 import re
 import pytz
+from django.core.mail import send_mail
 
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'theorema.settings')
@@ -35,7 +36,7 @@ def send_message(self):
   }
     from theorema.cameras.models import NotificationCamera, Camera
     from theorema.users.models import User
-    current_timezone=pytz.timezone('EU/Moscow')
+    current_timezone=pytz.timezone('Europe/Moscow')
     active_notifications=NotificationCamera.objects.filter(notify_time_start__lt = datetime.datetime.now(current_timezone).time(), notify_time_stop__gt = datetime.datetime.now().time())
     all_notifications=NotificationCamera.objects.all()
     notifications={}
@@ -62,4 +63,7 @@ def send_message(self):
             for notification in active_notifications:
                 for user in notification.users.all():
                     message=''.join([value for key,value in notifications.items() if key in notification.camera and value and int(re.search(r"(?<=Уровень события: )\w+", value).group(0)) > notification.notify_alert_level])
-                    print(user.username, notifications)
+                    try:
+                        send_mail('Новые уведомления', message, 'test@test.com', ['test@test.com'], fail_silently=False)
+                    except:
+                        raise Exception('send message fail')
