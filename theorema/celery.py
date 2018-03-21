@@ -37,7 +37,9 @@ def send_message(self):
     from theorema.cameras.models import NotificationCamera, Camera
     from theorema.users.models import User
     current_timezone=pytz.timezone('Europe/Moscow')
-    active_notifications=NotificationCamera.objects.filter(notify_time_start__lt = datetime.datetime.now(current_timezone).time(), notify_time_stop__gt = datetime.datetime.now().time())
+    print(datetime.datetime.now(current_timezone).time())
+    active_notifications=NotificationCamera.objects.filter(notify_time_start__lte = datetime.datetime.now(current_timezone).time(), notify_time_stop__gte = datetime.datetime.now(current_timezone).time())
+    print(active_notifications)
     all_notifications=NotificationCamera.objects.all()
     notifications={}
     if all_notifications:
@@ -51,19 +53,38 @@ def send_message(self):
                         stdout = [el for el in stdout.split('\n') if 'Event started' in el and 'CamInfoEventMessage' in el]
                         events=''
                         for el in stdout:
-                            str = 'Тип события: {}, '.format(ACTIVITY_TYPE[re.search(r'(?<=type = )\w+', el).group(0)])
-                            str += 'Время события: {}, '.format(re.search(r'(?<=time:)\S{8}', el).group(0))
-                            str += 'Ссылка на ролик: {}, '.format(re.search(r'(?<=link:http://127.0.0.1:)\S+.mp4', el).group(0))
+                            str = 'Время события {}, '.format(re.search(r'(?<=time:)\S{8}', el).group(0))
+                            str += 'Имя камеры: {}, '.format(cam.name)
+                            str += 'Тип события: {}, '.format(ACTIVITY_TYPE[re.search(r'(?<=type = )\w+', el).group(0)])
                             str += 'Уровень события: {}, '.format(re.search(r'(?<=confidence = )\w+', el).group(0))
-                            str += 'Имя камеры: {} \n'.format(cam.name)
+                            str += 'Ссылка на ролик: {}\n'.format(re.search(r'(?<=link:http://127.0.0.1:)\S+.mp4', el).group(0))
+                            #str += 'Имя камеры: {} \n'.format(cam.name)
                             events += str
                         print('end')
                         notifications[cam.id] = events
         if active_notifications:
             for notification in active_notifications:
                 for user in notification.users.all():
-                    message=''.join([value for key,value in notifications.items() if key in notification.camera and value and int(re.search(r"(?<=Уровень события: )\w+", value).group(0)) > notification.notify_alert_level])
-                    try:
-                        send_mail('Новые уведомления', message, 'test@test.com', ['test@test.com'], fail_silently=False)
-                    except:
-                        raise Exception('send message fail')
+                    message=''
+                    message_list=''.join([value for key,value in notifications.items() if key in notification.camera and value and int(re.search(r"(?<=Уровень события: )\w+", value).group(0)) > notification.notify_alert_level])
+                    #print(message_list)
+                    message_list=message_list.split('\n')
+                    message_list.remove('')
+                    #print(message_list)
+                    if message_list:
+                        for el in message_list:
+                            level=re.search(r"(?<=Уровень события: )\w+", el).group(0)
+                            print(level)
+                            message += el.replace(level, 'Высокий' if int(level) > 80 else ('Средний' if 80 > int(level) > 50  else 'Низкий')) + '\n'
+                        #    level = re.search(r"(?<=Уровень события: )\w+", message).group(0)
+                        #message= message.replace(level, 'Высокий' if int(level) > 80 else ('Средний' if 80 > int(level) > 50  else 'Низкий'))
+                        #message_list=[value for key,value in notifications.items() if key in notification.camera and value and int(re.search(r"(?<=Уровень события: )\w+", value).group(0)) > notification.notify_alert_level]
+                        #for line in message_list:
+                        #    level=re.search(r"(?<=Уровень события: )\w+", line).group(0)
+                        #    print(level)
+                        #    message += line.replace(level, 'Высокий' if int(level) > 80 else ('Средний' if 80 > int(level) > 50  else 'Низкий'))
+                        #    print(line)
+                        try:
+                            send_mail('Новые уведомления', message, 'test@test.com', ['test@test.com'], fail_silently=False)
+                        except:
+                            raise Exception('send message fail')
