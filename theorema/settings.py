@@ -159,3 +159,5 @@ try:
     from theorema.settings_local import *
 except ImportError as exc:
     __import__('warnings').warn("Can't load local settings: {}".format(str(exc)))
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
