@@ -9,12 +9,12 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         result = super().create(validated_data)
-        User.objects.create(
+        u = User(
             username='super_{}'.format(result.name),
-            password='pass_{}'.format(result.name),
             organization_id=result.id,
             is_organization_admin=True,
             fio=''
         )
+        u.password='pass_{}'.format(result.name)
+        u.save()
         return result
-
