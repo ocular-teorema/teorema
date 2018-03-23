@@ -11,7 +11,7 @@ from theorema.m2mhelper import M2MHelperSerializer
 class ServerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Server
-        fields = ('id', 'name', 'address', 'organization')
+        fields = ('id', 'name', 'address', 'type', 'organization')
 
     def create(self, validated_data):
         result = super().create(validated_data)

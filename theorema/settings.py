@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'allauth',
     'rest_auth',
     'rest_auth.registration',
+    'djcelery_email',
 
     'theorema.users',
     'theorema.cameras',
@@ -160,4 +161,10 @@ try:
 except ImportError as exc:
     __import__('warnings').warn("Can't load local settings: {}".format(str(exc)))
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
+EMAIL_HOST = 'ex.teorema.info'
+EMAIL_HOST_USER = 'analitika@teorema.info'
+EMAIL_HOST_PASSWORD = 'Lo0k@ndCry!'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
