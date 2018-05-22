@@ -7,11 +7,14 @@ from rest_framework import serializers
 from rest_framework.exceptions import APIException
 from .models import Server, Camera, CameraGroup, NotificationCamera
 from theorema.m2mhelper import M2MHelperSerializer
+from theorema.orgs.models import OcularUser
+from rest_framework.response import Response
+from rest_framework import status
 
 class ServerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Server
-        fields = ('id', 'name', 'address', 'type', 'organization')
+        fields = ('id', 'name', 'address', 'type', 'organization', 'parent_server_id')
 
     def create(self, validated_data):
         result = super().create(validated_data)
@@ -59,6 +62,8 @@ class CameraSerializer(M2MHelperSerializer):
         }
 
     def create(self, validated_data):
+#        if not OcularUser.objects.exists():
+#            raise APIException(code=400, detail={'status': 1, 'message': 'Oro user doesn"t exist'})
         if isinstance(validated_data['camera_group'], int):
             validated_data['camera_group'] = CameraGroup.objects.get(id=int(validated_data['camera_group']))
         else:

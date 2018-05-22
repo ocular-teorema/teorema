@@ -10,6 +10,7 @@ SERVER_TYPES = [
     ('storage', 'storage')
 ]
 class Server(models.Model):
+    parent_server_id=models.IntegerField(blank=True, null=True)
     name = models.CharField(max_length=100)
     address = models.GenericIPAddressField()
     organization = models.ForeignKey(Organization)

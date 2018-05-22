@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Organization
+from .models import Organization, OcularUser
 from theorema.users.models import User
 
 class OrganizationSerializer(serializers.ModelSerializer):
@@ -18,3 +18,8 @@ class OrganizationSerializer(serializers.ModelSerializer):
         u.password='pass_{}'.format(result.name)
         u.save()
         return result
+
+class OcularUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OcularUser
+        fields = ('hardware_hash', 'max_cam')

@@ -31,11 +31,11 @@ Difference%20based%20analysis={diff_analysis}
 Pipeline%20Name=cam{id}
 Camera%20name={name}
 Input%20Stream%20Url={address}
-Output%20Url=rtmp://localhost:1935/videoanalytic/cam{id}
+Output%20Url=rtp://localhost:{janus_port}
 Source%20Output%20Url=rtmp://localhost:1935/vasrc/cam{id}
 
 Archive%20Path=/home/_VideoArchive
-Database%20Path=DB/video_analytics
+Database%20Path=video_analytics
 Output%20Stream%20Bitrate={compress_level}
 
 Global%20Scale={global_scale}
@@ -43,6 +43,7 @@ fps={fps}
 statisticPeriodDays=14
 Processing%20Interval%20Sec=600
 Statistic%20Interval%20Sec=600
+
 
 Server%20address=127.0.0.1
 Notification%20smtp%20address=
@@ -52,3 +53,5 @@ Notification%20start%20time=00:00:00
 Notification%20syserr%20email=
 storage_life={storage_life}
 indefinitely={indefinitely} """
+
+

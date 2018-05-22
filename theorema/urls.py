@@ -19,7 +19,7 @@ from rest_framework.routers import DefaultRouter
 
 from .users.api import UserViewSet, profile_view, user_cameras, CamSetViewSet
 from .cameras.api import ServerViewSet, CameraViewSet, CameraGroupViewSet,NotificationViewSet
-from .orgs.api import OrganizationViewSet
+from .orgs.api import OrganizationViewSet, OcularUserViewSet, update_ocularuser_info 
 from .other.views import index, login, stat, video
 
 
@@ -31,6 +31,7 @@ router.register(r'camera_groups', CameraGroupViewSet)
 router.register(r'organizations', OrganizationViewSet)
 router.register(r'camsets', CamSetViewSet)
 router.register(r'notifications', NotificationViewSet)
+router.register(r'ocularuser', OcularUserViewSet)
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -39,6 +40,7 @@ urlpatterns = [
     url(r'^api/rest-auth/', include('rest_auth.urls')),
     url(r'stat/', stat),
     url(r'user_cameras/', user_cameras),
+    url(r'update_ocularuser_info', update_ocularuser_info)
 ]
 
 

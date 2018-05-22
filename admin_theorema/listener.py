@@ -14,7 +14,13 @@ import requests
 
 from celery import Celery
 from settings import *
+import psycopg2
+import re
+from DateTime import DateTime
 
+#from flask_cors import CORS
+from flask_restful.utils import cors
+from flask_cors import CORS
 
 def get_cam_saved_state(numeric_id):
     with open(os.path.join(get_cam_path(numeric_id), ADDITIONAL_CONFIG), 'r') as f:
@@ -114,8 +120,11 @@ def save_config(numeric_id, req):
             global_scale = [0.5, 0.5, 0.5, 0.5, 0.25, 0.125][req['resolution'] - 1],
             motion_analysis = 'true' if req['analysis'] > 2 else 'false',
             diff_analysis = 'true' if req['analysis'] > 1 else 'false',
-            indefinitely='true' if req['indefinitely'] else 'false'
+            indefinitely='true' if req['indefinitely'] else 'false',
+            janus_port=int(req['port'])+1
         ))
+#        os.system('kill `lsof -i | grep janus | awk "{ print $2 }" | head -n1`')
+#        Popen(['/opt/janus/bin/janus'])
 
 
 class Cam(Resource):
@@ -125,14 +134,20 @@ class Cam(Resource):
         cam_path = get_cam_path(req['id'])
         try:
             os.makedirs(os.path.join(cam_path, DBDIR))
-            shutil.copy('/home/theoremg/runEnv/DB/video_analytics', os.path.join(cam_path, DBDIR, 'video_analytics'))
+#            os.makedirs(os.path.join(cam_path, DBDIR))
+#            shutil.copy('/home/theoremg/runEnv/DB/video_analytics', os.path.join(cam_path, DBDIR, 'video_analytics'))
             save_config(req['id'], req)
             is_active = req.get('is_active', 1)
             save_cam_state(req['id'], is_active=is_active)
             all_cams_info['cam'+str(req['id'])] = {
                 'is_active': is_active,
                 'process': launch_process(COMMAND, os.path.join(CAMDIR, 'cam'+str(req['id']))) if is_active else None,
-            }
+            } 
+            with open("/opt/janus/etc/janus/janus.plugin.streaming.cfg", "a") as f:
+                f.write("\n[cam {id} restreaming sample]\ntype = rtp\ndescription = {id}\naudio = no\nvideo = yes\nvideoport = {port}\nvideopt = 96\nvideortpmap = H264/90000\nvideofmtp = profile-level-id=42e01f\n".format(id=req['id'], port=int(req['port'])+1))
+                f.close()
+                os.system('kill `lsof -i | grep janus | awk "{ print $2 }" | head -n1`')
+                Popen(['/opt/janus/bin/janus'])
         except Exception as e:
             print('\n'.join(traceback.format_exception(*sys.exc_info())))
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
@@ -176,7 +191,63 @@ class Stat(Resource):
         except Exception as e:
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
 
+def get_time(mill):
+    hours = mill//3600000
+    mins =  mill//1000//60 - hours*60
+#    print(hours, mins)
+    return '{hh}-{mm}'.format(hh=hours, mm=mins)
 
+
+class DatabaseData(Resource):
+#    @cors.crossdomain(origin='*')
+    def get(self, data):
+        data=re.match(r"startDate=(?P<date_start>\d+-\d+-\d+) endDate=(?P<date_end>\d+-\d+-\d+) startTime=(?P<time_start>\d+-\d+) endTime=(?P<time_end>\d+-\d+) events=(?P<events>\w) cam=(?P<cam>\w+)", data.replace('&', ' '))
+        data = data.groupdict()
+#        print(data)
+        conn = psycopg2.connect("dbname='video_analytics' user='va' password=''")
+        cur =conn.cursor()
+        start_time_database=' start_time >=' + str((int(data['time_start'][0:2])*60+int(data['time_start'][3:]))*60*999) +' and 'if data['time_start'] != '00-00' else ''
+        end_time_database=' end_time <= ' + str((int(data['time_end'][0:2])*60+int(data['time_end'][3:]))*60*1001) +' and 'if data['time_end'] != '00-00' else ''
+        start_date_database=' date >= '+ str(DateTime(data['date_start'].replace('-', '/') + ' UTC').JulianDay()) +' and '
+        end_date_database = ' date <= ' + str(DateTime(data['date_end'].replace('-', '/') + ' UTC').JulianDay()) +' and '
+        cam = "records.cam='{}'".format(data['cam'])
+        cur.execute('select start_time,end_time,date, video_archive,cam,id  from records where' + start_date_database + end_date_database + start_time_database + end_time_database + cam + ';' )
+        data_out=cur.fetchall()
+        result = []
+        event_types = "and type = {}".format(data['events']) if int(data['events']) > 0 else ''
+        for el in data_out:
+            r = { 'date':el[2], 'start':get_time(el[0]), 'end':get_time(el[1]), 'archivePostfix': el[3],  'cam':el[4], 'id':el[5]}
+            result.append(r)
+            conn.close()
+        for el in result:
+            conn=psycopg2.connect("dbname='video_analytics' user='va' password=''")
+            cur = conn.cursor()
+            cur.execute("select id, cam, archive_file1, archive_file2, start_timestamp, end_timestamp, type, confidence,reaction,file_offset_sec from events where events.cam='{cam}' and date={date} and archive_file1='{archive}'  {events};".format(cam=el['cam'], date=el['date'], archive=el['archivePostfix'], events=event_types))
+            rows=cur.fetchall()
+            list = []
+            for event in rows:
+                list.append({'id':event[0], 'cam':event[1], 'archiveStartHint':event[2], 'archiveEndHint':event[3], 'startTimeMS':event[4],'endTimeMS':event[5],'eventType':event[6], 'confidence':event[7], 'reaction': event[8], 'offset': event[9]})
+            el['events']=list
+            conn.close()
+        return result
+
+
+class DatabaseEventsData(Resource):
+    def get(self, data):
+        data=re.match(r"startDate=(?P<date_start>\d+-\d+-\d+) endDate=(?P<date_end>\d+-\d+-\d+) startTime=(?P<time_start>\d+) endTime=(?P<time_end>\d+) cam=(?P<cam>\w+)", data.replace('&', ' '))
+        data=data.groupdict()
+        conn = psycopg2.connect("dbname='video_analytics' user='va' password=''")
+        cur = conn.cursor()
+        start_date_database=' date >= '+ str(DateTime(data['date_start'].replace('-', '/') + ' UTC').JulianDay()) +' and '
+        end_date_database = ' date <= ' + str(DateTime(data['date_end'].replace('-', '/') + ' UTC').JulianDay()) +' and '
+        cur.execute("select id, cam, archive_file1, archive_file2, start_timestamp, end_timestamp, type, confidence, reaction,date,file_offset_sec from events where events.cam='{cam}'".format(cam=data['cam'])+ ' and'+start_date_database+end_date_database+'start_timestamp >='+data['time_start']+' and ' + 'end_timestamp <=' + data['time_end'] + ';')
+        rows=cur.fetchall()
+        list = []
+        for event in rows:
+                list.append({'id':event[0], 'cam':event[1], 'archiveStartHint':event[2], 'archiveEndHint':event[3], 'startTimeMS':event[4],'endTimeMS':event[5],'eventType':event[6], 'confidence':event[7], 'reaction': event[8], 'date': event[9], 'offset': event[10]})
+        conn.close()
+        return list
+        
 @with_lock
 def launch_cameras():
     for cam in get_saved_cams():
@@ -189,6 +260,8 @@ def launch_cameras():
             all_cams_info[cam]['process'] = None
 
 os.system('kill `pidof processInstance`')
+os.system('kill `lsof -i | grep janus | awk "{ print $2 }" | head -n1`')
+Popen(['/opt/janus/bin/janus'])
 
 lock = Lock()
 
@@ -200,15 +273,27 @@ if 'celery' not in sys.argv[0]:
 
 
 app = Flask(__name__)
+#app=CORS(app)
+
 api = Api(app)
+#api = CORS(api)
 api.add_resource(Cam, '/')
 api.add_resource(Stat, '/stat')
-
+api.add_resource(DatabaseData, '/db/<string:data>', endpoint='db_data')
+api.add_resource(DatabaseEventsData, '/archivedb/<string:data>', endpoint='db_arhcive_data')
 
 app.config.update(
     CELERY_BROKER_URL='amqp://teorema:teorema@0.0.0.0:5672//',
     CELERY_RESULT_BACKEND='amqp://teorema:teorema@0.0.0.0:5672//'
 )
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    print('zzzzzz================================')
+    return response
 
 
 def make_celery(app):
