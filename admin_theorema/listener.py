@@ -121,7 +121,8 @@ def save_config(numeric_id, req):
             motion_analysis = 'true' if req['analysis'] > 2 else 'false',
             diff_analysis = 'true' if req['analysis'] > 1 else 'false',
             indefinitely='true' if req['indefinitely'] else 'false',
-            janus_port=int(req['port'])+1
+            janus_port=int(req['port'])+1,
+            archive_path =  req['arhcive_path'] if req['arhcive_path'] else'/home/_VideoArchive'
         ))
 #        os.system('kill `lsof -i | grep janus | awk "{ print $2 }" | head -n1`')
 #        Popen(['/opt/janus/bin/janus'])

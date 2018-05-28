@@ -57,7 +57,7 @@ class CameraSerializer(M2MHelperSerializer):
                 'camera_group', 'organization', 'port', 'notify_email', 
                 'notify_phone', 'notify_events', 'notify_time_start',
                 'notify_time_stop', 'notify_alert_level', 'notify_send_email',
-                'notify_send_sms', 'indefinitely'
+                'notify_send_sms', 'indefinitely', 'archive_path'
         )
         extra_kwargs = {
             'port': {'read_only': True}

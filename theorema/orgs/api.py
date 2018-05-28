@@ -27,17 +27,11 @@ class OcularUserViewSet(ModelViewSet):
 @api_view(['GET'])
 def update_ocularuser_info(request): 
     if not OcularUser.objects.exists():
-#        md5hash = hashlib.md5()
-#        print(1)
-#        byte_str=bytes(str(subprocess.check_output('lspci', shell=True)), encoding='utf=8')
-#        print(2)
-#        md5hash.update(byte_str)
-#        print(3)
-#        hash = md5hash.hexdigest()      
-#        print(4)
-        hash=str(random.choice(range(123123123123)))
+        md5hash = hashlib.md5()
+        byte_str=bytes(str(subprocess.check_output('lspci', shell=True)), encoding='utf=8')
+        md5hash.update(byte_str)
+        hash = md5hash.hexdigest()
         response = requests.post('http://78.46.97.176:1234/account', json={'hash':hash, 'new_user': 'true'})
-        print(5)
         if response.json()['status'] == 'ok':
             print(response.json())
             OcularUser.objects.create(hardware_hash=hash, max_cam=response.json()['max_cams'])
@@ -47,3 +41,14 @@ def update_ocularuser_info(request):
     else:
         pass
     return Response({'message':'already_register'}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_today_hash(request):
+    md5hash = hashlib.md5()
+    byte_str = bytes(str(subprocess.check_output('lspci', shell=True)), encoding='utf=8')
+    md5hash.update(byte_str)
+    hash = md5hash.hexdigest()
+    if hash == OcularUser.objects.filter().last().hardware_hash:
+        return Response({'hash':'yes'},status=status.HTTP_200_OK)
+    else:
+        return Response({'hash': 'no'}, status=status.HTTP_200_OK)

@@ -34,7 +34,7 @@ Input%20Stream%20Url={address}
 Output%20Url=rtp://localhost:{janus_port}
 Source%20Output%20Url=rtmp://localhost:1935/vasrc/cam{id}
 
-Archive%20Path=/home/_VideoArchive
+Archive%20Path={archive_path}
 Database%20Path=video_analytics
 Output%20Stream%20Bitrate={compress_level}
 

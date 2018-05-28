@@ -58,6 +58,7 @@ class Camera(models.Model):
     notify_send_email = models.BooleanField(default=False)
     notify_send_sms = models.BooleanField(default=False)
     indefinitely = models.BooleanField(default=False)
+    archive_path=models.CharField(max_length=512, blank=True, null=True)
 
 
 class Camera2CameraGroup(models.Model):
