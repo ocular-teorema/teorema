@@ -10,4 +10,5 @@ class Organization(models.Model):
 class OcularUser(models.Model):
     hardware_hash=models.CharField(max_length=50)
     max_cam=JSONField(default=list)
-
+    remote_id=models.IntegerField(default=0)
+    type = models.CharField(max_length=200, default='offline')

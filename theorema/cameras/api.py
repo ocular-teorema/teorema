@@ -8,6 +8,10 @@ from .serializers import ServerSerializer, CameraSerializer,CameraGroupSerialize
 from theorema.other.cache_fix import CacheFixViewSet
 from theorema.permissions import ReadOnly
 from theorema.users.models import CamSet
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from theorema.orgs.models import *
+import hashlib 
 
 class NotificationViewSet(CacheFixViewSet):
     queryset = NotificationCamera.objects.all()
@@ -79,3 +83,38 @@ class CameraGroupViewSet(CacheFixViewSet):
         if param is not None:
             return self.queryset.filter(organization__id=param)
         return self.queryset
+
+
+@api_view(['POST'])
+def add_cams(request):
+    add_cams = []
+    hash = request.data['code']
+#    return Response({'sdasd':request.data})
+    hash_list = hash.split('-')
+    user = OcularUser.objects.filter().last()
+    user_hash = user.hardware_hash
+#    return Response({hashlib.sha224(str.encode(user_hash)).hexdigest(): hash_list[0]})
+#    m = rsa.decrypt(n, priv_key)
+#    return Response({'c':n})
+    
+#        user = OcularUser.objects.filter().last()
+#        user_hash = user.hardware_hash
+#        return Response({hashlib.sha224(str.encode(user_hash)).hexdigest(): 1})
+    if hashlib.sha224(str.encode(user_hash)).hexdigest() ==  hash_list[0]:
+#        return Response({'hash' : 'ok'})
+        for el in hash_list[1:4]:
+            for e in range(100):
+                e = str(e)+'abc'
+                if hashlib.sha224(str.encode(e)).hexdigest() == el:
+                    add_cams.append(e[:-3])
+        user.max_cam = {"a":add_cams[0], "f":add_cams[1], "s":add_cams[2] }
+        user.save()
+        return Response({'staus':'ok'})                
+    else:
+        pass
+#    code = bytes(request.data['code'], encoding='utf-8')
+#    m = rsa.decrypt(code, bob_priv)
+#    u = m.decode('utf-8')
+      
+#    if str(request.data['code']) == '123':
+    return Response({'status':'none'})

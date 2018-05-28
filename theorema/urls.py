@@ -18,7 +18,7 @@ from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 
 from .users.api import UserViewSet, profile_view, user_cameras, CamSetViewSet
-from .cameras.api import ServerViewSet, CameraViewSet, CameraGroupViewSet,NotificationViewSet
+from .cameras.api import ServerViewSet, CameraViewSet, CameraGroupViewSet,NotificationViewSet, add_cams
 from .orgs.api import OrganizationViewSet, OcularUserViewSet, update_ocularuser_info 
 from .other.views import index, login, stat, video
 
@@ -40,7 +40,8 @@ urlpatterns = [
     url(r'^api/rest-auth/', include('rest_auth.urls')),
     url(r'stat/', stat),
     url(r'user_cameras/', user_cameras),
-    url(r'update_ocularuser_info', update_ocularuser_info)
+    url(r'update_ocularuser_info', update_ocularuser_info),
+    url(r'api/offline_pay', add_cams)
 ]
 
 
