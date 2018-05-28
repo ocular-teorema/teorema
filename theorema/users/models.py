@@ -5,6 +5,7 @@ from django.contrib.postgres.fields import JSONField
 from theorema.orgs.models import Organization
 from theorema.cameras.models import CameraGroup
 import pytz
+from theorema.orgs.models import OcularUser
 
 TIMEZONES = tuple(zip(pytz.all_timezones, pytz.all_timezones))
 
@@ -16,6 +17,7 @@ class User(AbstractUser):
     cameras_access = JSONField(null=True)
     phone=models.CharField(max_length=30, blank=True)
     timezone = models.CharField(max_length=256, blank=True, choices=TIMEZONES)
+
 
 #https://stackoverflow.com/questions/26786512/how-to-see-if-a-field-changed-in-model-save-method
 @receiver(models.signals.pre_save, sender=User)
@@ -36,4 +38,10 @@ class CamSet(models.Model):
     name = models.CharField(max_length=500)
     cameras = JSONField(null=True)
     mode = models.SmallIntegerField(default=0)
+
+
+
+class DayLeft(models.Model):
+    user = models.OneToOneField(OcularUser)
+    stop_date = models.DateTimeField()
 

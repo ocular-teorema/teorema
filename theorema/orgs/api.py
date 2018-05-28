@@ -11,6 +11,9 @@ from rest_framework import status
 from rest_framework.exceptions import APIException
 import string
 import random
+from theorema.users.models import DayLeft
+from django.utils import timezone
+import datetime
 
 class OrganizationViewSet(ModelViewSet):
     queryset = Organization.objects.all()
@@ -49,6 +52,13 @@ def get_today_hash(request):
     md5hash.update(byte_str)
     hash = md5hash.hexdigest()
     if hash == OcularUser.objects.filter().last().hardware_hash:
+        obj = DayLeft.objects.filter(user=request.user)
+        if obj:
+            obj.delete()
         return Response({'hash':'yes'},status=status.HTTP_200_OK)
     else:
-        return Response({'hash': 'no'}, status=status.HTTP_200_OK)
+        obj, created = DayLeft.objects.create(user=request.user)
+        if created:
+            obj.stop_date = timezone.now() + datetime.timedelta(7)
+            obj.save()
+        return Response({'hash': 'no', 'date_end':obj.strftime('%d-%m-%Y')}, status=status.HTTP_200_OK)

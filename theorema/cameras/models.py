@@ -75,3 +75,4 @@ class NotificationCamera(models.Model):
     notify_time_start = models.TimeField(default=datetime.time(0,0))
     notify_time_stop = models.TimeField(default=datetime.time(0,0))
     notify_alert_level = models.SmallIntegerField(default=1)
+
