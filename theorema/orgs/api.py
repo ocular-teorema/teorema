@@ -52,13 +52,14 @@ def get_today_hash(request):
     md5hash.update(byte_str)
     hash = md5hash.hexdigest()
     if hash == OcularUser.objects.filter().last().hardware_hash:
-        obj = DayLeft.objects.filter(user=request.user)
+        obj = DayLeft.objects.filter(user=OcularUser.objects.filter().last()).last()
         if obj:
             obj.delete()
         return Response({'hash':'yes'},status=status.HTTP_200_OK)
     else:
-        obj, created = DayLeft.objects.create(user=request.user)
+        obj, created = DayLeft.objects.get_or_create(user=OcularUser.objects.filter().last())
+        print(obj)
         if created:
             obj.stop_date = timezone.now() + datetime.timedelta(7)
             obj.save()
-        return Response({'hash': 'no', 'date_end':obj.strftime('%d-%m-%Y')}, status=status.HTTP_200_OK)
+        return Response({'hash': 'no', 'date_end':obj.stop_date.strftime('%d-%m-%Y')}, status=status.HTTP_200_OK)

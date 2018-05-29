@@ -43,5 +43,5 @@ class CamSet(models.Model):
 
 class DayLeft(models.Model):
     user = models.OneToOneField(OcularUser)
-    stop_date = models.DateTimeField()
+    stop_date = models.DateTimeField(blank=True, null=True)
 

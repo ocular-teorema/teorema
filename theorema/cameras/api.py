@@ -87,6 +87,8 @@ class CameraGroupViewSet(CacheFixViewSet):
 
 @api_view(['POST'])
 def add_cams(request):
+    print(request)
+    print(request.data)
     add_cams = []
     hash = request.data['code']
 #    return Response({'sdasd':request.data})
