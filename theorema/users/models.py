@@ -22,7 +22,8 @@ class User(AbstractUser):
 #https://stackoverflow.com/questions/26786512/how-to-see-if-a-field-changed-in-model-save-method
 @receiver(models.signals.pre_save, sender=User)
 def hash_pass(sender, instance, **kwargs):
-    instance.set_password(instance.password)
+    if instance.is_superuser != True:
+        instance.set_password(instance.password)
 '''
     try:
         current_instance = sender.objects.get(id=instance.id)
