@@ -48,7 +48,7 @@ class NotificationSerializer(serializers.ModelSerializer):
 
 
 class CameraSerializer(M2MHelperSerializer):
-    camera_group = serializers.JSONField(required=False)
+    camera_group = serializers.JSONField(required=True)
     class Meta:
         model = Camera
         fields = (
@@ -73,7 +73,6 @@ class CameraSerializer(M2MHelperSerializer):
             validated_data['camera_group'] = CameraGroup.objects.get(id=int(validated_data['camera_group']))
         else:
             camera_group = CameraGroup(name=validated_data['camera_group'], organization=validated_data['organization'])
-            camera_group.save()
             validated_data['camera_group'] = camera_group
         used_ports = [el.port for el in Camera.objects.all()]
 
@@ -90,6 +89,7 @@ class CameraSerializer(M2MHelperSerializer):
             worker_data['notify_time_stop'] = str(worker_data.get('notify_time_stop', '00:00:00'))
             raw_response = requests.post('http://{}:5005'.format(validated_data['server'].address), json=worker_data)
             worker_response = json.loads(raw_response.content.decode())
+            camera_group.save() if camera_group else None
             print('create worker_response:', worker_response)
         except Exception as e:
             result.delete()
