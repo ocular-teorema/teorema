@@ -48,7 +48,7 @@ class NotificationSerializer(serializers.ModelSerializer):
 
 
 class CameraSerializer(M2MHelperSerializer):
-    camera_group = serializers.JSONField(required=True)
+    camera_group = serializers.JSONField(required=False)
     class Meta:
         model = Camera
         fields = (
@@ -71,6 +71,7 @@ class CameraSerializer(M2MHelperSerializer):
 #            raise APIException(code=400, detail={'status': 1, 'message': 'no pain - no gain'})
         if isinstance(validated_data['camera_group'], int):
             validated_data['camera_group'] = CameraGroup.objects.get(id=int(validated_data['camera_group']))
+            camera_group = None
         else:
             camera_group = CameraGroup(name=validated_data['camera_group'], organization=validated_data['organization'])
             validated_data['camera_group'] = camera_group
@@ -89,7 +90,8 @@ class CameraSerializer(M2MHelperSerializer):
             worker_data['notify_time_stop'] = str(worker_data.get('notify_time_stop', '00:00:00'))
             raw_response = requests.post('http://{}:5005'.format(validated_data['server'].address), json=worker_data)
             worker_response = json.loads(raw_response.content.decode())
-            camera_group.save() if camera_group else None
+            if camera_group:
+                camera_group.save()
             print('create worker_response:', worker_response)
         except Exception as e:
             result.delete()
