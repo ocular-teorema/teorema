@@ -64,6 +64,7 @@ class CameraSerializer(M2MHelperSerializer):
         }
 
     def create(self, validated_data):
+        print('online')
  #       if not OcularUser.objects.exists():
  #           raise APIException(code=400, detail={'status': 1, 'message': 'user doesn"t exist'})
  #       max_cams=requests.post('http://78.46.97.176:1234/account', json={'hash':OcularUser.objects.last().hardware_hash})
