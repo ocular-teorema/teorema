@@ -21,6 +21,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
         return result
 
 class OcularUserSerializer(serializers.ModelSerializer):
+
     def update(self, instance, validated_data):
         try:
             worker_data = {k: v for k, v in validated_data.items()}
@@ -29,7 +30,7 @@ class OcularUserSerializer(serializers.ModelSerializer):
             result = requests.patch('http://78.46.97.176:1234/account', json={'hardware_hash':hash, 'max_cam':max_cam})
             if result.json()['status'] == 'ok':
                 return super().update(instance, validated_data)
-        except:    
+        except:
             raise APIException(code=400, detail={'status': 'wrong'})
 
     class Meta:

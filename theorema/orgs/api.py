@@ -1,4 +1,3 @@
-
 from rest_framework.viewsets import ModelViewSet
 from .models import Organization, OcularUser
 from .serializers import OrganizationSerializer, OcularUserSerializer
@@ -27,6 +26,8 @@ class OcularUserViewSet(ModelViewSet):
         return OcularUser.objects.all()
 
 
+#online version
+#Этот метод вызывается только один раз и служит лишь для создания экземпляра Oculauser
 @api_view(['GET'])
 def update_ocularuser_info(request): 
     if not OcularUser.objects.exists():
@@ -34,16 +35,53 @@ def update_ocularuser_info(request):
         byte_str=bytes(str(subprocess.check_output('lspci', shell=True)), encoding='utf=8')
         md5hash.update(byte_str)
         hash = md5hash.hexdigest()
-        response = requests.post('http://78.46.97.176:1234/account', json={'hash':hash, 'new_user': 'true'})
-        if response.json()['status'] == 'ok':
-            print(response.json())
-            OcularUser.objects.create(hardware_hash=hash, max_cam=response.json()['max_cams'])
-            Response(response, status=status.HTTP_200_OK)
+        user = OcularUser.objects.create(hardware_hash=hash)
+        try:
+            response = requests.post('https://oculars.net/', json={'hash':hash})
+        except:
+            return Response({"status" : "bad request"})
+        if response.json()['exist'] == 'True':
+            user(
+                max_cam=response.json()['max_cams'],
+                remote_id=response.json()["user_id"]
+            )
+            user.save()
+            return Response({"status": "userinfo_update"}, status=status.HTTP_200_OK)
         else:
-             raise APIException(code=400, detail={'status': 1, 'message': 'something wrong'})
+            return Response({"status": "user_not_exist"})
     else:
         pass
-    return Response({'message':'already_register'}, status=status.HTTP_200_OK)
+    return Response({'status':'already_register'}, status=status.HTTP_200_OK)
+
+
+#offline_version
+#Этот метод используется для оффлайн регистрации
+#Вызывать его следует только тогда, когда предыдущий запрос вернул "bad_request"
+@api_view(['POST'], )
+def update_ocularuser_info(request):
+    user_cameras = {}
+    user = OcularUser.objects.filter().last()
+    data = request.data["data"]
+    data = data.split('-')
+    if data[0] == hashlib.md5(str.encode(user.hardware_hash)).hexdigest():
+        for el in data[1:4]:
+            for e in range(100):
+                if hashlib.md5(str.encode(str(e) + "s")).hexdigest() == el:
+                    user_cameras['s'] = e
+                    break
+                if hashlib.md5(str.encode(str(e) + "a")).hexdigest() == el:
+                    user_cameras['a'] = e
+                    break
+                if hashlib.md5(str.encode(str(e) + "f")).hexdigest() == el:
+                    user_cameras['f'] = e
+                    break
+                continue
+        user.max_cam = user_cameras
+        return Response({"status":"update"})
+    else:
+        return Response({"status": "wrong_code"})
+
+
 
 @api_view(['GET'])
 def get_today_hash(request):

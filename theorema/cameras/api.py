@@ -87,23 +87,12 @@ class CameraGroupViewSet(CacheFixViewSet):
 
 @api_view(['POST'])
 def add_cams(request):
-    print(request)
-    print(request.data)
     add_cams = []
     hash = request.data['code']
-#    return Response({'sdasd':request.data})
     hash_list = hash.split('-')
     user = OcularUser.objects.filter().last()
     user_hash = user.hardware_hash
-#    return Response({hashlib.sha224(str.encode(user_hash)).hexdigest(): hash_list[0]})
-#    m = rsa.decrypt(n, priv_key)
-#    return Response({'c':n})
-    
-#        user = OcularUser.objects.filter().last()
-#        user_hash = user.hardware_hash
-#        return Response({hashlib.sha224(str.encode(user_hash)).hexdigest(): 1})
-    if hashlib.sha224(str.encode(user_hash)).hexdigest() ==  hash_list[0]:
-#        return Response({'hash' : 'ok'})
+    if hashlib.sha224(str.encode(user_hash)).hexdigest() == hash_list[0]:
         for el in hash_list[1:4]:
             for e in range(100):
                 e = str(e)+'abc'
@@ -114,9 +103,4 @@ def add_cams(request):
         return Response({'staus':'ok'})                
     else:
         pass
-#    code = bytes(request.data['code'], encoding='utf-8')
-#    m = rsa.decrypt(code, bob_priv)
-#    u = m.decode('utf-8')
-      
-#    if str(request.data['code']) == '123':
     return Response({'status':'none'})
