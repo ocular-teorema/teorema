@@ -55,10 +55,10 @@ def update_ocularuser_info(request):
 
 
 #offline_version
-#Этот метод используется для оффлайн регистрации
+#Этот метод используется для оффлайн регистрации и оффлайнового добавления камер
 #Вызывать его следует только тогда, когда предыдущий запрос вернул "bad_request"
 @api_view(['POST'], )
-def update_ocularuser_info(request):
+def update_ocularuser_info_offline(request):
     user_cameras = {}
     user = OcularUser.objects.filter().last()
     data = request.data["data"]
