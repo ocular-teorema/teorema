@@ -82,7 +82,6 @@ def update_ocularuser_info_offline(request):
         return Response({"status": "wrong_code"})
 
 
-
 @api_view(['GET'])
 def get_today_hash(request):
     md5hash = hashlib.md5()
