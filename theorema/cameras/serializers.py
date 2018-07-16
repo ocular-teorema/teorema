@@ -64,20 +64,11 @@ class CameraSerializer(M2MHelperSerializer):
         }
 
     def create(self, validated_data):
-<<<<<<< HEAD
-        print('online')
- #       if not OcularUser.objects.exists():
- #           raise APIException(code=400, detail={'status': 1, 'message': 'user doesn"t exist'})
- #       max_cams=requests.post('http://78.46.97.176:1234/account', json={'hash':OcularUser.objects.last().hardware_hash})
-#        if Camera.objects.filter(analysis=validated_data['analysis']).count() == max_cams.json()['шmax_cams'][CAM_TYPES[validated_data['analysis']]]:
-#            raise APIException(code=400, detail={'status': 1, 'message': 'no pain - no gain'})
-=======
         if not OcularUser.objects.exists():
             raise APIException(code=400, detail={'status': 1, 'message': 'user doesn"t exist'})
         max_cams=requests.post('http://78.46.97.176:1234/account', json={'hash':OcularUser.objects.last().hardware_hash})
         if Camera.objects.filter(analysis=validated_data['analysis']).count() == max_cams.json()['max_cams'][CAM_TYPES[validated_data['analysis']]]:
             raise APIException(code=400, detail={'status': 1, 'message': 'no pain - no gain'})
->>>>>>> origin/offline_pay
         if isinstance(validated_data['camera_group'], int):
             validated_data['camera_group'] = CameraGroup.objects.get(id=int(validated_data['camera_group']))
             camera_group = None

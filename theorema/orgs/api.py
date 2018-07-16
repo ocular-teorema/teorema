@@ -13,6 +13,7 @@ import random
 from theorema.users.models import DayLeft
 from django.utils import timezone
 import datetime
+from theorema.settings import lk_url
 
 class OrganizationViewSet(ModelViewSet):
     queryset = Organization.objects.all()
@@ -37,7 +38,7 @@ def update_ocularuser_info(request):
         hash = md5hash.hexdigest()
         user = OcularUser.objects.create(hardware_hash=hash)
         try:
-            response = requests.post('https://oculars.net/', json={'hash':hash})
+            response = requests.post('{}api/v1/get_user_info'.format(lk_url), json={'hash':hash})
         except:
             return Response({"status" : "bad request"})
         if response.json()['exist'] == 'True':

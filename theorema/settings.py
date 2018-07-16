@@ -161,6 +161,11 @@ try:
 except ImportError as exc:
     __import__('warnings').warn("Can't load local settings: {}".format(str(exc)))
 
+if DEBUG:
+    lk_url = 'http://127.0.0.1:5000/'
+else:
+    lk_url = 'https://oculars.net/'
+
 #EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
 EMAIL_HOST = 'ex.teorema.info'

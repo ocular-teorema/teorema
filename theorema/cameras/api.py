@@ -100,7 +100,7 @@ def add_cams(request):
                     add_cams.append(e[:-3])
         user.max_cam = {"a":add_cams[0], "f":add_cams[1], "s":add_cams[2] }
         user.save()
-        return Response({'staus':'ok'})                
+        return Response({'staus':'ok'})
     else:
         pass
     return Response({'status':'none'})
