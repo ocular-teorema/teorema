@@ -19,7 +19,7 @@ from rest_framework.routers import DefaultRouter
 
 from .users.api import UserViewSet, profile_view, user_cameras, CamSetViewSet
 from .cameras.api import ServerViewSet, CameraViewSet, CameraGroupViewSet,NotificationViewSet, add_cams
-from .orgs.api import OrganizationViewSet, OcularUserViewSet, update_ocularuser_info , get_today_hash, update_ocularuser_info_offline
+from .orgs.api import OrganizationViewSet, OcularUserViewSet, update_ocularuser_info , update_ocularuser_info_offline,cam_pay
 from .other.views import index, login, stat, video
 
 
@@ -42,8 +42,9 @@ urlpatterns = [
     url(r'user_cameras/', user_cameras),
     url(r'update_ocularuser_info', update_ocularuser_info),
     url(r'update_ocularuser_info_offline', update_ocularuser_info_offline),
+    url(r'cam_pay', cam_pay),
     url(r'api/offline_pay', add_cams),
-    url(r'api/today_hash', get_today_hash),
+#    url(r'api/today_hash', get_today_hash),
 ]
 
 

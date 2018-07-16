@@ -27,32 +27,34 @@ class OcularUserViewSet(ModelViewSet):
         return OcularUser.objects.all()
 
 
-#online version
-#Этот метод вызывается только один раз и служит лишь для создания экземпляра Oculauser
+# online version
+#Этот метод следует вызывать при создании объекта ocularUser, а так же для обновления информации о камерах
 @api_view(['GET'])
-def update_ocularuser_info(request): 
+def update_ocularuser_info(request):
+    print(lk_url)
     if not OcularUser.objects.exists():
         md5hash = hashlib.md5()
         byte_str=bytes(str(subprocess.check_output('lspci', shell=True)), encoding='utf=8')
         md5hash.update(byte_str)
         hash = md5hash.hexdigest()
         user = OcularUser.objects.create(hardware_hash=hash)
-        try:
-            response = requests.post('{}api/v1/get_user_info'.format(lk_url), json={'hash':hash})
-        except:
-            return Response({"status" : "bad request"})
-        if response.json()['exist'] == 'True':
-            user(
-                max_cam=response.json()['max_cams'],
-                remote_id=response.json()["user_id"]
-            )
-            user.save()
-            return Response({"status": "userinfo_update"}, status=status.HTTP_200_OK)
-        else:
-            return Response({"status": "user_not_exist"})
     else:
-        pass
-    return Response({'status':'already_register'}, status=status.HTTP_200_OK)
+        user = OcularUser.objects.filter().last()
+        hash = user.hardware_hash
+    try:
+        response = requests.post('{}api/v1/get_user_info'.format(lk_url), {'hash':hash})
+    except:
+        return Response({"status" : "bad request"})
+    v = response.json()
+    print(response)
+    if response.json()['exist'] == True:
+        user.max_cam=response.json()['max_cams'],
+        user.remote_id=response.json()['user_id']
+        user.save()
+        return Response({"status": "userinfo_update"}, status=status.HTTP_200_OK)
+    else:
+        return Response({"status": "user_not_exist"})
+
 
 
 #offline_version
@@ -77,12 +79,40 @@ def update_ocularuser_info_offline(request):
                     user_cameras['f'] = e
                     break
                 continue
+        print(user_cameras)
         user.max_cam = user_cameras
         return Response({"status":"update"})
     else:
         return Response({"status": "wrong_code"})
 
 
+@api_view(['POST'], )
+def cam_pay(request):
+    '''
+    {"user_id":19,
+    "cam":{
+        "f":12,
+        "s":4,
+        "a":2
+    },
+    "sum":256
+    }
+
+    '''
+    cam = request.data['cam']
+    user_id = OcularUser.objects.filter().last().remote_id
+    sum = request.data['sum']
+    try:
+        result = requests.post('{}api/v1/cam_pay/'.format(lk_url),
+                               json={'user_id': user_id, 'cam': cam, "sum": sum})
+        print(result)
+        if result.json()['success_url'] != None:
+            return Response(result.json())
+    except:
+        return Response({'succes_url':'something wrong'})
+
+
+'''
 @api_view(['GET'])
 def get_today_hash(request):
     md5hash = hashlib.md5()
@@ -101,3 +131,4 @@ def get_today_hash(request):
             obj.stop_date = timezone.now() + datetime.timedelta(7)
             obj.save()
         return Response({'hash': 'no', 'date_end':obj.stop_date.strftime('%d-%m-%Y')}, status=status.HTTP_200_OK)
+'''
