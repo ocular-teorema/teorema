@@ -161,7 +161,7 @@ class Cam(Resource):
         try:
             stop_cam(req['id'])
             all_cams_info.pop('cam' + str(req['id']))
-            delete_cam_path.apply_async((cam_path,))
+            delete_cam_path(cam_path)
         except Exception as e:
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
         return {'status': 0}
@@ -261,7 +261,7 @@ def launch_cameras():
             all_cams_info[cam]['process'] = None
 
 os.system('kill `pidof processInstance`')
-os.system('kill `pidof janus`')
+os.system('fuser -k 8088/tcp')
 Popen(['/opt/janus/bin/janus'])
 
 lock = Lock()
