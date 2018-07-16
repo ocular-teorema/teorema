@@ -124,7 +124,7 @@ def save_config(numeric_id, req):
             janus_port=int(req['port'])+1,
             archive_path =  req['archive_path'] if req['archive_path'] else'/home/_VideoArchive'
         ))
-#        os.system('kill `lsof -i | grep janus | awk "{ print $2 }" | head -n1`')
+#        os.system('fuser -k 8088/tcp')
 #        Popen(['/opt/janus/bin/janus'])
 
 
@@ -147,7 +147,7 @@ class Cam(Resource):
             with open("/opt/janus/etc/janus/janus.plugin.streaming.cfg", "a") as f:
                 f.write("\n[cam {id} restreaming sample]\ntype = rtp\ndescription = {id}\naudio = no\nvideo = yes\nvideoport = {port}\nvideopt = 96\nvideortpmap = H264/90000\nvideofmtp = profile-level-id=42e01f\n".format(id=req['id'], port=int(req['port'])+1))
                 f.close()
-                os.system('kill `pidof janus`')
+                os.system('fuser -k 8088/tcp')
                 Popen(['/opt/janus/bin/janus'])
         except Exception as e:
             print('\n'.join(traceback.format_exception(*sys.exc_info())))
