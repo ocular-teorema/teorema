@@ -40,9 +40,9 @@ urlpatterns = [
     url(r'^api/rest-auth/', include('rest_auth.urls')),
     url(r'stat/', stat),
     url(r'user_cameras/', user_cameras),
-    url(r'update_ocularuser_info', update_ocularuser_info),
-    url(r'update_ocularuser_info_offline', update_ocularuser_info_offline),
-    url(r'cam_pay', cam_pay),
+    url(r'api/update_ocularuser_info', update_ocularuser_info),
+    url(r'api/update_ocularuser_info_offline', update_ocularuser_info_offline),
+    url(r'api/cam_pay', cam_pay),
     url(r'api/offline_pay', add_cams),
 #    url(r'api/today_hash', get_today_hash),
 ]
