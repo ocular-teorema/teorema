@@ -1,3 +1,7 @@
 .idea/
 migrations
 *.pyc
+*.swp
+*.db
+theorema-frontend
+theorema/static_collect

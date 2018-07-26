@@ -38,5 +38,5 @@ class OcularUserSerializer(serializers.ModelSerializer):
     '''
     class Meta:
         model = OcularUser
-        fields = ('id', 'hardware_hash', 'max_cam', 'type', 'remote_id')
+        fields = ('id', 'hardware_hash', 'max_cam', 'type', 'remote_id', 'is_approved')
       

@@ -31,7 +31,6 @@ class OcularUserViewSet(ModelViewSet):
 #Этот метод следует вызывать при создании объекта ocularUser, а так же для обновления информации о камерах
 @api_view(['GET'])
 def update_ocularuser_info(request):
-    print(lk_url)
     if not OcularUser.objects.exists():
         md5hash = hashlib.md5()
         byte_str=bytes(str(subprocess.check_output('lspci', shell=True)), encoding='utf=8')
@@ -43,13 +42,16 @@ def update_ocularuser_info(request):
         hash = user.hardware_hash
     try:
         response = requests.post('{}api/v1/get_user_info'.format(lk_url), {'hash':hash})
+        v = response
+        print(response)
     except:
-        return Response({"status" : "bad request"})
+        return Response({"status" : "bad_request"})
     v = response.json()
     print(response)
     if response.json()['exist'] == True:
         user.max_cam=response.json()['max_cams'],
         user.remote_id=response.json()['user_id']
+        user.is_approved = True
         user.save()
         return Response({"status": "userinfo_update"}, status=status.HTTP_200_OK)
     else:
@@ -60,8 +62,9 @@ def update_ocularuser_info(request):
 #offline_version
 #Этот метод используется для оффлайн регистрации и оффлайнового добавления камер
 #Вызывать его следует только тогда, когда предыдущий запрос вернул "bad_request"
-@api_view(['POST'], )
-def update_ocularuser_info_offline(request):
+@api_view(['POST' ] )
+def update_ocularuser_offline(request):
+    print(1231231223)
     user_cameras = {}
     user = OcularUser.objects.filter().last()
     data = request.data["data"]
@@ -79,7 +82,8 @@ def update_ocularuser_info_offline(request):
                     user_cameras['f'] = e
                     break
                 continue
-        print(user_cameras)
+        user.is_approved = True
+        user.save()
         user.max_cam = user_cameras
         return Response({"status":"update"})
     else:
@@ -110,6 +114,21 @@ def cam_pay(request):
             return Response(result.json())
     except:
         return Response({'succes_url':'something wrong'})
+
+
+@api_view(['GET'], )
+def transaction_list(request):
+    ocularuser = OcularUser.objects.filter().last()
+    try:
+        result = requests.get(
+            '{}api/v1/transaction/?user_id={}&hardware_hash={}'.format(
+                lk_url,
+                19,
+                ocularuser.hardware_hash
+            ))
+        return Response(result.json())
+    except:
+        return Response({"status":"None"})
 
 
 '''
