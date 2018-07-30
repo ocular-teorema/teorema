@@ -14,6 +14,7 @@ from theorema.users.models import DayLeft
 from django.utils import timezone
 import datetime
 from theorema.settings import lk_url
+import json
 
 class OrganizationViewSet(ModelViewSet):
     queryset = Organization.objects.all()
@@ -42,14 +43,11 @@ def update_ocularuser_info(request):
         hash = user.hardware_hash
     try:
         response = requests.post('{}api/v1/get_user_info'.format(lk_url), {'hash':hash})
-        v = response
-        print(response)
     except:
         return Response({"status" : "bad_request"})
-    v = response.json()
-    print(response)
     if response.json()['exist'] == True:
         user.max_cam=response.json()['max_cams'],
+        print(type(response.json()['max_cams']))
         user.remote_id=response.json()['user_id']
         user.is_approved = True
         user.save()
@@ -64,7 +62,6 @@ def update_ocularuser_info(request):
 #Вызывать его следует только тогда, когда предыдущий запрос вернул "bad_request"
 @api_view(['POST' ] )
 def update_ocularuser_offline(request):
-    print(1231231223)
     user_cameras = {}
     user = OcularUser.objects.filter().last()
     data = request.data["data"]
@@ -83,8 +80,8 @@ def update_ocularuser_offline(request):
                     break
                 continue
         user.is_approved = True
-        user.save()
         user.max_cam = user_cameras
+        user.save()
         return Response({"status":"update"})
     else:
         return Response({"status": "wrong_code"})
@@ -111,7 +108,8 @@ def cam_pay(request):
                                json={'user_id': user_id, 'cam': cam, "sum": sum})
         print(result)
         if result.json()['success_url'] != None:
-            return Response(result.json())
+            print(({'success_url': result.json()['success_url']}))
+            return Response({'success_url': result.json()['success_url']})
     except:
         return Response({'succes_url':'something wrong'})
 
