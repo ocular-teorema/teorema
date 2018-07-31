@@ -46,8 +46,7 @@ def update_ocularuser_info(request):
     except:
         return Response({"status" : "bad_request"})
     if response.json()['exist'] == True:
-        user.max_cam=response.json()['max_cams'],
-        print(type(response.json()['max_cams']))
+        user.max_cam=response.json()['max_cams']
         user.remote_id=response.json()['user_id']
         user.is_approved = True
         user.save()
