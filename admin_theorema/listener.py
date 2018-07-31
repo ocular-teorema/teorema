@@ -121,8 +121,8 @@ def save_config(numeric_id, req):
             motion_analysis = 'true' if req['analysis'] > 2 else 'false',
             diff_analysis = 'true' if req['analysis'] > 1 else 'false',
             indefinitely='true' if req['indefinitely'] else 'false',
-            janus_port=int(req['port'])+1,
-            scaled_port=int(req['port'])+2,
+            janus_port=int(req['port'])+50,
+            scaled_port=int(req['port'])+100,
             archive_path =  req['archive_path'] if req['archive_path'] else'/home/_VideoArchive'
         ))
 #        os.system('fuser -k 8088/tcp')
@@ -146,7 +146,11 @@ class Cam(Resource):
                 'process': launch_process(COMMAND, os.path.join(CAMDIR, 'cam'+str(req['id']))) if is_active else None,
             } 
             with open("/opt/janus/etc/janus/janus.plugin.streaming.cfg", "a") as f:
-                f.write("\n[cam {id} restreaming sample]\ntype = rtp\ndescription = {id}\naudio = no\nvideo = yes\nvideoport = {port}\nvideopt = 96\nvideortpmap = H264/90000\nvideofmtp = profile-level-id=42e01f\n".format(id=req['id'], port=int(req['port'])+2))
+                f.write("\n[cam {id}f restreaming sample]\ntype = rtp\ndescription = {id}f\naudio = no\nvideo = yes\nvideoport = {port}\nvideopt = 96\nvideortpmap = H264/90000\nvideofmtp = profile-level-id=42e01f\n".format(
+                    id=req['id'], port=int(req['port'])+50))
+                f.write(
+                    "\n[cam {id} restreaming sample]\ntype = rtp\ndescription = {id}\naudio = no\nvideo = yes\nvideoport = {port}\nvideopt = 96\nvideortpmap = H264/90000\nvideofmtp = profile-level-id=42e01f\n".format(
+                        id=req['id'], port=int(req['port']) + 100))
                 f.close()
 #                os.system('fuser -k 8088/tcp')
 #                Popen(['/opt/janus/bin/janus'])
