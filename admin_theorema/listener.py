@@ -122,6 +122,7 @@ def save_config(numeric_id, req):
             diff_analysis = 'true' if req['analysis'] > 1 else 'false',
             indefinitely='true' if req['indefinitely'] else 'false',
             janus_port=int(req['port'])+1,
+            scaled_port=int(req['port'])+2,
             archive_path =  req['archive_path'] if req['archive_path'] else'/home/_VideoArchive'
         ))
 #        os.system('fuser -k 8088/tcp')
@@ -145,10 +146,10 @@ class Cam(Resource):
                 'process': launch_process(COMMAND, os.path.join(CAMDIR, 'cam'+str(req['id']))) if is_active else None,
             } 
             with open("/opt/janus/etc/janus/janus.plugin.streaming.cfg", "a") as f:
-                f.write("\n[cam {id} restreaming sample]\ntype = rtp\ndescription = {id}\naudio = no\nvideo = yes\nvideoport = {port}\nvideopt = 96\nvideortpmap = H264/90000\nvideofmtp = profile-level-id=42e01f\n".format(id=req['id'], port=int(req['port'])+1))
+                f.write("\n[cam {id} restreaming sample]\ntype = rtp\ndescription = {id}\naudio = no\nvideo = yes\nvideoport = {port}\nvideopt = 96\nvideortpmap = H264/90000\nvideofmtp = profile-level-id=42e01f\n".format(id=req['id'], port=int(req['port'])+2))
                 f.close()
-                os.system('fuser -k 8088/tcp')
-                Popen(['/opt/janus/bin/janus'])
+#                os.system('fuser -k 8088/tcp')
+#                Popen(['/opt/janus/bin/janus'])
         except Exception as e:
             print('\n'.join(traceback.format_exception(*sys.exc_info())))
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
@@ -261,8 +262,8 @@ def launch_cameras():
             all_cams_info[cam]['process'] = None
 
 os.system('kill `pidof processInstance`')
-os.system('fuser -k 8088/tcp')
-Popen(['/opt/janus/bin/janus'])
+#os.system('fuser -k 8088/tcp')
+#Popen(['/opt/janus/bin/janus'])
 
 lock = Lock()
 
