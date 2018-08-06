@@ -144,14 +144,15 @@ class Cam(Resource):
             all_cams_info['cam'+str(req['id'])] = {
                 'is_active': is_active,
                 'process': launch_process(COMMAND, os.path.join(CAMDIR, 'cam'+str(req['id']))) if is_active else None,
-            } 
-            with open("/opt/janus/etc/janus/janus.plugin.streaming.cfg", "a") as f:
-                f.write("\n[cam {id}f restreaming sample]\ntype = rtp\ndescription = {id}f\naudio = no\nvideo = yes\nvideoport = {port}\nvideopt = 96\nvideortpmap = H264/90000\nvideofmtp = profile-level-id=42e01f\n".format(
-                    id=req['id'], port=int(req['port'])+50))
-                f.write(
-                    "\n[cam {id} restreaming sample]\ntype = rtp\ndescription = {id}\naudio = no\nvideo = yes\nvideoport = {port}\nvideopt = 96\nvideortpmap = H264/90000\nvideofmtp = profile-level-id=42e01f\n".format(
-                        id=req['id'], port=int(req['port']) + 100))
-                f.close()
+            }
+            if req['analysis'] > 1:
+                with open("/opt/janus/etc/janus/janus.plugin.streaming.cfg", "a") as f:
+                    f.write("\n[cam {id}f restreaming sample]\ntype = rtp\ndescription = {id}f\naudio = no\nvideo = yes\nvideoport = {port}\nvideopt = 96\nvideortpmap = H264/90000\nvideofmtp = profile-level-id=42e01f\n".format(
+                        id=req['id'], port=int(req['port'])+50))
+                    f.write(
+                        "\n[cam {id} restreaming sample]\ntype = rtp\ndescription = {id}\naudio = no\nvideo = yes\nvideoport = {port}\nvideopt = 96\nvideortpmap = H264/90000\nvideofmtp = profile-level-id=42e01f\n".format(
+                            id=req['id'], port=int(req['port']) + 100))
+                    f.close()
 #                os.system('fuser -k 8088/tcp')
 #                Popen(['/opt/janus/bin/janus'])
         except Exception as e:
