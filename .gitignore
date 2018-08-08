@@ -5,3 +5,4 @@ migrations
 *.db
 theorema-frontend
 theorema/static_collect
+theorema-system/
