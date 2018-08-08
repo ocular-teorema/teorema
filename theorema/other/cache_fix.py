@@ -95,3 +95,14 @@ class Marker:
             self.querysets[model].dirty = True
         except KeyError:
             pass
+
+
+class CacheControlMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        print('aaaab')
+        response = self.get_response(request)
+        response['Cache-Control'] = 'no-cache'
+        return response
