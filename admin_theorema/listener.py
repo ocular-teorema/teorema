@@ -223,7 +223,8 @@ class DatabaseData(Resource):
         data_out=cur.fetchall()
         result = []
         event_types = "and type = {}".format(data['events']) if int(data['events']) > 0 else ''
-        if data_out:
+        print(data_out)
+        if len(data_out)>0:
             for el in data_out:
                 r = { 'date':el[2], 'start':get_time(el[0]), 'end':get_time(el[1]), 'archivePostfix': el[3],  'cam':el[4], 'id':el[5]}
                 result.append(r)
@@ -241,21 +242,28 @@ class DatabaseData(Resource):
         else:
             id = 1
             try:
-                dir_data = subprocess.check_output("ls", cwd="/home/_VideoArchive/".format(data['cam']))
+                dir_data = subprocess.check_output("ls", cwd="/home/_VideoArchive/{}".format(data['cam']))
+#                print(dir_data)
+#                print("rrrrr")
+                dir_data = dir_data.decode()
+                dir_data=dir_data.split('\n')
                 dir_data.remove("alertFragments")
-                dir_data.remove("")
+                dir_data.remove('') if "" in dir_data else None
                 for row in dir_data:
+                    print(row)
                     data_dict=re.match(r"cam(?P<cam>\d+)_(?P<date>\d+_\d+_\d+)___(?P<time>\d+_\d+_\d+)", row)
-                    juliandate = round(julian.to_jd(data_dict["date"], "%d_%m_%Y"))
+                    data_dict=data_dict.groupdict()
+                    juliandate = round(julian.to_jd(datetime.datetime.strptime(data_dict["date"], "%d_%m_%Y")+ datetime.timedelta(hours=int(data_dict["time"][:2]), minutes=int(data_dict["time"][3:5]))))
                     starttime = int(data_dict["time"][:2]) * 60 + int(data_dict["time"][3:5]) * 60 * 1000
                     endtime = (int(data_dict["time"][:2]) * 60 + int(data_dict["time"][3:5]) * 60 * 1000)+600000
                     result.append({
                         'id':id,
-                        'cam':data_dict["cam"],
-                        'archivePostfix':row,
+                        'cam':'cam'+data_dict["cam"],
+                        'archivePostfix':'/cam'+data_dict['cam']+'/'+row,
                         'date' : juliandate,
-                        'start':starttime,
-                    'end':endtime})
+                        'start':data_dict["time"][0:5].replace('_', '-'),
+                    'end':endtime,
+                    'events':[]})
                     id += 1
             except:
                 pass
