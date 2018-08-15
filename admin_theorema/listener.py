@@ -223,7 +223,7 @@ class DatabaseData(Resource):
         data_out=cur.fetchall()
         result = []
         event_types = "and type = {}".format(data['events']) if int(data['events']) > 0 else ''
-        if len(data_out) != 0:
+        if data_out:
             for el in data_out:
                 r = { 'date':el[2], 'start':get_time(el[0]), 'end':get_time(el[1]), 'archivePostfix': el[3],  'cam':el[4], 'id':el[5]}
                 result.append(r)
