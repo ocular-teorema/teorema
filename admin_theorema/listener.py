@@ -11,12 +11,13 @@ from flask_restful import Resource, Api
 import socket
 import datetime
 import requests
-
+import subprocess
 from celery import Celery
 from settings import *
 import psycopg2
 import re
 from DateTime import DateTime
+import julian
 
 #from flask_cors import CORS
 from flask_restful.utils import cors
@@ -211,7 +212,7 @@ class DatabaseData(Resource):
         data=re.match(r"startDate=(?P<date_start>\d+-\d+-\d+) endDate=(?P<date_end>\d+-\d+-\d+) startTime=(?P<time_start>\d+-\d+) endTime=(?P<time_end>\d+-\d+) events=(?P<events>\w) cam=(?P<cam>\w+)", data.replace('&', ' '))
         data = data.groupdict()
 #        print(data)
-        conn = psycopg2.connect("dbname='video_analytics' user='va' password=''")
+        conn = psycopg2.connect("dbname='video_analytics' user='va' password='theorema'")
         cur =conn.cursor()
         start_time_database=' start_time >=' + str((int(data['time_start'][0:2])*60+int(data['time_start'][3:]))*60*999) +' and 'if data['time_start'] != '00-00' else ''
         end_time_database=' end_time <= ' + str((int(data['time_end'][0:2])*60+int(data['time_end'][3:]))*60*1001) +' and 'if data['time_end'] != '00-00' else ''
@@ -222,20 +223,42 @@ class DatabaseData(Resource):
         data_out=cur.fetchall()
         result = []
         event_types = "and type = {}".format(data['events']) if int(data['events']) > 0 else ''
-        for el in data_out:
-            r = { 'date':el[2], 'start':get_time(el[0]), 'end':get_time(el[1]), 'archivePostfix': el[3],  'cam':el[4], 'id':el[5]}
-            result.append(r)
-            conn.close()
-        for el in result:
-            conn=psycopg2.connect("dbname='video_analytics' user='va' password=''")
-            cur = conn.cursor()
-            cur.execute("select id, cam, archive_file1, archive_file2, start_timestamp, end_timestamp, type, confidence,reaction,file_offset_sec from events where events.cam='{cam}' and date={date} and archive_file1='{archive}'  {events};".format(cam=el['cam'], date=el['date'], archive=el['archivePostfix'], events=event_types))
-            rows=cur.fetchall()
-            list = []
-            for event in rows:
-                list.append({'id':event[0], 'cam':event[1], 'archiveStartHint':event[2], 'archiveEndHint':event[3], 'startTimeMS':event[4],'endTimeMS':event[5],'eventType':event[6], 'confidence':event[7], 'reaction': event[8], 'offset': event[9]})
-            el['events']=list
-            conn.close()
+        if len(data_out) != 0:
+            for el in data_out:
+                r = { 'date':el[2], 'start':get_time(el[0]), 'end':get_time(el[1]), 'archivePostfix': el[3],  'cam':el[4], 'id':el[5]}
+                result.append(r)
+                conn.close()
+            for el in result:
+                conn=psycopg2.connect("dbname='video_analytics' user='va' password='theorema'")
+                cur = conn.cursor()
+                cur.execute("select id, cam, archive_file1, archive_file2, start_timestamp, end_timestamp, type, confidence,reaction,file_offset_sec from events where events.cam='{cam}' and date={date} and archive_file1='{archive}'  {events};".format(cam=el['cam'], date=el['date'], archive=el['archivePostfix'], events=event_types))
+                rows=cur.fetchall()
+                list = []
+                for event in rows:
+                    list.append({'id':event[0], 'cam':event[1], 'archiveStartHint':event[2], 'archiveEndHint':event[3], 'startTimeMS':event[4],'endTimeMS':event[5],'eventType':event[6], 'confidence':event[7], 'reaction': event[8], 'offset': event[9]})
+                el['events']=list
+                conn.close()
+        else:
+            id = 1
+            try:
+                dir_data = subprocess.check_output("ls", cwd="/home/_VideoArchive/".format(data['cam']))
+                dir_data.remove("alertFragments")
+                dir_data.remove("")
+                for row in dir_data:
+                    data_dict=re.match(r"cam(?P<cam>\d+)_(?P<date>\d+_\d+_\d+)___(?P<time>\d+_\d+_\d+)", row)
+                    juliandate = round(julian.to_jd(data_dict["date"], "%d_%m_%Y"))
+                    starttime = int(data_dict["time"][:2]) * 60 + int(data_dict["time"][3:5]) * 60 * 1000
+                    endtime = (int(data_dict["time"][:2]) * 60 + int(data_dict["time"][3:5]) * 60 * 1000)+600000
+                    result.append({
+                        'id':id,
+                        'cam':data_dict["cam"],
+                        'archivePostfix':row,
+                        'date' : juliandate,
+                        'start':starttime,
+                    'end':endtime})
+                    id += 1
+            except:
+                pass
         return result
 
 
@@ -243,7 +266,7 @@ class DatabaseEventsData(Resource):
     def get(self, data):
         data=re.match(r"startDate=(?P<date_start>\d+-\d+-\d+) endDate=(?P<date_end>\d+-\d+-\d+) startTime=(?P<time_start>\d+) endTime=(?P<time_end>\d+) cam=(?P<cam>\w+)", data.replace('&', ' '))
         data=data.groupdict()
-        conn = psycopg2.connect("dbname='video_analytics' user='va' password=''")
+        conn = psycopg2.connect("dbname='video_analytics' user='va' password='theorema'")
         cur = conn.cursor()
         start_date_database=' date >= '+ str(DateTime(data['date_start'].replace('-', '/') + ' UTC').JulianDay()) +' and '
         end_date_database = ' date <= ' + str(DateTime(data['date_end'].replace('-', '/') + ' UTC').JulianDay()) +' and '
@@ -251,7 +274,7 @@ class DatabaseEventsData(Resource):
         rows=cur.fetchall()
         list = []
         for event in rows:
-                list.append({'id':event[0], 'cam':event[1], 'archiveStartHint':event[2], 'archiveEndHint':event[3], 'startTimeMS':event[4],'endTimeMS':event[5],'eventType':event[6], 'confidence':event[7], 'reaction': event[8], 'date': event[9], 'offset': event[10]})
+            list.append({'id':event[0], 'cam':event[1], 'archiveStartHint':event[2], 'archiveEndHint':event[3], 'startTimeMS':event[4],'endTimeMS':event[5],'eventType':event[6], 'confidence':event[7], 'reaction': event[8], 'date': event[9], 'offset': event[10]})
         conn.close()
         return list
         
