@@ -253,7 +253,7 @@ class DatabaseData(Resource):
                     print(row)
                     data_dict=re.match(r"cam(?P<cam>\d+)_(?P<date>\d+_\d+_\d+)___(?P<time>\d+_\d+_\d+)", row)
                     data_dict=data_dict.groupdict()
-                    juliandate = round(julian.to_jd(datetime.datetime.strptime(data_dict["date"], "%d_%m_%Y")+ datetime.timedelta(hours=int(data_dict["time"][:2]), minutes=int(data_dict["time"][3:5]))))
+                    juliandate = round(julian.to_jd(datetime.datetime.strptime(data_dict["date"], "%d_%m_%Y")+ datetime.timedelta(hours=int(data_dict["time"][:2]), minutes=int(data_dict["time"][3:5]), seconds=30)))
                     starttime = int(data_dict["time"][:2]) * 60 + int(data_dict["time"][3:5]) * 60 * 1000
                     endtime = (int(data_dict["time"][:2]) * 60 + int(data_dict["time"][3:5]) * 60 * 1000)+600000
                     result.append({
