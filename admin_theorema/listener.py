@@ -264,8 +264,8 @@ class DatabaseData(Resource):
                     print(endtime)
                     if ( round(DateTime(data['date_start'].replace('-', '/') + ' UTC').JulianDay()) <= juliandate and
                             round(DateTime(data['date_end'].replace('-', '/') + ' UTC').JulianDay()) >= juliandate and
-                            int(int(data['time_end'][0:2]) * 60 + int(data['time_end'][3:])) * 60 * 1001 >= endtime
-#                            int(int(data['time_start'][0:2]) * 60 + int(data['time_start'][3:])) * 60 * 999 <= starttime
+                            int(int(data['time_end'][0:2]) * 60 + int(data['time_end'][3:])) * 60 * 1001 >= endtime and
+                            int(int(data['time_start'][0:2]) * 60 + int(data['time_start'][3:])) * 60 * 999 <= starttime
                     ):
                         result.append({
                             'id':id,
