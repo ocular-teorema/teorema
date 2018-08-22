@@ -261,16 +261,20 @@ class DatabaseData(Resource):
                     starttime = int(data_dict["time"][:2]) * 60 + int(data_dict["time"][3:5]) * 60 * 1000
                     endtime = (int(data_dict["time"][:2]) * 60 + int(data_dict["time"][3:5]) * 60 * 1000)+600000
                     print(juliandate)
-                    if round(DateTime(data['date_start'].replace('-', '/') + ' UTC').JulianDay()) <= juliandate and round(DateTime(data['date_end'].replace('-', '/') + ' UTC').JulianDay()) >= juliandate and  
-                    result.append({
-                        'id':id,
-                        'cam':'cam'+data_dict["cam"],
-                        'archivePostfix':'/cam'+data_dict['cam']+'/'+row,
-                        'date' : juliandate,
-                        'start':data_dict["time"][0:5].replace('_', '-'),
-                    'end':endtime,
-                    'events':[]})
-                    id += 1
+                    if ( round(DateTime(data['date_start'].replace('-', '/') + ' UTC').JulianDay()) <= juliandate and
+                            round(DateTime(data['date_end'].replace('-', '/') + ' UTC').JulianDay()) >= juliandate and
+                            int(data['time_end'][0:2]) * 60 + int(data['time_end'][3:]) * 60 * 1001 <= endtime and
+                            int(data['time_end'][0:2]) * 60 + int(data['time_start'][3:]) * 60 * 1001 >= starttime
+                    ):
+                        result.append({
+                            'id':id,
+                            'cam':'cam'+data_dict["cam"],
+                            'archivePostfix':'/cam'+data_dict['cam']+'/'+row,
+                            'date' : juliandate,
+                            'start':data_dict["time"][0:5].replace('_', '-'),
+                        'end':endtime,
+                        'events':[]})
+                        id += 1
             except:
                 pass
         return result
