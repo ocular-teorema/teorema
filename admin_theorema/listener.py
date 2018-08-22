@@ -224,6 +224,9 @@ class DatabaseData(Resource):
         result = []
         event_types = "and type = {}".format(data['events']) if int(data['events']) > 0 else ''
         print(data_out)
+        print("start")
+        print(str(DateTime(data['date_start'].replace('-', '/') + ' UTC').JulianDay()))
+        print(str(DateTime(data['date_end'].replace('-', '/') + ' UTC').JulianDay()))
         if len(data_out)>0:
             for el in data_out:
                 r = { 'date':el[2], 'start':get_time(el[0]), 'end':get_time(el[1]), 'archivePostfix': el[3],  'cam':el[4], 'id':el[5]}
@@ -256,6 +259,7 @@ class DatabaseData(Resource):
                     juliandate = round(julian.to_jd(datetime.datetime.strptime(data_dict["date"], "%d_%m_%Y")+ datetime.timedelta(hours=int(data_dict["time"][:2]), minutes=int(data_dict["time"][3:5]), seconds=30)))
                     starttime = int(data_dict["time"][:2]) * 60 + int(data_dict["time"][3:5]) * 60 * 1000
                     endtime = (int(data_dict["time"][:2]) * 60 + int(data_dict["time"][3:5]) * 60 * 1000)+600000
+                    print(juliandate)
                     result.append({
                         'id':id,
                         'cam':'cam'+data_dict["cam"],
