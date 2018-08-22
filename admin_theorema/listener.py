@@ -258,13 +258,14 @@ class DatabaseData(Resource):
                     data_dict=re.match(r"cam(?P<cam>\d+)_(?P<date>\d+_\d+_\d+)___(?P<time>\d+_\d+_\d+)", row)
                     data_dict=data_dict.groupdict()
                     juliandate = round(julian.to_jd(datetime.datetime.strptime(data_dict["date"], "%d_%m_%Y")+ datetime.timedelta(hours=int(data_dict["time"][:2]), minutes=int(data_dict["time"][3:5]), seconds=30)))
-                    starttime = int(data_dict["time"][:2]) * 60 + int(data_dict["time"][3:5]) * 60 * 1000
-                    endtime = (int(data_dict["time"][:2]) * 60 + int(data_dict["time"][3:5]) * 60 * 1000)+600000
-                    print(juliandate)
+                    starttime = int(int(data_dict["time"][:2]) * 60 + int(data_dict["time"][3:5])) * 60 * 1000
+                    endtime = (int(int(data_dict["time"][:2]) * 60 + int(data_dict["time"][3:5])) * 60 * 1000)+600000
+                    print(int(int(data['time_end'][0:2]) * 60 + int(data['time_end'][3:]))*60*1000)
+                    print(endtime)
                     if ( round(DateTime(data['date_start'].replace('-', '/') + ' UTC').JulianDay()) <= juliandate and
                             round(DateTime(data['date_end'].replace('-', '/') + ' UTC').JulianDay()) >= juliandate and
-                            int(data['time_end'][0:2]) * 60 + int(data['time_end'][3:]) * 60 * 1001 <= endtime and
-                            int(data['time_end'][0:2]) * 60 + int(data['time_start'][3:]) * 60 * 1001 >= starttime
+                            int(int(data['time_end'][0:2]) * 60 + int(data['time_end'][3:])) * 60 * 1001 >= endtime
+#                            int(int(data['time_start'][0:2]) * 60 + int(data['time_start'][3:])) * 60 * 999 <= starttime
                     ):
                         result.append({
                             'id':id,
@@ -275,6 +276,7 @@ class DatabaseData(Resource):
                         'end':endtime,
                         'events':[]})
                         id += 1
+#                    print(result)
             except:
                 pass
         return result

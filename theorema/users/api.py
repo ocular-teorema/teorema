@@ -84,5 +84,5 @@ class CamSetViewSet(ModelViewSet):
 
     def get_queryset(self):
         if not self.request.user.is_staff:
-            return self.queryset.filter(user=self.request.user)
-        return self.queryset
+            return CamSet.objects.all().filter(user=self.request.user)
+        return CamSet.objects.all()
