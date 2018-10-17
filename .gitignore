@@ -6,3 +6,4 @@ migrations
 theorema-frontend
 theorema/static_collect
 theorema-system/
+theorema/settings_local.py
