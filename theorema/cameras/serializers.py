@@ -5,7 +5,7 @@ import json
 import random
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
-from .models import Server, Camera, CameraGroup, NotificationCamera
+from .models import Server, Camera, CameraGroup, NotificationCamera, Quadrator, Camera2Quadrator
 from theorema.m2mhelper import M2MHelperSerializer
 from theorema.orgs.models import OcularUser
 from rest_framework.response import Response
@@ -140,4 +140,51 @@ class CameraSerializer(M2MHelperSerializer):
             for key in list(res.keys()):
                 if key.startswith('notify'):
                     res.pop(key)
+        return res
+
+class QuadratorSerializer(serializers.ModelSerializer):
+    cameras = serializers.JSONField(write_only=True)
+    class Meta:
+        model = Quadrator
+        fields = (
+                'id', 'name', 'num_cam_x', 'num_cam_y', 'output_width', 'output_height', 'output_FPS',
+                'output_quality', 'port', 'organization', 'server', 'cameras'
+        )
+        extra_kwargs = {
+            'port': {'read_only': True},
+            'organization': {'read_only': True},
+        }
+
+    def create(self, validated_data):
+        validated_data['organization'] = self.context['request'].user.organization
+        cameras = validated_data.pop('cameras')
+        validated_data['port'] = random.randrange(15000, 60000)
+        res = super().create(validated_data)
+        try:
+            worker_data = {k:v for k,v in validated_data.items()}
+            worker_data.pop('server')
+            worker_data.pop('organization')
+            worker_data['type'] = 'quadrator'
+            worker_data['id'] = res.id
+#            raw_response = requests.post('http://{}:5005'.format(validated_data['server'].address), json=worker_data, timeout=5)
+#            worker_response = json.loads(raw_response.content.decode())
+#            print('create worker_response:', worker_response)
+        except Exception as e:
+            result.delete()
+            raise APIException(code=400, detail={'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))})
+        for cam_id in cameras:
+            Camera2Quadrator(camera_id = cam_id, quadrator=res).save()
+        return res
+
+    def to_representation(self, quadrator):
+        res = super().to_representation(quadrator)
+        res['cameras'] = [x.camera.id for x in quadrator.camera2quadrator_set.all()]
+        return res
+
+    def update(self, quadrator, validated_data):
+        cameras = validated_data.pop('cameras')
+        res = super().update(quadrator, validated_data)
+        quadrator.camera2quadrator_set.all().delete()
+        for cam_id in cameras:
+            Camera2Quadrator(camera_id = cam_id, quadrator=res).save()
         return res

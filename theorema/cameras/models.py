@@ -76,3 +76,21 @@ class NotificationCamera(models.Model):
     notify_time_stop = models.TimeField(default=datetime.time(0,0))
     notify_alert_level = models.SmallIntegerField(default=1)
 
+
+class Quadrator(models.Model):
+    name = models.CharField(max_length=100)
+    num_cam_x = models.IntegerField()
+    num_cam_y = models.IntegerField()
+    output_width = models.IntegerField()
+    output_height = models.IntegerField()
+    output_FPS = models.IntegerField()
+    output_quality = models.IntegerField()
+    port = models.IntegerField()
+    organization = models.ForeignKey(Organization)
+    server = models.ForeignKey(Server)
+
+
+class Camera2Quadrator(models.Model):
+    camera = models.ForeignKey(Camera)
+    quadrator = models.ForeignKey(Quadrator)
+

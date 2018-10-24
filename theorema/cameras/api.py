@@ -3,8 +3,8 @@ import json
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import APIException
-from .models import Server, Camera, CameraGroup, NotificationCamera
-from .serializers import ServerSerializer, CameraSerializer,CameraGroupSerializer, NotificationSerializer
+from .models import Server, Camera, CameraGroup, NotificationCamera, Quadrator
+from .serializers import ServerSerializer, CameraSerializer,CameraGroupSerializer, NotificationSerializer, QuadratorSerializer
 from theorema.other.cache_fix import CacheFixViewSet
 from theorema.permissions import ReadOnly
 from theorema.users.models import CamSet
@@ -104,3 +104,10 @@ def add_cams(request):
     else:
         pass
     return Response({'status':'none'})
+
+class QuadratorViewSet(CacheFixViewSet):
+    permission_classes = (IsAuthenticated,)
+    queryset = Quadrator.objects.all()
+    serializer_class = QuadratorSerializer
+
+
