@@ -164,14 +164,17 @@ class QuadratorSerializer(serializers.ModelSerializer):
             worker_data = {k:v for k,v in validated_data.items()}
             worker_data.pop('server')
             worker_data.pop('organization')
-            worker_data['type'] = 'quadrator'
+            worker_data['type'] = 'quad'
             worker_data['id'] = res.id
-#            raw_response = requests.post('http://{}:5005'.format(validated_data['server'].address), json=worker_data, timeout=5)
-#            worker_response = json.loads(raw_response.content.decode())
-#            print('create worker_response:', worker_response)
+            raw_response = requests.post('http://{}:5005'.format(validated_data['server'].address), json=worker_data, timeout=5)
+            worker_response = json.loads(raw_response.content.decode())
+            print('POST worker_response:', worker_response)
         except Exception as e:
             result.delete()
             raise APIException(code=400, detail={'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))})
+        if worker_response['status']:
+            raise APIException(code=400, detail={'message': worker_response['message']})
+
         for cam_id in cameras:
             Camera2Quadrator(camera_id = cam_id, quadrator=res).save()
         return res
@@ -184,6 +187,20 @@ class QuadratorSerializer(serializers.ModelSerializer):
     def update(self, quadrator, validated_data):
         cameras = validated_data.pop('cameras')
         res = super().update(quadrator, validated_data)
+        try:
+            worker_data = {k:v for k,v in validated_data.items()}
+            worker_data.pop('server')
+            worker_data.pop('organization')
+            worker_data['type'] = 'quad'
+            raw_response = requests.patch('http://{}:5005'.format(validated_data['server'].address), json=worker_data, timeout=5)
+            worker_response = json.loads(raw_response.content.decode())
+            print('PATCH worker_response:', worker_response)
+        except Exception as e:
+            result.delete()
+            raise APIException(code=400, detail={'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))})
+        if worker_response['status']:
+            raise APIException(code=400, detail={'message': worker_response['message']})
+
         quadrator.camera2quadrator_set.all().delete()
         for cam_id in cameras:
             Camera2Quadrator(camera_id = cam_id, quadrator=res).save()

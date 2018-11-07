@@ -18,51 +18,37 @@ import psycopg2
 import re
 from DateTime import DateTime
 import julian
+import configparser
 
-#from flask_cors import CORS
 from flask_restful.utils import cors
 from flask_cors import CORS
 
-def get_cam_saved_state(numeric_id):
-    with open(os.path.join(get_cam_path(numeric_id), ADDITIONAL_CONFIG), 'r') as f:
-        result = json.loads(f.read())
-    return result
+SUPERVISOR_ERROR_TEXT = '''
+        Need to interact with supervisor.
+        1) Set permissions to socket file. 
+        Open your supervisord.conf and in [unix_http_server] section write:
+        chmod=0770
+        chown=root:%group you run this listener%
+        After this, restart supervisord.
+        2) Set permissions to config file:
+        touch /etc/supervisor/conf.d/cameras.conf
+        chown root:%group you run this listener% /etc/supervisor/conf.d/cameras.conf
+        chmod 660 /etc/supervisor/conf.d/cameras.conf
 
-def get_cam_path(numeric_id):
-    return os.path.join(CAMDIR, 'cam'+str(numeric_id))
+'''
+
+CAM_PREFIX = 'cam'
+QUAD_PREFIX = 'quad'
+
+def get_obj_name(numeric_id, obj_type):
+    return obj_type + str(numeric_id)
+
+def get_path(numeric_id, obj_name):
+    return os.path.join(CAMDIR, obj_name)
 
 def get_filesystem_info():
-    # man df
     return Popen(['df', '/home/_VideoArchive'], stdout=PIPE, stderr=PIPE).communicate()[0].decode().split()[-5:-2]
 
-def launch_process(command, cwd):
-    return Popen(command.split(), cwd=cwd, stdout=PIPE, stderr=PIPE)
-
-def get_saved_cams():
-    return [f for f in os.listdir(CAMDIR) if not os.path.isfile(os.path.join(CAMDIR, f))]
-
-def save_cam_state(numeric_id, **kwargs):
-    with open(os.path.join(get_cam_path(numeric_id), ADDITIONAL_CONFIG), 'w') as f:
-        f.write(json.dumps(kwargs))
-
-def process_died(process):
-    return process is None or process.poll() is not None
-
-def stop_cam(numeric_id):
-    
-    process = all_cams_info['cam'+str(numeric_id)].get('process')
-    print(process)
-    if process:
-        '''
-        process.kill()
-        process.poll() # prevent zomdie if patched to !is_active
-        '''
-        print(all_cams_info)
-        print(process.pid)
-#       maybe this will work
-#        os.kill(process.pid, 15)
-        os.system('kill {}'.format(process.pid))
- 
 def with_lock(func):
     def result(*args, **kwargs):
         with lock:
@@ -70,43 +56,8 @@ def with_lock(func):
     return result
 
 
-class ControlPi(Thread):
-    def run(self):
-        while True:
-            try:
-                self.check_processes()
-#                self.check_cam()
-                time.sleep(2)
-            except Exception as e:
-                print('\n'.join(traceback.format_exception(*sys.exc_info())))
 
-    @with_lock
-    def check_processes(self):
-        for cam, cam_info in all_cams_info.items():
-            if cam_info['is_active'] and process_died(cam_info['process']):
-                cam_info['process'] = launch_process(COMMAND, os.path.join(CAMDIR, cam))
-
-    @with_lock
-    def check_cam(self):
-        for cam in get_saved_cams():
-            print('worked!')
-            if all_cams_info[cam]['is_active']:
-                file = get_cam_path(cam[3:]) + '/theorem.conf'
-                #print(file)
-                with open(file, 'r') as f:
-                    port = f.readlines()[1][9:].splitlines()
-                    print(datetime.datetime.now())
-                    try:
-                        requests.get("http://127.0.0.1:{}".format(port[0]), timeout=10)
-                    except:
-                        print(cam, 'down')
-                        process = all_cams_info[str(cam)].get('process')
-                        os.system('kill ' + str(process.pid))
-                        print('{} was restarted'.format(cam))
-                        print(datetime.datetime.now())
-
-
-def save_config(numeric_id, req):
+def save_cam_config(numeric_id, req):
     with open(os.path.join(get_cam_path(numeric_id), CONFIG_NAME), 'w') as f:
         f.write(TEMPLATE.format(
             port = req['port'],
@@ -117,7 +68,6 @@ def save_config(numeric_id, req):
             storage_life = req['storage_life'] if not req['indefinitely'] else 1000,
             compress_level = req['compress_level'] + 27,
             downscale_coeff = [0.5, 0.3, 0.25, 0.15, 0.15, 0.15][req['resolution'] - 1],
-#            global_scale = [1.0, 1.0, 1.0, 1.0, 0.5, 0.25][req['resolution'] - 1],
             global_scale = [0.5, 0.5, 0.5, 0.5, 0.25, 0.125][req['resolution'] - 1],
             motion_analysis = 'true' if req['analysis'] > 2 else 'false',
             diff_analysis = 'true' if req['analysis'] > 1 else 'false',
@@ -126,36 +76,68 @@ def save_config(numeric_id, req):
             scaled_port=int(req['port'])+100,
             archive_path =  req['archive_path'] if req['archive_path'] else'/home/_VideoArchive'
         ))
-#        os.system('fuser -k 8088/tcp')
-#        Popen(['/opt/janus/bin/janus'])
 
+def save_quad_config(numeric_id, req):
+    with open(os.path.join(get_quad_path(numeric_id), QUAD_CONFIG_NAME), 'w') as f:
+        f.write(json.dumps({
+                "outputUrl":    'ws://localhost:%s/' % req['port'],
+                "outputWidth":  req['output_width'],
+                "outputHeight": req['output_height'],
+                "outputFps":    req['output_FPS'],
+                "outputCrf":    req['output_quality'], 
+                "borderWidth":  4,
+                "numCamsX":     req['num_cam_x'],  
+                "numCamsY":     req['num_cam_y'],
+                "camList": [
+                        {
+                                "name": cam['name'],
+                                "isPresent": false,
+                                "streamUrl": cam['url']
+                        } for cam in req['cameras']
+                ]
+        }, indent=4))
+
+
+def save_config(obj_type, path, req):
+    if obj_type == 'cam':
+        return save_cam_config(req, path)
+    elif obj_type == 'quad':
+        return save_quad_config(req, path)
+    else:
+        raise Exception('unknown type')
+
+def set_autostart(obj_type, obj_name, path, is_active):
+    if obj_type == 'cam':
+        command = '/usr/bin/kvadrator %s' % os.path.join(path, 'config.json')
+    elif ob_type == 'quad':
+        command = '/usr/bin/processInstance'
+    config['program:%s' % obj_name] = {
+            'command': command,
+            'directory': path,
+            'autostart': 'true',
+            'autorestart': 'true',
+            'redirect_stderr': 'true'
+    }
+    save_supervisor_config()
+
+def del_autostart(obj_name):
+    config.pop(obj_name, None)
+    save_supervisor_config()
 
 class Cam(Resource):
     @with_lock
     def post(self):
         req = request.get_json()
-        cam_path = get_cam_path(req['id'])
+        obj_type = req.get('type', 'cam')
+        obj_name = get_obj_name(req['id'], obj_type)
+        path = make_path(obj_name)
         try:
-            os.makedirs(os.path.join(cam_path, DBDIR))
-#            os.makedirs(os.path.join(cam_path, DBDIR))
-#            shutil.copy('/home/theoremg/runEnv/DB/video_analytics', os.path.join(cam_path, DBDIR, 'video_analytics'))
-            save_config(req['id'], req)
+            os.makedirs(path)
+            save_config(obj_type, path, req)
             is_active = req.get('is_active', 1)
-            save_cam_state(req['id'], is_active=is_active)
-            all_cams_info['cam'+str(req['id'])] = {
-                'is_active': is_active,
-                'process': launch_process(COMMAND, os.path.join(CAMDIR, 'cam'+str(req['id']))) if is_active else None,
-            }
-            if req['analysis'] > 1:
-                with open("/opt/janus/etc/janus/janus.plugin.streaming.cfg", "a") as f:
-                    f.write("\n[cam {id}f restreaming sample]\ntype = rtp\ndescription = {id}f\naudio = no\nvideo = yes\nvideoport = {port}\nvideopt = 96\nvideortpmap = H264/90000\nvideofmtp = profile-level-id=42e01f\n".format(
-                        id=req['id'], port=int(req['port'])+50))
-                    f.write(
-                        "\n[cam {id} restreaming sample]\ntype = rtp\ndescription = {id}\naudio = no\nvideo = yes\nvideoport = {port}\nvideopt = 96\nvideortpmap = H264/90000\nvideofmtp = profile-level-id=42e01f\n".format(
-                            id=req['id'], port=int(req['port']) + 100))
-                    f.close()
-#                os.system('fuser -k 8088/tcp')
-#                Popen(['/opt/janus/bin/janus'])
+            if is_active:
+                add_autostart(obj_type, obj_name, path)
+
         except Exception as e:
             print('\n'.join(traceback.format_exception(*sys.exc_info())))
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
@@ -164,11 +146,13 @@ class Cam(Resource):
     @with_lock
     def delete(self):
         req = request.get_json()
-        cam_path = get_cam_path(req['id'])
+        obj_type = req.get('type', 'cam')
+        obj_name = get_obj_name(req['id'], obj_type)
+        path = make_path(obj_name)
         try:
-            stop_cam(req['id'])
-            all_cams_info.pop('cam' + str(req['id']))
-            delete_cam_path(cam_path)
+            del_autostart(obj_name)
+            delete_cam_path(path)
+            # do delete from config
         except Exception as e:
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
         return {'status': 0}
@@ -176,17 +160,21 @@ class Cam(Resource):
     @with_lock
     def patch(self):
         req = request.get_json()
-        cam_path = get_cam_path(req['id'])
-        print(cam_path)
+        obj_type = req.get('type', 'cam')
+        obj_name = get_obj_name(req['id'], obj_type)
+        path = make_path(obj_name)
         try:
-            save_config(req['id'], req)
-            save_cam_state(req['id'], is_active=req.get('is_active', 1))
-            all_cams_info['cam'+str(req['id'])]['is_active'] = req.get('is_active', 1)
-            stop_cam(req['id'])
+            save_cam_config(req['id'], req)
+            is_active = req.get('is_active', 1)
+            if is_active:
+                add_autostart(obj_type, obj_name, path)
+            else:
+                del_autostart(obj_name)
+            save_cam_state(req['id'], is_active=is_active)
+            # do restart supervisor supbrocess
         except Exception as e:
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
         return {'status': 0}
-
 
 
 class Stat(Resource):
@@ -202,7 +190,6 @@ class Stat(Resource):
 def get_time(mill):
     hours = mill//3600000
     mins =  mill//1000//60 - hours*60
-#    print(hours, mins)
     return '{hh}-{mm}'.format(hh=hours, mm=mins)
 
 
@@ -211,7 +198,6 @@ class DatabaseData(Resource):
     def get(self, data):
         data=re.match(r"startDate=(?P<date_start>\d+-\d+-\d+) endDate=(?P<date_end>\d+-\d+-\d+) startTime=(?P<time_start>\d+-\d+) endTime=(?P<time_end>\d+-\d+) events=(?P<events>\w) cam=(?P<cam>\w+)", data.replace('&', ' '))
         data = data.groupdict()
-#        print(data)
         conn = psycopg2.connect("dbname='video_analytics' user='va' password='theorema'")
         cur =conn.cursor()
         start_time_database=' start_time >=' + str((int(data['time_start'][0:2])*60+int(data['time_start'][3:]))*60*999) +' and 'if data['time_start'] != '00-00' else ''
@@ -247,8 +233,6 @@ class DatabaseData(Resource):
             id = 1
             try:
                 dir_data = subprocess.check_output("ls", cwd="/home/_VideoArchive/{}".format(data['cam']))
-#                print(dir_data)
-#                print("rrrrr")
                 dir_data = dir_data.decode()
                 dir_data=dir_data.split('\n')
                 dir_data.remove("alertFragments")
@@ -298,29 +282,11 @@ class DatabaseEventsData(Resource):
         conn.close()
         return list
         
-@with_lock
-def launch_cameras():
-    for cam in get_saved_cams():
-        all_cams_info[cam] = {}
-        is_active = get_cam_saved_state(cam[3:])['is_active']
-        all_cams_info[cam]['is_active'] = is_active
-        if is_active:
-            all_cams_info[cam]['process'] = launch_process(COMMAND, os.path.join(CAMDIR, cam))
-        else:
-            all_cams_info[cam]['process'] = None
-
-os.system('kill `pidof processInstance`')
-#os.system('fuser -k 8088/tcp')
-#Popen(['/opt/janus/bin/janus'])
+def save_supervisor_config():
+    with open(SUPERVISOR_CAMERAS_CONF, 'w') as f:
+        config.write(f)
 
 lock = Lock()
-
-all_cams_info = {}
-if 'celery' not in sys.argv[0]:
-    launch_cameras()
-
-    ControlPi().start()
-
 
 app = Flask(__name__)
 #app=CORS(app)
@@ -336,6 +302,8 @@ app.config.update(
     CELERY_BROKER_URL='amqp://teorema:teorema@0.0.0.0:5672//',
     CELERY_RESULT_BACKEND='amqp://teorema:teorema@0.0.0.0:5672//'
 )
+
+
 
 @app.after_request
 def add_cors_headers(response):
@@ -365,31 +333,22 @@ celery = make_celery(app)
 
 @celery.task(bind=True, name = 'delete_cam')
 def delete_cam_path(self, cam_path):
-
     shutil.rmtree(cam_path)
-
-    print('Камера Успешно удалена')
-
-'''
-def check_cam(all_cams_info):
-    for cam in get_saved_cams():
-        if all_cams_info[cam]['is_active']:
-            print(cam)
-            print(all_cams_info[cam]['is_active'])
-            file = get_cam_path(cam[3:]) + '/theorem.conf'
-            with open(file, 'r') as f:
-                port = f.readlines()[1][9:]
-                sock = socket.socket()
-                if sock.connect_ex(('127.0.0.1', int(port))) == 0:
-                    stop_cam(cam[3:])
-                    launch_process(COMMAND, os.path.join(CAMDIR, cam))
-                    print('{} was restarted'.format(cam))
-    print('{} works fine'.format('all'))
-'''
+    print('Camera successfully deleted')
 
 
+config = configparser.ConfigParser()
+
+print('testing permissions to supervisor...')
+try:
+    config.read(SUPERVISOR_CAMERAS_CONF)
+    save_supervisor_config()
+    if os.system('supervisorctl status > /dev/null') != 0:
+        raise Exception('Cannot run supervisorctl')
+except:
+    print(SUPERVISOR_ERROR_TEXT)
+    raise
+print('permissions ok')
+print('found %s cameras' % len(config.sections()))
 
 
-# this dont work properly with background thread. use EXPORT FLASK_APP=listener.py && flask run
-#if __name__ == '__main__':
-#    app.run(debug=True)

@@ -1,10 +1,12 @@
 CAMDIR = '/home/_processInstances'
 CONFIG_NAME = 'theorem.conf'
+QUAD_CONFIG_NAME = 'config.json'
 DBDIR = 'DB'
 COMMAND = '/usr/bin/processInstance'
+COMMAND_QUAD = '/usr/bin/kvadrator %s' % QUAD_CONFIG_NAME
 ADDITIONAL_CONFIG = 'conf.conf'
 LAG = 2
-
+SUPERVISOR_CAMERAS_CONF = '/etc/supervisor/conf.d/cameras.conf'
 
 TEMPLATE = """[General]
 HttpPort={port}
