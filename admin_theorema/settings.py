@@ -33,8 +33,7 @@ Difference%20based%20analysis={diff_analysis}
 Pipeline%20Name=cam{id}
 Camera%20name={name}
 Input%20Stream%20Url={address}
-Output%20Url=rtp://localhost:{janus_port}
-Scaled%20Output%20Url=rtp://localhost:{scaled_port}
+Output%20Url=ws://localhost:{output_port}
 Source%20Output%20Url=rtmp://localhost:1935/vasrc/cam{id}
 
 Archive%20Path={archive_path}

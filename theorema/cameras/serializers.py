@@ -19,13 +19,13 @@ class ServerSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'address', 'type', 'organization', 'parent_server_id')
 
     def create(self, validated_data):
-        result = super().create(validated_data)
+        res = super().create(validated_data)
         try:
             raw_response = requests.post('http://{}:5005'.format(validated_data['address']), timeout=5)
         except Exception as e:
-            result.delete()
+            res.delete()
             raise APIException(code=400, detail={'status': 1, 'message': str(e)})
-        return result
+        return res
 
 
 class CameraGroupSerializer(serializers.ModelSerializer):
@@ -52,7 +52,7 @@ class CameraSerializer(M2MHelperSerializer):
     class Meta:
         model = Camera
         fields = (
-                'id', 'name', 'address', 'fps', 'analysis', 'resolution',
+                'id', 'name', 'address', 'analysis',
                 'storage_life', 'compress_level', 'is_active', 'server',
                 'camera_group', 'organization', 'port', 'notify_email', 
                 'notify_phone', 'notify_events', 'notify_time_start',
@@ -69,7 +69,6 @@ class CameraSerializer(M2MHelperSerializer):
 #        max_cams=requests.post('http://78.46.97.176:1234/account', json={'hash':OcularUser.objects.last().hardware_hash})
 #        if Camera.objects.filter(analysis=validated_data['analysis']).count() == max_cams.json()['max_cams'][CAM_TYPES[validated_data['analysis']]]:
 #            raise APIException(code=400, detail={'status': 1, 'message': 'no pain - no gain'})
-        print(1)
         if isinstance(validated_data['camera_group'], int):
             validated_data['camera_group'] = CameraGroup.objects.get(id=int(validated_data['camera_group']))
             camera_group = None
@@ -79,30 +78,30 @@ class CameraSerializer(M2MHelperSerializer):
             validated_data['camera_group'] = camera_group
         port = Camera.objects.last().port + 200 if Camera.objects.exists() else 15000
         validated_data['port'] = port
-        result = super().create(validated_data)
+        res = super().create(validated_data)
 
         try:
             worker_data = {k:v for k,v in validated_data.items()}
             worker_data.pop('server')
             worker_data.pop('camera_group')
             worker_data.pop('organization')
-            worker_data['id'] = result.id
+            worker_data['id'] = res.id
             worker_data['notify_time_start'] = str(worker_data.get('notify_time_start', '00:00:00'))
             worker_data['notify_time_stop'] = str(worker_data.get('notify_time_stop', '00:00:00'))
             raw_response = requests.post('http://{}:5005'.format(validated_data['server'].address), json=worker_data)
             worker_response = json.loads(raw_response.content.decode())
-            print('create worker_response:', worker_response)
+            print('create worker_response:', worker_response, flush=True)
         except Exception as e:
-            result.delete()
+            res.delete()
             if camera_group:
                 camera_group.delete()
             raise APIException(code=400, detail={'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))})
         if worker_response['status']:
-            result.delete()
+            res.delete()
             if camera_group:
                 camera_group.delete()
             raise APIException(code=400, detail={'status': 1, 'message': worker_response['message']})
-        return result
+        return res
 
     def update(self, camera, validated_data):
         try:
@@ -116,6 +115,7 @@ class CameraSerializer(M2MHelperSerializer):
             worker_data['port'] = camera.port
             raw_response = requests.patch('http://{}:5005'.format(validated_data['server'].address), json=worker_data)
             worker_response = json.loads(raw_response.content.decode())
+            print('update worker response', worker_response, flush=True)
         except Exception as e:
             raise APIException(code=400, detail={'message': str(e)})
         if worker_response['status']:
@@ -140,6 +140,7 @@ class CameraSerializer(M2MHelperSerializer):
             for key in list(res.keys()):
                 if key.startswith('notify'):
                     res.pop(key)
+        res['ws_video_url'] = 'ws://%s:%s' % (camera.server.address, camera.port+50)
         return res
 
 class QuadratorSerializer(serializers.ModelSerializer):
@@ -156,7 +157,8 @@ class QuadratorSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        validated_data['organization'] = self.context['request'].user.organization
+        if not self.context['request'].user.is_staff:
+            validated_data['organization'] = self.context['request'].user.organization
         cameras = validated_data.pop('cameras')
         validated_data['port'] = random.randrange(15000, 60000)
         res = super().create(validated_data)
@@ -166,15 +168,17 @@ class QuadratorSerializer(serializers.ModelSerializer):
             worker_data.pop('organization')
             worker_data['type'] = 'quad'
             worker_data['id'] = res.id
+            worker_data['cameras'] = []
+            for c_id in cameras:
+                c = Camera.objects.get(id=c_id)
+                worker_data['cameras'].append({'name': c.name, 'isPresent': True, 'port': c.id})
             raw_response = requests.post('http://{}:5005'.format(validated_data['server'].address), json=worker_data, timeout=5)
             worker_response = json.loads(raw_response.content.decode())
-            print('POST worker_response:', worker_response)
+            print('POST worker_response:', worker_response, flush=True)
         except Exception as e:
-            result.delete()
             raise APIException(code=400, detail={'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))})
         if worker_response['status']:
             raise APIException(code=400, detail={'message': worker_response['message']})
-
         for cam_id in cameras:
             Camera2Quadrator(camera_id = cam_id, quadrator=res).save()
         return res
@@ -182,9 +186,12 @@ class QuadratorSerializer(serializers.ModelSerializer):
     def to_representation(self, quadrator):
         res = super().to_representation(quadrator)
         res['cameras'] = [x.camera.id for x in quadrator.camera2quadrator_set.all()]
+        res['ws_video_url'] = 'ws://%s:%s' % (quadrator.server.address, quadrator.port)
         return res
 
     def update(self, quadrator, validated_data):
+        if not user.is_admin:
+            validated_data['organization'] = self.context['request'].user.organization
         cameras = validated_data.pop('cameras')
         res = super().update(quadrator, validated_data)
         try:
@@ -196,7 +203,7 @@ class QuadratorSerializer(serializers.ModelSerializer):
             worker_response = json.loads(raw_response.content.decode())
             print('PATCH worker_response:', worker_response)
         except Exception as e:
-            result.delete()
+            res.delete()
             raise APIException(code=400, detail={'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))})
         if worker_response['status']:
             raise APIException(code=400, detail={'message': worker_response['message']})

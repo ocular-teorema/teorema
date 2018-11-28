@@ -13,9 +13,11 @@ import random
 from theorema.users.models import DayLeft
 from django.utils import timezone
 import datetime
+from rest_framework.permissions import IsAuthenticated
 from theorema.settings import lk_url
 
 class OrganizationViewSet(ModelViewSet):
+    permission_classes = (IsAuthenticated, )
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
 

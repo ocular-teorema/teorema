@@ -43,7 +43,7 @@ QUAD_PREFIX = 'quad'
 def get_obj_name(numeric_id, obj_type):
     return obj_type + str(numeric_id)
 
-def get_path(numeric_id, obj_name):
+def get_path(obj_name):
     return os.path.join(CAMDIR, obj_name)
 
 def get_filesystem_info():
@@ -57,42 +57,41 @@ def with_lock(func):
 
 
 
-def save_cam_config(numeric_id, req):
-    with open(os.path.join(get_cam_path(numeric_id), CONFIG_NAME), 'w') as f:
+def save_cam_config(path, req):
+    with open(os.path.join(path, CONFIG_NAME), 'w') as f:
         f.write(TEMPLATE.format(
             port = req['port'],
             id = req['id'],
             name = req['name'],
             address = req['address'],
-            fps = req['fps'],
+            fps = 0, # req['fps']
             storage_life = req['storage_life'] if not req['indefinitely'] else 1000,
             compress_level = req['compress_level'] + 27,
-            downscale_coeff = [0.5, 0.3, 0.25, 0.15, 0.15, 0.15][req['resolution'] - 1],
-            global_scale = [0.5, 0.5, 0.5, 0.5, 0.25, 0.125][req['resolution'] - 1],
+            downscale_coeff = 0.25, #[0.5, 0.3, 0.25, 0.15, 0.15, 0.15][req['resolution'] - 1],
+            global_scale = 0.5, #[0.5, 0.5, 0.5, 0.5, 0.25, 0.125][req['resolution'] - 1],
             motion_analysis = 'true' if req['analysis'] > 2 else 'false',
             diff_analysis = 'true' if req['analysis'] > 1 else 'false',
             indefinitely='true' if req['indefinitely'] else 'false',
-            janus_port=int(req['port'])+50,
-            scaled_port=int(req['port'])+100,
+            output_port = int(req['port']) + 50,
             archive_path =  req['archive_path'] if req['archive_path'] else'/home/_VideoArchive'
         ))
 
-def save_quad_config(numeric_id, req):
-    with open(os.path.join(get_quad_path(numeric_id), QUAD_CONFIG_NAME), 'w') as f:
+def save_quad_config(path, req):
+    with open(os.path.join(path, QUAD_CONFIG_NAME), 'w') as f:
         f.write(json.dumps({
-                "outputUrl":    'ws://localhost:%s/' % req['port'],
+                "outputUrl":    'ws://localhost:%s' % req['port'],
                 "outputWidth":  req['output_width'],
                 "outputHeight": req['output_height'],
                 "outputFps":    req['output_FPS'],
-                "outputCrf":    req['output_quality'], 
+                "outputCrf":    req['output_quality'],
                 "borderWidth":  4,
-                "numCamsX":     req['num_cam_x'],  
+                "numCamsX":     req['num_cam_x'],
                 "numCamsY":     req['num_cam_y'],
                 "camList": [
                         {
                                 "name": cam['name'],
-                                "isPresent": false,
-                                "streamUrl": cam['url']
+                                "isPresent": True,
+                                "streamUrl": 'rtmp://localhost:1935/vasrc/cam%s' % cam['port']
                         } for cam in req['cameras']
                 ]
         }, indent=4))
@@ -100,23 +99,24 @@ def save_quad_config(numeric_id, req):
 
 def save_config(obj_type, path, req):
     if obj_type == 'cam':
-        return save_cam_config(req, path)
+        return save_cam_config(path, req)
     elif obj_type == 'quad':
-        return save_quad_config(req, path)
+        return save_quad_config(path, req)
     else:
         raise Exception('unknown type')
 
-def set_autostart(obj_type, obj_name, path, is_active):
+def add_autostart(obj_type, obj_name, path):
     if obj_type == 'cam':
-        command = '/usr/bin/kvadrator %s' % os.path.join(path, 'config.json')
-    elif ob_type == 'quad':
         command = '/usr/bin/processInstance'
+    elif obj_type == 'quad':
+        command = '/usr/bin/kvadrator %s' % os.path.join(path, 'config.json')
     config['program:%s' % obj_name] = {
             'command': command,
             'directory': path,
             'autostart': 'true',
             'autorestart': 'true',
-            'redirect_stderr': 'true'
+            'redirect_stderr': 'true',
+            'user': 'www-data',
     }
     save_supervisor_config()
 
@@ -130,7 +130,7 @@ class Cam(Resource):
         req = request.get_json()
         obj_type = req.get('type', 'cam')
         obj_name = get_obj_name(req['id'], obj_type)
-        path = make_path(obj_name)
+        path = get_path(obj_name)
         try:
             os.makedirs(path)
             save_config(obj_type, path, req)
@@ -139,8 +139,9 @@ class Cam(Resource):
                 add_autostart(obj_type, obj_name, path)
 
         except Exception as e:
-            print('\n'.join(traceback.format_exception(*sys.exc_info())))
+            print('\n'.join(traceback.format_exception(*sys.exc_info())), flush=True)
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
+        print('post ok', flush=True)
         return {'status': 0}
 
     @with_lock
@@ -148,12 +149,12 @@ class Cam(Resource):
         req = request.get_json()
         obj_type = req.get('type', 'cam')
         obj_name = get_obj_name(req['id'], obj_type)
-        path = make_path(obj_name)
+        path = get_path(obj_name)
         try:
             del_autostart(obj_name)
-            delete_cam_path(path)
-            # do delete from config
+            delete_path(path)
         except Exception as e:
+            print('\n'.join(traceback.format_exception(*sys.exc_info())), flush=True)
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
         return {'status': 0}
 
@@ -162,17 +163,16 @@ class Cam(Resource):
         req = request.get_json()
         obj_type = req.get('type', 'cam')
         obj_name = get_obj_name(req['id'], obj_type)
-        path = make_path(obj_name)
+        path = get_path(obj_name)
         try:
-            save_cam_config(req['id'], req)
+            save_config(obj_type, path, req)
             is_active = req.get('is_active', 1)
             if is_active:
                 add_autostart(obj_type, obj_name, path)
             else:
                 del_autostart(obj_name)
-            save_cam_state(req['id'], is_active=is_active)
-            # do restart supervisor supbrocess
         except Exception as e:
+            print('\n'.join(traceback.format_exception(*sys.exc_info())), flush=True)
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
         return {'status': 0}
 
@@ -198,7 +198,7 @@ class DatabaseData(Resource):
     def get(self, data):
         data=re.match(r"startDate=(?P<date_start>\d+-\d+-\d+) endDate=(?P<date_end>\d+-\d+-\d+) startTime=(?P<time_start>\d+-\d+) endTime=(?P<time_end>\d+-\d+) events=(?P<events>\w) cam=(?P<cam>\w+)", data.replace('&', ' '))
         data = data.groupdict()
-        conn = psycopg2.connect("dbname='video_analytics' user='va' password='theorema'")
+        conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
         cur =conn.cursor()
         start_time_database=' start_time >=' + str((int(data['time_start'][0:2])*60+int(data['time_start'][3:]))*60*999) +' and 'if data['time_start'] != '00-00' else ''
         end_time_database=' end_time <= ' + str((int(data['time_end'][0:2])*60+int(data['time_end'][3:]))*60*1001) +' and 'if data['time_end'] != '00-00' else ''
@@ -220,7 +220,7 @@ class DatabaseData(Resource):
                 result.append(r)
                 conn.close()
             for el in result:
-                conn=psycopg2.connect("dbname='video_analytics' user='va' password='theorema'")
+                conn=psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
                 cur = conn.cursor()
                 cur.execute("select id, cam, archive_file1, archive_file2, start_timestamp, end_timestamp, type, confidence,reaction,file_offset_sec from events where events.cam='{cam}' and date={date} and archive_file1='{archive}'  {events};".format(cam=el['cam'], date=el['date'], archive=el['archivePostfix'], events=event_types))
                 rows=cur.fetchall()
@@ -270,7 +270,7 @@ class DatabaseEventsData(Resource):
     def get(self, data):
         data=re.match(r"startDate=(?P<date_start>\d+-\d+-\d+) endDate=(?P<date_end>\d+-\d+-\d+) startTime=(?P<time_start>\d+) endTime=(?P<time_end>\d+) cam=(?P<cam>\w+)", data.replace('&', ' '))
         data=data.groupdict()
-        conn = psycopg2.connect("dbname='video_analytics' user='va' password='theorema'")
+        conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
         cur = conn.cursor()
         start_date_database=' date >= '+ str(DateTime(data['date_start'].replace('-', '/') + ' UTC').JulianDay()) +' and '
         end_date_database = ' date <= ' + str(DateTime(data['date_end'].replace('-', '/') + ' UTC').JulianDay()) +' and '
@@ -285,6 +285,11 @@ class DatabaseEventsData(Resource):
 def save_supervisor_config():
     with open(SUPERVISOR_CAMERAS_CONF, 'w') as f:
         config.write(f)
+    print('launching update...')
+    res = os.system('supervisorctl update')
+    print('updated', res, flush=True)
+
+
 
 lock = Lock()
 
@@ -310,7 +315,6 @@ def add_cors_headers(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-    print('zzzzzz================================')
     return response
 
 
@@ -332,8 +336,8 @@ def make_celery(app):
 celery = make_celery(app)
 
 @celery.task(bind=True, name = 'delete_cam')
-def delete_cam_path(self, cam_path):
-    shutil.rmtree(cam_path)
+def delete_path(self, path):
+    shutil.rmtree(path)
     print('Camera successfully deleted')
 
 
