@@ -190,6 +190,7 @@ class QuadratorSerializer(serializers.ModelSerializer):
         return res
 
     def update(self, quadrator, validated_data):
+        user = self.context['request'].user
         if not user.is_admin:
             validated_data['organization'] = self.context['request'].user.organization
         cameras = validated_data.pop('cameras')
