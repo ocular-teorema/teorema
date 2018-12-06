@@ -141,6 +141,7 @@ class CameraSerializer(M2MHelperSerializer):
                 if key.startswith('notify'):
                     res.pop(key)
         res['ws_video_url'] = 'ws://%s:%s' % (camera.server.address, camera.port+50)
+        res['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (camera.server.address, camera.id)
         return res
 
 class QuadratorSerializer(serializers.ModelSerializer):
