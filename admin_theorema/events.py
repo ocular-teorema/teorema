@@ -78,9 +78,9 @@ class CamSender(Protocol):
 class CamSenderFactory(Factory):
     def buildProtocol(self, addr):
         print(addr.host)
-        if addr.host not in (ADMIN_ADDR, '127.0.0.1', '10.0.2.2'):
-            print('connect dropped')
-            return None
+#        if addr.host not in (ADMIN_ADDR, '127.0.0.1', '10.0.2.2'):
+#            print('connect dropped')
+#            return None
         return CamSender()
 
 
