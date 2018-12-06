@@ -79,7 +79,8 @@ def save_cam_config(path, req):
 def save_quad_config(path, req):
     with open(os.path.join(path, QUAD_CONFIG_NAME), 'w') as f:
         f.write(json.dumps({
-                "outputUrl":    'ws://localhost:%s' % req['port'],
+                "outputUrl1":    'ws://localhost:%s' % req['port'],
+                "outputUrl2": "rtmp://localhost:1935/vasrc/quad%s" % req['id'],
                 "outputWidth":  req['output_width'],
                 "outputHeight": req['output_height'],
                 "outputFps":    req['output_FPS'],
