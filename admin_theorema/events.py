@@ -17,7 +17,7 @@ raw_cams =[{'id': int(k[len('program:cam'):]), 'directory': v['directory']} for 
 cams = []
 for c in raw_cams:
     cam_config = configparser.ConfigParser()
-    cam_config.read(os.path.join(c['directory'], 'theorem.conf'))
+    cam_config.read(os.path.join(c['directory'], 'theorem.conf'), 'utf-8')
     try:
         c['port'] = int(cam_config['General']['HttpPort'])
     except:
@@ -77,6 +77,10 @@ class CamSender(Protocol):
 
 class CamSenderFactory(Factory):
     def buildProtocol(self, addr):
+        print(addr.host)
+        if addr.host not in (ADMIN_ADDR, '127.0.0.1', '10.0.2.2'):
+            print('connect dropped')
+            return None
         return CamSender()
 
 
