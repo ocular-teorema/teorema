@@ -140,7 +140,7 @@ class CameraSerializer(M2MHelperSerializer):
             for key in list(res.keys()):
                 if key.startswith('notify'):
                     res.pop(key)
-        res['ws_video_url'] = 'ws://%s:%s' % (camera.server.address, camera.port+50)
+        res['ws_video_url'] = 'ws://%s/video_ws/?port=%s' % (camera.server.address, camera.port+50)
         res['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (camera.server.address, camera.id)
         res['m3u8_video_url'] = 'http://%s:8080/vasrc/cam%s/index.m3u8' % (camera.server.address, camera.id)
         return res
@@ -188,7 +188,7 @@ class QuadratorSerializer(serializers.ModelSerializer):
     def to_representation(self, quadrator):
         res = super().to_representation(quadrator)
         res['cameras'] = [x.camera.id for x in quadrator.camera2quadrator_set.all()]
-        res['ws_video_url'] = 'ws://%s:%s' % (quadrator.server.address, quadrator.port)
+        res['ws_video_url'] = 'ws://%s/video_ws/?port=%s' % (quadrator.server.address, quadrator.port)
         res['m3u8_video_url'] = 'http://%s:8080/vasrc/quad%s/index.m3u8' % (quadrator.server.address, quadrator.id)
         return res
 
