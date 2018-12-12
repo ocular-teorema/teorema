@@ -11,6 +11,7 @@ from flask_restful import Resource, Api
 import socket
 import datetime
 import requests
+import base64
 import subprocess
 from celery import Celery
 from settings import *
@@ -22,6 +23,7 @@ import configparser
 
 from flask_restful.utils import cors
 from flask_cors import CORS
+from flask import make_response
 
 SUPERVISOR_ERROR_TEXT = '''
         Need to interact with supervisor.
@@ -179,7 +181,7 @@ class Cam(Resource):
 
 
 class Stat(Resource):
-    def get(request):
+    def get(self):
         try:
             return {
                 'message': get_filesystem_info(),
@@ -290,7 +292,22 @@ def save_supervisor_config():
     res = os.system('supervisorctl update')
     print('updated', res, flush=True)
 
+class Thumb(Resource):
+    def get(self, cam_id, time):
+        print(cam_id, time, flush=True)
+        date = datetime.datetime.fromtimestamp(time)
+        j_day = int(julian.to_jd(date))
+        ms = (date.hour*60*60 + date.minute*60 + date.second) * 1000
+        print(j_day, ms, flush=True)
+        conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
+        cur = conn.cursor()
+        cur.execute("select heatmap from records where date=%s and start_time >= %s and cam='cam%s' limit 1;" % (j_day, ms, cam_id))
+        img = base64.b64decode(cur.fetchone()[0])
 
+        response = make_response(img)
+        response.headers.set('Content-Type', 'image/png')
+        response.headers.set('Content-Disposition', 'inline', filename='thumb.png')
+        return response
 
 lock = Lock()
 
@@ -303,6 +320,7 @@ api.add_resource(Cam, '/')
 api.add_resource(Stat, '/stat')
 api.add_resource(DatabaseData, '/db/<string:data>', endpoint='db_data')
 api.add_resource(DatabaseEventsData, '/archivedb/<string:data>', endpoint='db_arhcive_data')
+api.add_resource(Thumb, '/thumb/<int:cam_id>/<int:time>/')
 
 app.config.update(
     CELERY_BROKER_URL='amqp://teorema:teorema@0.0.0.0:5672//',
