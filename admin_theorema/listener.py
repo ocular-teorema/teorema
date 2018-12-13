@@ -20,6 +20,9 @@ import re
 from DateTime import DateTime
 import julian
 import configparser
+from PIL import Image
+import io
+
 
 from flask_restful.utils import cors
 from flask_cors import CORS
@@ -304,7 +307,13 @@ class Thumb(Resource):
         cur.execute("select heatmap from records where date=%s and start_time >= %s and cam='cam%s' limit 1;" % (j_day, ms, cam_id))
         img = base64.b64decode(cur.fetchone()[0])
 
-        response = make_response(img)
+        io_img = io.BytesIO(img)
+        pil_img = Image.open(io_img)
+        res_img = pil_img.resize((175,100))
+        out_img = io.BytesIO()
+        res_img.save(out_img, format='PNG')
+
+        response = make_response(out_img.getvalue())
         response.headers.set('Content-Type', 'image/png')
         response.headers.set('Content-Disposition', 'inline', filename='thumb.png')
         return response
