@@ -194,7 +194,7 @@ class QuadratorSerializer(serializers.ModelSerializer):
 
     def update(self, quadrator, validated_data):
         user = self.context['request'].user
-        if not user.is_admin:
+        if not user.is_staff:
             validated_data['organization'] = self.context['request'].user.organization
         cameras = validated_data.pop('cameras')
         res = super().update(quadrator, validated_data)
