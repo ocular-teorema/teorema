@@ -197,17 +197,24 @@ class QuadratorSerializer(serializers.ModelSerializer):
         if not user.is_staff:
             validated_data['organization'] = self.context['request'].user.organization
         cameras = validated_data.pop('cameras')
+        print(cameras, flush=True)
         res = super().update(quadrator, validated_data)
         try:
             worker_data = {k:v for k,v in validated_data.items()}
             worker_data.pop('server')
             worker_data.pop('organization')
             worker_data['type'] = 'quad'
+            worker_data['id'] = quadrator.id
+            worker_data['cameras'] = []
+            for c_id in cameras:
+                c = Camera.objects.get(id=c_id)
+                worker_data['cameras'].append({'name': c.name, 'isPresent': True, 'port': c.id})
+            worker_data['port'] = quadrator.port
+            print(worker_data, flush=True)
             raw_response = requests.patch('http://{}:5005'.format(validated_data['server'].address), json=worker_data, timeout=5)
             worker_response = json.loads(raw_response.content.decode())
             print('PATCH worker_response:', worker_response)
         except Exception as e:
-            res.delete()
             raise APIException(code=400, detail={'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))})
         if worker_response['status']:
             raise APIException(code=400, detail={'message': worker_response['message']})
