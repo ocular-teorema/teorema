@@ -127,7 +127,7 @@ def add_autostart(obj_type, obj_name, path):
     save_supervisor_config()
 
 def del_autostart(obj_name):
-    config.pop(obj_name, None)
+    config.pop('program:%s' % obj_name, None)
     save_supervisor_config()
 
 class Cam(Resource):
