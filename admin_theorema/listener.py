@@ -123,6 +123,7 @@ def add_autostart(obj_type, obj_name, path):
             'autorestart': 'true',
             'redirect_stderr': 'true',
             'user': 'www-data',
+            'startretries': 9999999,
     }
     save_supervisor_config()
 

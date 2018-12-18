@@ -173,7 +173,7 @@ class QuadratorSerializer(serializers.ModelSerializer):
             worker_data['cameras'] = []
             for c_id in cameras:
                 c = Camera.objects.get(id=c_id)
-                worker_data['cameras'].append({'name': c.name, 'isPresent': True, 'port': c.id})
+                worker_data['cameras'].append({'name': 'cam%s' % c.id, 'isPresent': True, 'port': c.id})
             raw_response = requests.post('http://{}:5005'.format(validated_data['server'].address), json=worker_data, timeout=5)
             worker_response = json.loads(raw_response.content.decode())
             print('POST worker_response:', worker_response, flush=True)
@@ -208,7 +208,7 @@ class QuadratorSerializer(serializers.ModelSerializer):
             worker_data['cameras'] = []
             for c_id in cameras:
                 c = Camera.objects.get(id=c_id)
-                worker_data['cameras'].append({'name': c.name, 'isPresent': True, 'port': c.id})
+                worker_data['cameras'].append({'name': 'cam%s' % c.id, 'isPresent': True, 'port': c.id})
             worker_data['port'] = quadrator.port
             print(worker_data, flush=True)
             raw_response = requests.patch('http://{}:5005'.format(validated_data['server'].address), json=worker_data, timeout=5)
