@@ -174,10 +174,14 @@ class Cam(Resource):
         try:
             save_config(obj_type, path, req)
             is_active = req.get('is_active', 1)
-            if is_active:
-                add_autostart(obj_type, obj_name, path)
+            if is_active and 'program:%s'%obj_name in config.sections():
+                print('restarting %s due to potential config changes'%obj_name, flush=True)
+                os.system('supervisorctl restart %s'%obj_name)
             else:
-                del_autostart(obj_name)
+                if is_active:
+                    add_autostart(obj_type, obj_name, path)
+                else:
+                    del_autostart(obj_name)
         except Exception as e:
             print('\n'.join(traceback.format_exception(*sys.exc_info())), flush=True)
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
@@ -294,7 +298,7 @@ def save_supervisor_config():
         config.write(f)
     print('launching update...')
     res = os.system('supervisorctl update')
-    print('updated', res, flush=True)
+    print('update fail' if res else 'update success', flush=True)
 
 class Thumb(Resource):
     def get(self, cam_id, time):
