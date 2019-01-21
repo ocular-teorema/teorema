@@ -165,7 +165,7 @@ class Cam(Resource):
         try: 
             delete_path(path)
         except FileNotFoundError as e:
-            continue
+            pass 
         return {'status': 0}
 
     @with_lock
