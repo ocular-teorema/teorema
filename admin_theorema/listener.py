@@ -159,10 +159,13 @@ class Cam(Resource):
         path = get_path(obj_name)
         try:
             del_autostart(obj_name)
-            delete_path(path)
         except Exception as e:
             print('\n'.join(traceback.format_exception(*sys.exc_info())), flush=True)
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
+        try: 
+            delete_path(path)
+        except FileNotFoundError as e:
+            continue
         return {'status': 0}
 
     @with_lock
