@@ -57,8 +57,10 @@ class CameraViewSet(CacheFixViewSet):
             raw_response = requests.delete('http://{}:5005'.format(camera.server.address), json=worker_data)
             worker_response = json.loads(raw_response. content.decode())
 
-            if len(Camera.objects.filter(camera_group_id=camera.camera_group_id)) == 1:
-                CameraGroup.objects.get(id=camera.camera_group_id).delete()
+            if camera.camera_group.camera_set.exclude(id=camera.id).count() == 0:
+                camera_group_to_delete = camera.camera_group
+            else:
+                camera_group_to_delete = None
 
             for camset in CamSet.objects.all():
                 if camera.id in camset.cameras:
@@ -69,8 +71,10 @@ class CameraViewSet(CacheFixViewSet):
             raise APIException(code=400, detail={'message': str(e)})
         if worker_response['status']:
             raise APIException(code=400, detail={'message': worker_response['message']})
-        return super().destroy(request, pk)
-
+        res = super().destroy(request, pk)
+        if camera_group_to_delete:
+            camera_group_to_delete.delete()
+        return res
 
 class CameraGroupViewSet(CacheFixViewSet):
     queryset = CameraGroup.objects.all()
