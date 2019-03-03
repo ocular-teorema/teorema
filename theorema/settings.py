@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'allauth',
     'rest_auth',
     'rest_auth.registration',
-    'djcelery_email',
+#    'djcelery_email',
 
     'theorema.users',
     'theorema.cameras',
@@ -58,7 +58,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'theorema.other.cache_fix.CacheControlMiddleware'
 ]
 
 ROOT_URLCONF = 'theorema.urls'

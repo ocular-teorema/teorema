@@ -5,7 +5,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import APIException
 from .models import Server, Camera, CameraGroup, NotificationCamera, Quadrator
 from .serializers import ServerSerializer, CameraSerializer,CameraGroupSerializer, NotificationSerializer, QuadratorSerializer
-from theorema.other.cache_fix import CacheFixViewSet
 from theorema.permissions import ReadOnly
 from theorema.users.models import CamSet
 from rest_framework.decorators import api_view
@@ -13,7 +12,7 @@ from rest_framework.response import Response
 from theorema.orgs.models import *
 import hashlib 
 
-class NotificationViewSet(CacheFixViewSet):
+class NotificationViewSet(ModelViewSet):
     queryset = NotificationCamera.objects.all()
     serializer_class = NotificationSerializer
     permission_classes = (IsAuthenticated, )
@@ -24,7 +23,7 @@ class NotificationViewSet(CacheFixViewSet):
             return queryset.filter(organization=self.request.user.organization)
         return queryset
 
-class ServerViewSet(CacheFixViewSet):
+class ServerViewSet(ModelViewSet):
     queryset = Server.objects.all()
     serializer_class = ServerSerializer
     permission_classes = (IsAuthenticated, )
@@ -39,7 +38,7 @@ class ServerViewSet(CacheFixViewSet):
         return queryset
 
 
-class CameraViewSet(CacheFixViewSet):
+class CameraViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Camera.objects.all()
     serializer_class = CameraSerializer
@@ -79,7 +78,7 @@ class CameraViewSet(CacheFixViewSet):
             camera_group_to_delete.delete()
         return res
 
-class CameraGroupViewSet(CacheFixViewSet):
+class CameraGroupViewSet(ModelViewSet):
     queryset = CameraGroup.objects.all()
     serializer_class = CameraGroupSerializer
 
@@ -113,7 +112,7 @@ def add_cams(request):
         pass
     return Response({'status':'none'})
 
-class QuadratorViewSet(CacheFixViewSet):
+class QuadratorViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Quadrator.objects.all()
     serializer_class = QuadratorSerializer

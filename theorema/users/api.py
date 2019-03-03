@@ -7,9 +7,8 @@ from .models import User, CamSet
 from .serializers import UserSerializer, CamSetSerializer
 from theorema.cameras.models import Camera, CameraGroup
 from theorema.cameras.serializers import CameraSerializer, CameraGroupSerializer
-from theorema.other.cache_fix import CacheFixViewSet
 
-class UserViewSet(CacheFixViewSet):
+class UserViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
