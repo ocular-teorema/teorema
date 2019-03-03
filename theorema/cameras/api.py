@@ -19,9 +19,10 @@ class NotificationViewSet(CacheFixViewSet):
     permission_classes = (IsAuthenticated, )
 
     def get_queryset(self):
+        queryset = super().get_queryset()
         if not self.request.user.is_staff:
-            return self.queryset.filter(organization=self.request.user.organization)
-        return self.queryset
+            return queryset.filter(organization=self.request.user.organization)
+        return queryset
 
 class ServerViewSet(CacheFixViewSet):
     queryset = Server.objects.all()
@@ -29,12 +30,13 @@ class ServerViewSet(CacheFixViewSet):
     permission_classes = (IsAuthenticated, )
 
     def get_queryset(self):
+        queryset = super().get_queryset()
         if not self.request.user.is_staff:
-            return self.queryset.filter(organization=self.request.user.organization)
+            return queryset.filter(organization=self.request.user.organization)
         param = self.request.query_params.get('organization', None)
         if param is not None:
-            return self.queryset.filter(organization__id=param)
-        return self.queryset
+            return queryset.filter(organization__id=param)
+        return queryset
 
 
 class CameraViewSet(CacheFixViewSet):
@@ -43,12 +45,13 @@ class CameraViewSet(CacheFixViewSet):
     serializer_class = CameraSerializer
 
     def get_queryset(self):
+        queryset = super().get_queryset()
         if not self.request.user.is_staff:
-            return self.queryset.filter(organization=self.request.user.organization)
+            return queryset.filter(organization=self.request.user.organization)
         param = self.request.query_params.get('organization', None)
         if param is not None:
-            return self.queryset.filter(organization__id=param)
-        return self.queryset
+            return queryset.filter(organization__id=param)
+        return queryset
     
     def destroy(self, request, pk=None):
         try:
@@ -81,12 +84,13 @@ class CameraGroupViewSet(CacheFixViewSet):
     serializer_class = CameraGroupSerializer
 
     def get_queryset(self):
+        queryset = super().get_queryset()
         if not self.request.user.is_staff:
-            return self.queryset.filter(organization=self.request.user.organization)
+            return queryset.filter(organization=self.request.user.organization)
         param = self.request.query_params.get('organization', None)
         if param is not None:
-            return self.queryset.filter(organization__id=param)
-        return self.queryset
+            return queryset.filter(organization__id=param)
+        return queryset
 
 
 @api_view(['POST'])
@@ -115,12 +119,13 @@ class QuadratorViewSet(CacheFixViewSet):
     serializer_class = QuadratorSerializer
 
     def get_queryset(self):
+        queryset = super().get_queryset()
         if not self.request.user.is_staff:
-            return self.queryset.filter(organization=self.request.user.organization)
+            return queryset.filter(organization=self.request.user.organization)
         param = self.request.query_params.get('organization', None)
         if param is not None:
-            return self.queryset.filter(organization__id=param)
-        return self.queryset
+            return queryset.filter(organization__id=param)
+        return queryset
 
     def destroy(self, request, pk=None):
         try:

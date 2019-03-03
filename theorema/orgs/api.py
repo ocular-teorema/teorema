@@ -25,9 +25,6 @@ class OcularUserViewSet(ModelViewSet):
     queryset = OcularUser.objects.all()
     serializer_class = OcularUserSerializer
     
-    def get_queryset(self):
-        return OcularUser.objects.all()
-
 
 # online version
 #Этот метод следует вызывать при создании объекта ocularUser, а так же для обновления информации о камерах

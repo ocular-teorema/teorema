@@ -15,15 +15,15 @@ class UserViewSet(CacheFixViewSet):
     serializer_class = UserSerializer
 
     def get_queryset(self):
-        print(self.queryset)
+        queryset = super().get_queryset()
         if self.request.user.is_staff:
             param = self.request.query_params.get('organization', None)
             if param is not None:
-                return self.queryset.filter(organization__id=param)
-            return self.queryset
+                return queryset.filter(organization__id=param)
+            return queryset
         if self.request.user.is_organization_admin:
-            return self.queryset.filter(organization=self.request.user.organization)
-        return self.queryset.filter(id=self.request.user.id)
+            return queryset.filter(organization=self.request.user.organization)
+        return queryset.filter(id=self.request.user.id)
 
 
 @api_view()
@@ -83,6 +83,7 @@ class CamSetViewSet(ModelViewSet):
     serializer_class = CamSetSerializer
 
     def get_queryset(self):
+        queryset = super().get_queryset()
         if not self.request.user.is_staff:
-            return CamSet.objects.all().filter(user=self.request.user)
-        return CamSet.objects.all()
+            return queryset.filter(user=self.request.user)
+        return queryset
