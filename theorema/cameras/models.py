@@ -13,6 +13,7 @@ class Server(models.Model):
     parent_server_id=models.IntegerField(blank=True, null=True)
     name = models.CharField(max_length=100)
     address = models.GenericIPAddressField()
+    local_address = models.GenericIPAddressField(default='0.0.0.0')
     organization = models.ForeignKey(Organization)
     type = models.CharField(choices=SERVER_TYPES, default='full', max_length=8)
 
