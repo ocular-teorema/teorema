@@ -16,7 +16,7 @@ CAM_TYPES={1:'s', 2:'a', 3:'f'}
 class ServerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Server
-        fields = ('id', 'name', 'address', 'type', 'organization', 'parent_server_id')
+        fields = ('id', 'name', 'address', 'type', 'organization', 'parent_server_id', 'local_address')
 
     def create(self, validated_data):
         res = super().create(validated_data)
