@@ -9,7 +9,7 @@ LAG = 2
 SUPERVISOR_CAMERAS_CONF = '/etc/supervisor/conf.d/cameras.conf'
 
 TEMPLATE = """[General]
-HttpPort={port}
+Port={port}
 
 [AnalysisParams]
 Diff%20Threshold=18
