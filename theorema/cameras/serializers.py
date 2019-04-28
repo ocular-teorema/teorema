@@ -140,9 +140,21 @@ class CameraSerializer(M2MHelperSerializer):
             for key in list(res.keys()):
                 if key.startswith('notify'):
                     res.pop(key)
-        res['ws_video_url'] = 'ws://%s/video_ws/?port=%s' % (camera.server.address, camera.port+50)
-        res['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (camera.server.address, camera.id)
-        res['m3u8_video_url'] = 'http://%s:8080/vasrc/cam%s/index.m3u8' % (camera.server.address, camera.id)
+
+        x_forwarded_for = self.context['request'].META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = self.context['request'].META.get('REMOTE_ADDR')
+
+        if ip.startswith('10') or ip.startswith('192.168') or ip.startswith('172.16'):
+            serv_addr = camera.server.local_address
+        else:
+            serv_addr = camera.server.address
+
+        res['ws_video_url'] = 'ws://%s/video_ws/?port=%s' % (serv_addr, camera.port+50)
+        res['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (serv_addr, camera.id)
+        res['m3u8_video_url'] = 'http://%s:8080/vasrc/cam%s/index.m3u8' % (serv_addr, camera.id)
         return res
 
 class QuadratorSerializer(serializers.ModelSerializer):
