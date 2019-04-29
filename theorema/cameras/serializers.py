@@ -141,9 +141,9 @@ class CameraSerializer(M2MHelperSerializer):
                 if key.startswith('notify'):
                     res.pop(key)
 
-        x_forwarded_for = self.context['request'].META.get('HTTP_X_FORWARDED_FOR')
-        if x_forwarded_for:
-            ip = x_forwarded_for.split(',')[0]
+        x_real_ip = self.context['request'].META.get('HTTP_X_REAL_IP')
+        if x_real_ip:
+            ip = x_real_ip.split(',')[0]
         else:
             ip = self.context['request'].META.get('REMOTE_ADDR')
 
