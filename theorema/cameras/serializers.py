@@ -198,10 +198,21 @@ class QuadratorSerializer(serializers.ModelSerializer):
         return res
 
     def to_representation(self, quadrator):
+
+        x_real_ip = self.context['request'].META.get('HTTP_X_REAL_IP')
+        if x_real_ip:
+            ip = x_real_ip.split(',')[0]
+        else:
+            ip = self.context['request'].META.get('REMOTE_ADDR')
+
+        if ip.startswith('10') or ip.startswith('192.168') or ip.startswith('172.16'):
+            serv_addr = quadrator.server.local_address
+        else:
+            serv_addr = quadrator.server.address
         res = super().to_representation(quadrator)
         res['cameras'] = [x.camera.id for x in quadrator.camera2quadrator_set.all()]
-        res['ws_video_url'] = 'ws://%s/video_ws/?port=%s' % (quadrator.server.address, quadrator.port)
-        res['m3u8_video_url'] = 'http://%s:8080/vasrc/quad%s/index.m3u8' % (quadrator.server.address, quadrator.id)
+        res['ws_video_url'] = 'ws://%s/video_ws/?port=%s' % (serv_addr, quadrator.port)
+        res['m3u8_video_url'] = 'http://%s:8080/vasrc/quad%s/index.m3u8' % (serv_addr, quadrator.id)
         return res
 
     def update(self, quadrator, validated_data):

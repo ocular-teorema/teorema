@@ -62,15 +62,26 @@ def user_cameras(request):
                cameras_objects = Camera.objects.filter(id__in=user_cameras_for_this_group)
         group_repr['cameras'] = []
         for camera_object in cameras_objects:
-            camera_repr = camera_serializer.to_representation(camera_object, with_group=False)
-            camera_repr['output_url'] = 'rtmp://{}:1935/videoanalytic/'.format(camera_object.server.address)
-            camera_repr['output_vascaled_url'] = 'rtmp://{}:1935/vascaled/'.format(camera_object.server.address)
-            camera_repr['output_vasrc_url'] = 'rtmp://{}:1935/vasrc/'.format(camera_object.server.address)
-            camera_repr['events_url'] = 'http://{}:{}/'.format(camera_object.server.address, camera_object.port)
 
-            camera_repr['http_output_url'] = '/videoanalytic/cam{}/index.m3u8'.format(camera_object.id)
-            camera_repr['http_output_vascaled_url'] = '/vascaled/cam{}/index.m3u8'.format(camera_object.id)
-            camera_repr['http_output_vasrc_url'] = '/vasrc/cam{}/index.m3u8'.format(camera_object.id)
+            x_real_ip = request.META.get('HTTP_X_REAL_IP')
+            if x_real_ip:
+                ip = x_real_ip.split(',')[0]
+            else:
+                ip = request.META.get('REMOTE_ADDR')
+
+            if ip.startswith('10') or ip.startswith('192.168') or ip.startswith('172.16'):
+                serv_addr = camera_object.server.local_address
+            else:
+                serv_addr = camera_object.server.address
+            camera_repr = camera_serializer.to_representation(camera_object, with_group=False)
+            camera_repr['output_url'] = 'rtmp://{}:1935/videoanalytic/'.format(serv_addr)
+            camera_repr['output_vascaled_url'] = 'rtmp://{}:1935/vascaled/'.format(serv_addr)
+            camera_repr['output_vasrc_url'] = 'rtmp://{}:1935/vasrc/'.format(serv_addr)
+#            camera_repr['events_url'] = 'http://{}:{}/'.format(camera_object.server.address, camera_object.port)
+
+#            camera_repr['http_output_url'] = '/videoanalytic/cam{}/index.m3u8'.format(camera_object.id)
+#            camera_repr['http_output_vascaled_url'] = '/vascaled/cam{}/index.m3u8'.format(camera_object.id)
+#            camera_repr['http_output_vasrc_url'] = '/vasrc/cam{}/index.m3u8'.format(camera_object.id)
             group_repr['cameras'].append(camera_repr)
         result['groups'].append(group_repr)
     return Response(result)
