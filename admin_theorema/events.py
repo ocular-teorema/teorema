@@ -19,7 +19,7 @@ for c in raw_cams:
     cam_config = configparser.ConfigParser()
     cam_config.read(os.path.join(c['directory'], 'theorem.conf'), 'utf-8')
     try:
-        c['port'] = int(cam_config['General']['HttpPort'])
+        c['port'] = int(cam_config['General']['Port'])
     except:
         print('cam %s ignored due to config error' % c['id'])
     else:
