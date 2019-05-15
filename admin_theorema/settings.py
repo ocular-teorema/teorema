@@ -8,7 +8,7 @@ ADDITIONAL_CONFIG = 'conf.conf'
 LAG = 2
 SUPERVISOR_CAMERAS_CONF = '/etc/supervisor/conf.d/cameras.conf'
 
-TEMPLATE = """[General]
+TEMPLATE = """[Common]
 Port={port}
 
 [AnalysisParams]
