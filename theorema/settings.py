@@ -88,8 +88,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'theorema',
-        'USER': 'theorema',
-        'PASSWORD': 'theorema',
+        'USER': 'postgres',
+        'PASSWORD': 'Blizzard',
         'HOST': 'localhost',
         'PORT': 5432,
         'CONN_MAX_AGE': None

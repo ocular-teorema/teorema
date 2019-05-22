@@ -94,4 +94,8 @@ class Quadrator(models.Model):
 class Camera2Quadrator(models.Model):
     camera = models.ForeignKey(Camera)
     quadrator = models.ForeignKey(Quadrator)
+    x = models.IntegerField(default=0)
+    y = models.IntegerField(default=0)
+    cols = models.IntegerField(default=1)
+    rows = models.IntegerField(default=1)
 

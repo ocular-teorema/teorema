@@ -157,8 +157,15 @@ class CameraSerializer(M2MHelperSerializer):
         res['m3u8_video_url'] = 'http://%s:8080/vasrc/cam%s/index.m3u8' % (serv_addr, camera.id)
         return res
 
+class Camera2QuadratorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Camera2Quadrator
+        fields = (
+                'camera_id', 'x', 'y', 'cols', 'rows'
+        )
+
 class QuadratorSerializer(serializers.ModelSerializer):
-    cameras = serializers.JSONField(write_only=True)
+    cameras = serializers.ListField(write_only=True)
     class Meta:
         model = Quadrator
         fields = (
@@ -183,8 +190,12 @@ class QuadratorSerializer(serializers.ModelSerializer):
             worker_data['type'] = 'quad'
             worker_data['id'] = res.id
             worker_data['cameras'] = []
-            for c_id in cameras:
-                c = Camera.objects.get(id=c_id)
+            print('validated_data cameras:');
+            for cam in cameras:
+                camera_id = cam.pop('camera_id')
+                c = Camera.objects.get(id=camera_id)
+                cam['camera'] = c;
+                cam['quadrator'] = res;
                 worker_data['cameras'].append({'name': 'cam%s' % c.id, 'isPresent': True, 'port': c.id})
             raw_response = requests.post('http://{}:5005'.format(validated_data['server'].address), json=worker_data, timeout=5)
             worker_response = json.loads(raw_response.content.decode())
@@ -193,8 +204,8 @@ class QuadratorSerializer(serializers.ModelSerializer):
             raise APIException(code=400, detail={'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))})
         if worker_response['status']:
             raise APIException(code=400, detail={'message': worker_response['message']})
-        for cam_id in cameras:
-            Camera2Quadrator(camera_id = cam_id, quadrator=res).save()
+        for cam in cameras:
+            Camera2Quadrator(**cam).save()
         return res
 
     def to_representation(self, quadrator):
@@ -210,7 +221,8 @@ class QuadratorSerializer(serializers.ModelSerializer):
         else:
             serv_addr = quadrator.server.address
         res = super().to_representation(quadrator)
-        res['cameras'] = [x.camera.id for x in quadrator.camera2quadrator_set.all()]
+        
+        res['cameras'] = [Camera2QuadratorSerializer().to_representation(x) for x in quadrator.camera2quadrator_set.all()]
         res['ws_video_url'] = 'ws://%s/video_ws/?port=%s' % (serv_addr, quadrator.port)
         res['m3u8_video_url'] = 'http://%s:8080/vasrc/quad%s/index.m3u8' % (serv_addr, quadrator.id)
         return res
@@ -229,8 +241,11 @@ class QuadratorSerializer(serializers.ModelSerializer):
             worker_data['type'] = 'quad'
             worker_data['id'] = quadrator.id
             worker_data['cameras'] = []
-            for c_id in cameras:
-                c = Camera.objects.get(id=c_id)
+            for cam in cameras:
+                camera_id = cam.pop('camera_id')
+                c = Camera.objects.get(id=camera_id)
+                cam['camera'] = c;
+                cam['quadrator'] = res;
                 worker_data['cameras'].append({'name': 'cam%s' % c.id, 'isPresent': True, 'port': c.id})
             worker_data['port'] = quadrator.port
             print(worker_data, flush=True)
@@ -243,6 +258,6 @@ class QuadratorSerializer(serializers.ModelSerializer):
             raise APIException(code=400, detail={'message': worker_response['message']})
 
         quadrator.camera2quadrator_set.all().delete()
-        for cam_id in cameras:
-            Camera2Quadrator(camera_id = cam_id, quadrator=res).save()
+        for cam in cameras:
+            Camera2Quadrator(**cam).save()
         return res
