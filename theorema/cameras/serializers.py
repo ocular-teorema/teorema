@@ -27,6 +27,27 @@ class ServerSerializer(serializers.ModelSerializer):
             raise APIException(code=400, detail={'status': 1, 'message': str(e)})
         return res
 
+    def to_representation(self, server, with_group=True):
+        res = super().to_representation(server)
+        if not self.context['request'].user.is_staff and not self.context['request'].user.is_organization_admin:
+            for key in list(res.keys()):
+                if key.startswith('notify'):
+                    res.pop(key)
+
+        x_real_ip = self.context['request'].META.get('HTTP_X_REAL_IP')
+        if x_real_ip:
+            ip = x_real_ip.split(',')[0]
+        else:
+            ip = self.context['request'].META.get('REMOTE_ADDR')
+
+        if ip.startswith('10') or ip.startswith('192.168') or ip.startswith('172.16'):
+            serv_addr = server.local_address
+        else:
+            serv_addr = server.address
+
+        res["fact_address"] = serv_addr
+
+        return res
 
 class CameraGroupSerializer(serializers.ModelSerializer):
     class Meta:
@@ -155,6 +176,8 @@ class CameraSerializer(M2MHelperSerializer):
         res['ws_video_url'] = 'ws://%s/video_ws/?port=%s' % (serv_addr, camera.port+50)
         res['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (serv_addr, camera.id)
         res['m3u8_video_url'] = 'http://%s:8080/vasrc/cam%s/index.m3u8' % (serv_addr, camera.id)
+        res['thumb_url'] = 'http://%s:5005/thumb/%s/' % (serv_addr, camera.id)
+
         return res
 
 class Camera2QuadratorSerializer(serializers.ModelSerializer):
