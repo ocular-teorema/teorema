@@ -218,11 +218,7 @@ class QuadratorSerializer(serializers.ModelSerializer):
                 c = Camera.objects.get(id=camera_id)
                 cam['camera'] = c;
                 cam['quadrator'] = res;
-                x = cam.pop('x')
-                y = cam.pop('y')
-                rows = cam.pop('rows')
-                cols = cam.pop('cols')
-                worker_data['cameras'].append({'name': 'cam%s' % c.id, 'posX': x, 'posY': y, 'width': cols, 'height': rows, 'port': c.id})
+                worker_data['cameras'].append({'name': 'cam%s' % c.id, 'posX': cam['x'], 'posY': cam['y'], 'width': cam['cols'], 'height': cam['rows'], 'port': c.id})
             print('worker_data cameras:', worker_data['cameras']);
             raw_response = requests.post('http://{}:5005'.format(validated_data['server'].address), json=worker_data, timeout=5)
             worker_response = json.loads(raw_response.content.decode())
@@ -273,11 +269,7 @@ class QuadratorSerializer(serializers.ModelSerializer):
                 c = Camera.objects.get(id=camera_id)
                 cam['camera'] = c;
                 cam['quadrator'] = res;
-                x = cam.pop('x')
-                y = cam.pop('y')
-                rows = cam.pop('rows')
-                cols = cam.pop('cols')
-                worker_data['cameras'].append({'name': 'cam%s' % c.id, 'posX': x, 'posY': y, 'width': cols, 'height': rows, 'port': c.id})
+                worker_data['cameras'].append({'name': 'cam%s' % c.id, 'posX': cam['x'], 'posY': cam['y'], 'width': cam['cols'], 'height': cam['rows'], 'port': c.id})
             print('worker_data cameras:', worker_data['cameras']);
             worker_data['port'] = quadrator.port
             raw_response = requests.patch('http://{}:5005'.format(validated_data['server'].address), json=worker_data, timeout=5)
