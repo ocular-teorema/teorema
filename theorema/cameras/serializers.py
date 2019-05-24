@@ -213,13 +213,17 @@ class QuadratorSerializer(serializers.ModelSerializer):
             worker_data['type'] = 'quad'
             worker_data['id'] = res.id
             worker_data['cameras'] = []
-            print('validated_data cameras:');
             for cam in cameras:
                 camera_id = cam.pop('camera_id')
                 c = Camera.objects.get(id=camera_id)
                 cam['camera'] = c;
                 cam['quadrator'] = res;
-                worker_data['cameras'].append({'name': 'cam%s' % c.id, 'isPresent': True, 'port': c.id})
+                x = cam.pop('x')
+                y = cam.pop('y')
+                rows = cam.pop('rows')
+                cols = cam.pop('cols')
+                worker_data['cameras'].append({'name': 'cam%s' % c.id, 'posX': x, 'posY': y, 'width': cols, 'height': rows, 'port': c.id})
+            print('worker_data cameras:', worker_data['cameras']);
             raw_response = requests.post('http://{}:5005'.format(validated_data['server'].address), json=worker_data, timeout=5)
             worker_response = json.loads(raw_response.content.decode())
             print('POST worker_response:', worker_response, flush=True)
@@ -269,9 +273,13 @@ class QuadratorSerializer(serializers.ModelSerializer):
                 c = Camera.objects.get(id=camera_id)
                 cam['camera'] = c;
                 cam['quadrator'] = res;
-                worker_data['cameras'].append({'name': 'cam%s' % c.id, 'isPresent': True, 'port': c.id})
+                x = cam.pop('x')
+                y = cam.pop('y')
+                rows = cam.pop('rows')
+                cols = cam.pop('cols')
+                worker_data['cameras'].append({'name': 'cam%s' % c.id, 'posX': x, 'posY': y, 'width': cols, 'height': rows, 'port': c.id})
+            print('worker_data cameras:', worker_data['cameras']);
             worker_data['port'] = quadrator.port
-            print(worker_data, flush=True)
             raw_response = requests.patch('http://{}:5005'.format(validated_data['server'].address), json=worker_data, timeout=5)
             worker_response = json.loads(raw_response.content.decode())
             print('PATCH worker_response:', worker_response)

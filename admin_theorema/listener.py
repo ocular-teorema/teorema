@@ -96,7 +96,10 @@ def save_quad_config(path, req):
                 "camList": [
                         {
                                 "name": cam['name'],
-                                "isPresent": True,
+                                "posX": cam['posX'],
+                                "posY": cam['posY'],
+                                "width": cam['width'],
+                                "height": cam['height'],
                                 "streamUrl": 'rtmp://localhost:1935/vasrc/cam%s' % cam['port']
                         } for cam in req['cameras']
                 ]
