@@ -91,8 +91,6 @@ def save_quad_config(path, req):
                 "outputFps":    req['output_FPS'],
                 "outputCrf":    req['output_quality'],
                 "borderWidth":  4,
-                "numCamsX":     req['num_cam_x'],
-                "numCamsY":     req['num_cam_y'],
                 "camList": [
                         {
                                 "name": cam['name'],
