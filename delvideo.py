@@ -20,7 +20,7 @@ def delvideo():
             continue
         print('work on %s' % dirname)
         try:
-            config.read(os.path.join(dirname, 'theorem.conf'))
+            config.read(os.path.join(dirname, 'theorem.conf'), encoding='utf-8')
             storage_life = int(config['PipelineParams']['storage_life'])
         except Exception as e:
             print('error %s while reading %s conf' % (e, dirname))
