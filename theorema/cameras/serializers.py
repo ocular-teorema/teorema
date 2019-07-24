@@ -33,7 +33,6 @@ class ServerSerializer(serializers.ModelSerializer):
             for key in list(res.keys()):
                 if key.startswith('notify'):
                     res.pop(key)
-
         x_real_ip = self.context['request'].META.get('HTTP_X_REAL_IP')
         if x_real_ip:
             ip = x_real_ip.split(',')[0]
@@ -65,7 +64,7 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
        validated_data['organization']=self.context['request'].user.organization
-       return super().create(validated_data) 
+       return super().create(validated_data)
 
 
 class CameraSerializer(M2MHelperSerializer):
@@ -75,7 +74,7 @@ class CameraSerializer(M2MHelperSerializer):
         fields = (
                 'id', 'name', 'address', 'analysis',
                 'storage_life', 'compress_level', 'is_active', 'server',
-                'camera_group', 'organization', 'port', 'notify_email', 
+                'camera_group', 'organization', 'port', 'notify_email',
                 'notify_phone', 'notify_events', 'notify_time_start',
                 'notify_time_stop', 'notify_alert_level', 'notify_send_email',
                 'notify_send_sms', 'indefinitely', 'archive_path'
@@ -157,10 +156,13 @@ class CameraSerializer(M2MHelperSerializer):
             res['camera_group'] = CameraGroupSerializer().to_representation(camera.camera_group)
         else:
             res.pop('camera_group')
-        if not self.context['request'].user.is_staff and not self.context['request'].user.is_organization_admin:
-            for key in list(res.keys()):
-                if key.startswith('notify'):
-                    res.pop(key)
+        try:
+            if not self.context['request'].user.is_staff and not self.context['request'].user.is_organization_admin:
+                for key in list(res.keys()):
+                    if key.startswith('notify'):
+                        res.pop(key)
+        except:
+            pass
 
         x_real_ip = self.context['request'].META.get('HTTP_X_REAL_IP')
         if x_real_ip:
@@ -244,7 +246,7 @@ class QuadratorSerializer(serializers.ModelSerializer):
         else:
             serv_addr = quadrator.server.address
         res = super().to_representation(quadrator)
-        
+
         res['cameras'] = [Camera2QuadratorSerializer().to_representation(x) for x in quadrator.camera2quadrator_set.all()]
         res['ws_video_url'] = 'ws://%s/video_ws/?port=%s' % (serv_addr, quadrator.port)
         res['m3u8_video_url'] = 'http://%s:8080/vasrc/quad%s/index.m3u8' % (serv_addr, quadrator.id)
