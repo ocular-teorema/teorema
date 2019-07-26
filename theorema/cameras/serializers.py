@@ -93,9 +93,16 @@ class CameraSerializer(M2MHelperSerializer):
             validated_data['camera_group'] = CameraGroup.objects.get(id=int(validated_data['camera_group']))
             camera_group = None
         else:
-            camera_group = CameraGroup(name=validated_data['camera_group'], organization=validated_data['organization'])
-            camera_group.save()
-            validated_data['camera_group'] = camera_group
+            camera_group_exist = CameraGroup.objects.filter(
+                    name=validated_data['camera_group'],
+                    organization=validated_data['organization'])
+            if camera_group_exist:
+                validated_data['camera_group'] = camera_group_exist.first()
+                camera_group = None
+            else:
+                camera_group = CameraGroup(name=validated_data['camera_group'], organization=validated_data['organization'])
+                camera_group.save()
+                validated_data['camera_group'] = camera_group
         port = Camera.objects.last().port + 200 if Camera.objects.exists() else 15000
         validated_data['port'] = port
         res = super().create(validated_data)
