@@ -27,7 +27,7 @@ def delvideo():
         storage_free = os_storage.f_bavail * os_storage.f_frsize
         path_info = parse_fs(dirname)
         du_limit = path_info['disk_usage']
-        fp_oldest = path_info['oldest_four'][0]
+        #fp_oldest = path_info['oldest_four'][0]
 
         if storage_free < du_limit:
             print('free storage is %s' % storage_free)
@@ -39,7 +39,7 @@ def delvideo():
                 try:
                     os.remove(video)
                 except Exception as e:
-                    print('cannot remove %s due to %s', (fp_oldest, e))
+                    print('cannot remove %s due to %s', (video, e))
                     continue
 
         try:
@@ -97,7 +97,7 @@ def usage_for_list(video_list):
 
 def parse_fs(videodirpath):
     oldest_four = find_oldest(videodirpath, 4)
-    fusage = usage_for_list(oldest_four)
+    fusage = usage_for_list(oldest_four) * 6
     return {
         'disk_usage': fusage,
         'oldest_four': oldest_four
