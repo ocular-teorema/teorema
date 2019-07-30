@@ -3,6 +3,7 @@ from deleter.lib.search_videos import find_videos
 from deleter.lib.file_size import find_size
 from deleter.lib.older_by import find_older,sort_pairs_by_date,create_pairs
 from deleter.lib.delete_handler import find_free_space,delete_handler
+from delvideo import VIDEO_DIR
 
 #_PATH = os.getcwd()
 #_PATH =
@@ -17,7 +18,7 @@ middle_file = 40*ratio
 def main():
     #each func must me for single and call with map)
     #return list
-    videos = find_videos(_PATH)
+    videos = find_videos(VIDEO_DIR)
     #return list
     files_by_hour = map(find_size,videos)
     #return value
