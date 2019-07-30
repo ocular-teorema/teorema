@@ -15,7 +15,7 @@ middle_file = 40*ratio
 
 
 
-def main():
+def deleter_main():
     #each func must me for single and call with map)
     #return list
     videos = find_videos(VIDEO_DIR)
@@ -38,4 +38,4 @@ def main():
     delete_handler(older_files,limit_for_delete,middle_file,ratio)
 
 if __name__ == "__main__":
-    main()
+    deleter_main()
