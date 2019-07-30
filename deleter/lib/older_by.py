@@ -1,6 +1,6 @@
 import os
 import datetime
-from file_size import return_name,create_name_path,find_files_older,return_name,convert_name_to_datetime
+from deleter.lib.file_size import return_name,create_name_path,find_files_older,return_name,convert_name_to_datetime
 
 
 def day_limit():
