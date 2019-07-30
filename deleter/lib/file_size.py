@@ -1,3 +1,5 @@
+import datetime
+import os
 import re
 
 def create_limit():
@@ -19,14 +21,14 @@ def create_name_path(name, path):
 def find_files_older(name_path,time_limit):
       for name, path in name_path.items():
           time_creation = convert_name_to_datetime(name)
-          if time_creation >= time_limit:
+          if time_creation <= time_limit:
               return path
           else:
               continue
 
 
 def convert_name_to_datetime(name):
-    pattern = '\w{1,3}\d{1,3}_\d\d_\d\d_\d{4}___\d\d_\d\d_\d\d'
+    pattern = r'\w{1,3}\d{1,3}_\d\d_\d\d_\d{4}___\d\d_\d\d_\d\d'
     if (re.match(pattern,name) is not None):
             if name is not None:
                 w_ext = name.split('_')
