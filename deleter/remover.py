@@ -6,36 +6,39 @@ from deleter.lib.delete_handler import find_free_space,delete_handler
 from delvideo import VIDEO_DIR
 
 #_PATH = os.getcwd()
-#_PATH =
+#_PATH = '/home/_VideoArchive'
 #bite
-ratio = 1048576
+ratio = 1000000000
 #basic file weigth file in directory
 middle_file = 40*ratio
 
 
 
 
-def deleter_main():
+def main():
     #each func must me for single and call with map)
     #return list
     videos = find_videos(VIDEO_DIR)
     #return list
     files_by_hour = map(find_size,videos)
+    total_by_hour = (sum(filter(None,files_by_hour)))
+    print('size files by hour'+str(total_by_hour/ratio)+"gb")
     #return value
-    total_by_hour = sum(files_by_hour)
-    #return value
-    limit_for_delete = total_by_hour*3
+    limit_for_delete = total_by_hour*4
+    print('limit today is'+str(limit_for_delete/ratio )+'gb')
     #return list
-    older_files = map(find_older,videos)
-    older_files_by_date = map(create_pairs,older_files)
+    older_files = filter(None,map(find_older,videos))
+    older_files_by_date =filter(None, map(create_pairs,older_files))
     #create list with most older files
     files_for_delete = sort_pairs_by_date(older_files_by_date)
+    #print(list(older_files_by_date))
     free_space = find_free_space()
-    print(files_for_delete)
+    print('free is' + str(free_space/ratio)+'gb')
     #default free_space is 0 for delete all
     #func take inside list with files
-    print(older_files)
-    delete_handler(older_files,limit_for_delete,middle_file,ratio)
+
+    delete_handler(files_for_delete,limit_for_delete,middle_file,ratio)
+
 
 if __name__ == "__main__":
-    deleter_main()
+    main()

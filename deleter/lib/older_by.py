@@ -22,7 +22,7 @@ def create_pairs(file):
 
 def sort_pairs_by_date(pairs):
     pairs_for_sort = pairs
-    data_sorted = sorted(pairs_for_sort, key=lambda item: item.keys()[-1])
+    data_sorted = sorted(pairs_for_sort, key=lambda item: list(item.keys()))
     return data_sorted
 
 
