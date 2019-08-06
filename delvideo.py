@@ -56,10 +56,10 @@ def delvideo():
 
         limit = int(julian.to_jd(datetime.datetime.now() - datetime.timedelta(days=storage_life+GAP)))
         print('deleting from events, can take a while')
-#        cur.execute("delete from events where archive_file1 like '/%s%%' and date < %s;" % (subdirname, limit))
+        cur.execute("delete from events where archive_file1 like '/%s%%' and date < %s;" % (subdirname, limit))
         conn.commit()
         print('deleting from records, can take a while')
-#        cur.execute("delete from records where video_archive like '/%s%%' and date < %s;" % (subdirname, limit))
+        cur.execute("delete from records where video_archive like '/%s%%' and date < %s;" % (subdirname, limit))
         conn.commit()
         print('removing old files with related db records/events')
 
