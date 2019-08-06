@@ -8,7 +8,7 @@ def delete_file(filename):
 def find_free_space():
     #values on some machine possible some devert
     #free size in bites
-    st = os.statvfs('/')
+    st = os.statvfs('/home/_VideoArchive')
     free = st.f_bavail * st.f_frsize
     return free
 
