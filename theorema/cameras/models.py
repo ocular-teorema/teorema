@@ -22,6 +22,12 @@ class CameraGroup(models.Model):
     name = models.CharField(max_length=100)
     organization = models.ForeignKey(Organization)
 
+
+class QuadratorGroup(models.Model):
+    name = models.CharField(max_length=100)
+    organization = models.ForeignKey(Organization)
+
+
 CameraAnalysisTypes = [
     (1, 'Full'),
     (2, 'Move'),
@@ -89,7 +95,7 @@ class Quadrator(models.Model):
     port = models.IntegerField()
     organization = models.ForeignKey(Organization)
     server = models.ForeignKey(Server)
-
+    quadrator_group = models.ForeignKey(QuadratorGroup,null = True,default = None)
 
 class Camera2Quadrator(models.Model):
     camera = models.ForeignKey(Camera)
@@ -98,4 +104,3 @@ class Camera2Quadrator(models.Model):
     y = models.IntegerField(default=0)
     cols = models.IntegerField(default=1)
     rows = models.IntegerField(default=1)
-

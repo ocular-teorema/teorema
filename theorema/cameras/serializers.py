@@ -5,7 +5,7 @@ import json
 import random
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
-from .models import Server, Camera, CameraGroup, NotificationCamera, Quadrator, Camera2Quadrator
+from .models import Server, Camera, CameraGroup, NotificationCamera, Quadrator, Camera2Quadrator,QuadratorGroup
 from theorema.m2mhelper import M2MHelperSerializer
 from theorema.orgs.models import OcularUser
 from rest_framework.response import Response
@@ -52,9 +52,15 @@ class CameraGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = CameraGroup
         fields = (
-                'id', 'name'
+                'id', 'name', 'organization'
         )
 
+class QuadratorGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CameraGroup
+        fields = (
+                'id', 'name', 'organization'
+        )
 
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -202,18 +208,35 @@ class QuadratorSerializer(serializers.ModelSerializer):
         model = Quadrator
         fields = (
                 'id', 'name', 'num_cam_x', 'num_cam_y', 'output_width', 'output_height', 'output_FPS',
-                'output_quality', 'port', 'organization', 'server', 'cameras'
+                'output_quality', 'port', 'organization', 'server', 'cameras','quadrator_group'
         )
         extra_kwargs = {
             'port': {'read_only': True},
             'organization': {'read_only': True},
         }
 
+
     def create(self, validated_data):
         if not self.context['request'].user.is_staff:
             validated_data['organization'] = self.context['request'].user.organization
         cameras = validated_data.pop('cameras')
         validated_data['port'] = random.randrange(15000, 60000)
+        if isinstance(validated_data['quadrator_group'], int):
+            validated_data['quadrator_group'] = QuadratorGroup.objects.get(id=int(validated_data['quadrator_group']))
+            quadrator_group = None
+        else:
+            quadrator_group_exist = QuadratorGroup.objects.filter(
+                    name=validated_data['quadrator_group'],
+                    organization=validated_data['organization'])
+            if quadrator_group_exist:
+                validated_data['quadrator_group'] = quadrator_group_exist.first()
+                quadrator_group = None
+            else:
+                quadrator_group = QuadratorGroup(name=validated_data['quadrator_group'], organization=validated_data['organization'])
+                quadrator_group.save()
+                validated_data['quadrator_group'] = quadrator_group
+        port = Quadrator.objects.last().port + 200 if Quadrator.objects.exists() else 15000
+        validated_data['port'] = port
         res = super().create(validated_data)
         try:
             worker_data = {k:v for k,v in validated_data.items()}
@@ -222,6 +245,7 @@ class QuadratorSerializer(serializers.ModelSerializer):
             worker_data['type'] = 'quad'
             worker_data['id'] = res.id
             worker_data['cameras'] = []
+            worker_data['quadrator_group']
             for cam in cameras:
                 camera_id = cam.pop('camera_id')
                 c = Camera.objects.get(id=camera_id)
@@ -235,10 +259,11 @@ class QuadratorSerializer(serializers.ModelSerializer):
         except Exception as e:
             raise APIException(code=400, detail={'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))})
         if worker_response['status']:
-            raise APIException(code=400, detail={'message': worker_response['message']})
+               raise APIException(code=400, detail={'message': worker_response['message']})
         for cam in cameras:
             Camera2Quadrator(**cam).save()
         return res
+
 
     def to_representation(self, quadrator):
 

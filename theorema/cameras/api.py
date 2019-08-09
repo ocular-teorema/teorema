@@ -3,8 +3,8 @@ import json
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import APIException
-from .models import Server, Camera, CameraGroup, NotificationCamera, Quadrator
-from .serializers import ServerSerializer, CameraSerializer,CameraGroupSerializer, NotificationSerializer, QuadratorSerializer
+from .models import Server, Camera, CameraGroup, NotificationCamera, Quadrator,QuadratorGroup
+from .serializers import ServerSerializer, CameraSerializer,CameraGroupSerializer, NotificationSerializer, QuadratorSerializer,QuadratorGroupSerializer
 from theorema.permissions import ReadOnly
 from theorema.users.models import CamSet
 from rest_framework.decorators import api_view
@@ -90,6 +90,23 @@ class CameraGroupViewSet(ModelViewSet):
         if param is not None:
             return queryset.filter(organization__id=param)
         return queryset
+
+
+
+class QuadratorGroupViewSet(ModelViewSet):
+    queryset = QuadratorGroup.objects.all()
+    serializer_class = QuadratorGroupSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if not self.request.user.is_staff:
+            return queryset.filter(organization=self.request.user.organization)
+        param = self.request.query_params.get('organization', None)
+        if param is not None:
+            return queryset.filter(organization__id=param)
+        return queryset
+
+
 
 
 @api_view(['POST'])

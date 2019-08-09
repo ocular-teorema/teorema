@@ -18,7 +18,7 @@ from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 
 from .users.api import UserViewSet, profile_view, user_cameras, CamSetViewSet
-from .cameras.api import ServerViewSet, CameraViewSet, CameraGroupViewSet,NotificationViewSet, add_cams, QuadratorViewSet
+from .cameras.api import ServerViewSet, CameraViewSet, CameraGroupViewSet,NotificationViewSet, add_cams, QuadratorViewSet,QuadratorGroupViewSet
 from .orgs.api import OrganizationViewSet, OcularUserViewSet, update_ocularuser_info , update_ocularuser_info_offline,cam_pay
 from .other.views import index, login, stat, video
 
@@ -28,6 +28,7 @@ router.register(r'users', UserViewSet)
 router.register(r'servers', ServerViewSet)
 router.register(r'cameras', CameraViewSet)
 router.register(r'camera_groups', CameraGroupViewSet)
+router.register(r'quadrator_groups', QuadratorGroupViewSet)
 router.register(r'organizations', OrganizationViewSet)
 router.register(r'camsets', CamSetViewSet)
 router.register(r'notifications', NotificationViewSet)
