@@ -1,3 +1,4 @@
+
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import PermissionDenied
@@ -5,8 +6,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import User, CamSet
 from .serializers import UserSerializer, CamSetSerializer
-from theorema.cameras.models import Camera, CameraGroup
-from theorema.cameras.serializers import CameraSerializer, CameraGroupSerializer
+from theorema.cameras.models import Camera, CameraGroup,QuadratorGroup
+from theorema.cameras.serializers import CameraSerializer, CameraGroupSerializer,QuadratorGroupSerializer,QuadratorSerializer
 
 class UserViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -88,16 +89,14 @@ def user_cameras(request):
 
 
 
-
-
 @api_view()
 def user_quadrators(request):
     if request.user.is_anonymous:
         raise PermissionDenied()
-    if not request.user.quadrators_access:
+    if not request.user.quadrator_access:
         user_groups = []
     else:
-        user_groups = request.user.quadrators_access.get('quadrators_groups', [])
+        user_groups = request.user.quadrator_access.get('quadrators_groups', [])
     groups_ids = [x['group'] for x in user_groups]
     if not groups_ids:
         if request.user.is_staff:
