@@ -57,7 +57,7 @@ class CameraGroupSerializer(serializers.ModelSerializer):
 
 class QuadratorGroupSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CameraGroup
+        model = QuadratorGroup
         fields = (
                 'id', 'name', 'organization'
         )
