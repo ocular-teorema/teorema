@@ -10,7 +10,7 @@ from theorema.users.models import CamSet
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from theorema.orgs.models import *
-import hashlib 
+import hashlib
 
 class NotificationViewSet(ModelViewSet):
     queryset = NotificationCamera.objects.all()
@@ -51,7 +51,7 @@ class CameraViewSet(ModelViewSet):
         if param is not None:
             return queryset.filter(organization__id=param)
         return queryset
-    
+
     def destroy(self, request, pk=None):
         try:
             worker_data={'id': pk, 'type': 'cam'}
@@ -68,7 +68,7 @@ class CameraViewSet(ModelViewSet):
                 if camera.id in camset.cameras:
                     camset.cameras.remove(camera.id)
                     camset.save()
-                    
+
         except Exception as e:
             raise APIException(code=400, detail={'message': str(e)})
         if worker_response['status']:
@@ -136,8 +136,9 @@ class QuadratorViewSet(ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        if not self.request.user.is_staff:
-            return queryset.filter(organization=self.request.user.organization)
+        quadr_access = self.request.user.quadrator_access
+        if not self.request.user.is_staff and not self.request.user.is_organization_admin:
+            return queryset.filter(organization=self.request.user.organization, id__in=quadr_access)
         param = self.request.query_params.get('organization', None)
         if param is not None:
             return queryset.filter(organization__id=param)
