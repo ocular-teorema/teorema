@@ -6,8 +6,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import User, CamSet
 from .serializers import UserSerializer, CamSetSerializer
-from theorema.cameras.models import Camera, CameraGroup,QuadratorGroup
-from theorema.cameras.serializers import CameraSerializer, CameraGroupSerializer,QuadratorGroupSerializer,QuadratorSerializer
+from theorema.cameras.models import Camera, CameraGroup
+from theorema.cameras.serializers import CameraSerializer, CameraGroupSerializer,QuadratorSerializer
 
 class UserViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -86,65 +86,6 @@ def user_cameras(request):
             group_repr['cameras'].append(camera_repr)
         result['groups'].append(group_repr)
     return Response(result)
-
-
-
-@api_view()
-def user_quadrators(request):
-    if request.user.is_anonymous:
-        raise PermissionDenied()
-    if not request.user.quadrator_access:
-        user_groups = []
-    else:
-        user_groups = request.user.quadrator_access.get('quadrators_groups', [])
-    groups_ids = [x['group'] for x in user_groups]
-    if not groups_ids:
-        if request.user.is_staff:
-            quadrators_groups_objects = QuadratorGroup.objects.all()
-        else:
-            quadrators_groups_objects = QuadratorGroup.objects.filter(organization=request.user.organization)
-    else:
-        quadrators_groups_objects = QuadratorGroup.objects.filter(id__in =  groups_ids)
-    quadrators_group_serializer = QuadratorGroupSerializer()
-    quadrator_serializer = QuadratorSerializer(context={'request': request})
-    result = {'quadrators_groups':[]}
-#here iteration group
-    for quadrator_object in quadrators_groups_objects:
-        quad_repr = quadrators_group_serializer.to_representation(quadrator)
-        if quadrator_object.id not in groups_ids:
-            need_quadrators = Quadrator.objects.filter(quadrator_group=quadrator_object)
-        #user_quadrators_for_this_group = list(filter(lambda x: x['quad'] == quad_repr['id'],user_groups))
-        user_quadrators_for_this_group = list(filter(lambda x: x['quad'] == quadrator_object.id,user_groups))[0]['quadrator']
-        if not user_quadrators_for_this_group:
-            need_quadrators = Quadrator.objects.filter(quadrators = quadrator)
-        else:
-            need_quadrators = Quadrator.objects.filter(id__in = user_quadrators_for_this_group)
-        group_repr['quadrators'] = []
-        for quadrator in quadrator_object:
-                x_real_ip = self.context['request'].META.get('HTTP_X_REAL_IP')
-                if x_real_ip:
-                    ip = x_real_ip.split(',')[0]
-                else:
-                    ip = self.context['request'].META.get('REMOTE_ADDR')
-
-                if ip.startswith('10') or ip.startswith('192.168') or ip.startswith('172.16'):
-                    serv_addr = quadrator.server.local_address
-                else:
-                    serv_addr = quadrator.server.address
-                quad_repr = quadrator_serializer.to_representation(quadrator,with_group = False)
-                quad_repr['output_url'] = 'rtmp://{}:1935/videoanalytic/'.format(serv_addr)
-                quad_repr['output_vascaled_url'] = 'rtmp://{}:1935/vascaled/'.format(serv_addr)
-                quad_repr['output_vasrc_url'] = 'rtmp://{}:1935/vasrc/'.format(serv_addr)
-                group_repr['quadrators'].append(quad_repr)
-        result['quadrator_groups'].append(group_repr)
-    return Response(result)
-
-
-
-
-
-
-
 
 
 class CamSetViewSet(ModelViewSet):
