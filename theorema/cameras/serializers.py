@@ -202,7 +202,7 @@ class QuadratorSerializer(serializers.ModelSerializer):
         model = Quadrator
         fields = (
                 'id', 'name', 'num_cam_x', 'num_cam_y', 'output_width', 'output_height', 'output_FPS',
-                'output_quality', 'port', 'organization', 'server', 'cameras',
+                'output_quality', 'port', 'organization', 'server', 'cameras'
         )
         extra_kwargs = {
             'port': {'read_only': True},
@@ -215,8 +215,6 @@ class QuadratorSerializer(serializers.ModelSerializer):
             validated_data['organization'] = self.context['request'].user.organization
         cameras = validated_data.pop('cameras')
         validated_data['port'] = random.randrange(15000, 60000)
-        port = Quadrator.objects.last().port + 200 if Quadrator.objects.exists() else 15000
-        validated_data['port'] = port
         res = super().create(validated_data)
         try:
             worker_data = {k:v for k,v in validated_data.items()}
@@ -238,7 +236,7 @@ class QuadratorSerializer(serializers.ModelSerializer):
         except Exception as e:
             raise APIException(code=400, detail={'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))})
         if worker_response['status']:
-               raise APIException(code=400, detail={'message': worker_response['message']})
+            raise APIException(code=400, detail={'message': worker_response['message']})
         for cam in cameras:
             Camera2Quadrator(**cam).save()
         return res
