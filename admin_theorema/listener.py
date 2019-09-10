@@ -7,7 +7,7 @@ import time
 import json
 from subprocess import Popen, PIPE
 from flask import Flask, request
-from flask_restful import Resource, Api
+from flask_restful import Resource, Api, reqparse
 import socket
 import datetime
 import requests
@@ -163,10 +163,10 @@ class Cam(Resource):
         except Exception as e:
             print('\n'.join(traceback.format_exception(*sys.exc_info())), flush=True)
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
-        try: 
+        try:
             delete_path(path)
         except FileNotFoundError as e:
-            pass 
+            pass
         return {'status': 0}
 
     @with_lock
@@ -192,7 +192,7 @@ class Cam(Resource):
         return {'status': 0}
 
 
-class Stat(Resource):
+class Stat_fs(Resource):
     def get(self):
         try:
             return {
@@ -201,6 +201,62 @@ class Stat(Resource):
             }
         except Exception as e:
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
+
+
+class Stat(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('startTs', type=str)
+        parser.add_argument('endTs', type=str)
+        parser.add_argument('cameras', type=str)
+        args = parser.parse_args()
+        print(args, flush=True)
+
+        start_time = args['startTs']
+        end_time = args['endTs']
+        cameras_list = args['cameras'].split(',')
+        conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
+        cur = conn.cursor()
+
+        cameras = []
+        for x in range(len(cameras_list)):
+            cameras.append("'cam{}'".format(cameras_list[x]))
+
+        cameras_database = 'events.cam in ' + '({})'.format(', '.join(cameras))
+
+        cur.execute("select type, confidence, reaction  from events where {cam}".format(cam=cameras_database)
+                    + ' and  start_timestamp >=' + str(start_time) + ' and ' + 'end_timestamp <=' + str(end_time) + ';')
+
+        rows = cur.fetchall()
+        conn.close()
+
+        react_stat = {'-1': 0, '1': 0, '2': 0}
+        types_stat = {'1': 0, '2': 0, '4': 0, '8': 0}
+        confidence_stat = {'low': 0, 'medium': 0, 'high': 0}
+
+        for event in rows:
+            event_type = event[0]
+            confidence = event[1]
+            reaction = event[2]
+
+            types_stat[str(event_type)] += 1
+            react_stat[str(reaction)] += 1
+
+            if confidence >= 80:
+                confidence_stat['high'] += 1
+            elif confidence >= 50:
+                confidence_stat['medium'] += 1
+            else:
+                confidence_stat['low'] += 1
+
+        result = {
+            "react": react_stat,
+            "types": types_stat,
+            "confidence": confidence_stat
+        }
+        print(result)
+        return result
+
 
 def get_time(mill):
     hours = mill//3600000
@@ -296,7 +352,7 @@ class DatabaseEventsData(Resource):
             list.append({'id':event[0], 'cam':event[1], 'archiveStartHint':event[2], 'archiveEndHint':event[3], 'startTimeMS':event[4],'endTimeMS':event[5],'eventType':event[6], 'confidence':event[7], 'reaction': event[8], 'date': event[9], 'offset': event[10]})
         conn.close()
         return list
-        
+
 def save_supervisor_config():
     with open(SUPERVISOR_CAMERAS_CONF, 'w') as f:
         config.write(f)
@@ -335,7 +391,8 @@ app = Flask(__name__)
 api = Api(app)
 #api = CORS(api)
 api.add_resource(Cam, '/')
-api.add_resource(Stat, '/stat')
+api.add_resource(Stat, '/stat>', endpoint='events_stat')
+api.add_resource(Stat_fs, '/stat_fs')
 api.add_resource(DatabaseData, '/db/<string:data>', endpoint='db_data')
 api.add_resource(DatabaseEventsData, '/archivedb/<string:data>', endpoint='db_arhcive_data')
 api.add_resource(Thumb, '/thumb/<int:cam_id>/<int:time>/')
