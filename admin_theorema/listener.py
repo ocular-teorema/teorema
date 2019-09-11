@@ -72,7 +72,7 @@ def save_cam_config(path, req):
             fps = 0, # req['fps']
             storage_life = req['storage_life'] if not req['indefinitely'] else 1000,
             compress_level = req['compress_level'] + 27,
-            downscale_coeff = 0.25, #[0.5, 0.3, 0.25, 0.15, 0.15, 0.15][req['resolution'] - 1],
+            downscale_coeff = 0, #[0.5, 0.3, 0.25, 0.15, 0.15, 0.15][req['resolution'] - 1],
             global_scale = 0.5, #[0.5, 0.5, 0.5, 0.5, 0.25, 0.125][req['resolution'] - 1],
             motion_analysis = 'true' if req['analysis'] > 2 else 'false',
             diff_analysis = 'true' if req['analysis'] > 1 else 'false',
