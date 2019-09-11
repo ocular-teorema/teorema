@@ -353,6 +353,90 @@ class DatabaseEventsData(Resource):
         conn.close()
         return list
 
+
+class Archive(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('startTs', type=str)
+        parser.add_argument('endTs', type=str)
+        parser.add_argument('cameras', type=str)
+        parser.add_argument('react', type=str)
+        parser.add_argument('types', type=str)
+        parser.add_argument('conf_low', type=int)
+        parser.add_argument('conf_medium', type=int)
+        parser.add_argument('conf_high', type=int)
+        parser.add_argument('skip', type=int)
+        args = parser.parse_args()
+        print(args, flush=True)
+
+        start_time = args['startTs']
+        end_time = args['endTs']
+        cameras_list = args['cameras'].split(',')
+        reactions = args['react']
+        event_types = args['types']
+        conf_low = args['conf_low']
+        conf_medium = args['conf_medium']
+        conf_high = args['conf_high']
+        skip = args['skip']
+
+        conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
+        cur = conn.cursor()
+
+        cameras = []
+        for x in range(len(cameras_list)):
+            cameras.append("'cam{}'".format(cameras_list[x]))
+
+        cameras_database = 'events.cam in ' + '({})'.format(', '.join(cameras))
+        types_db = ' and type in ({})'.format(event_types)
+        reacts_db = ' and reaction in ({})'.format(reactions)
+
+        confidence_db = ' and confidence '
+
+        if conf_low:
+            if conf_medium:
+                if not conf_high:
+                    confidence_db += '< 80 '
+                else:
+                    confidence_db = ''
+            else:
+                confidence_db += '< 50 ' if not conf_high else 'not between 50 and 79 '
+        else:
+            if conf_medium:
+                confidence_db += 'between 50 and 79 ' if not conf_high else '>= 59'
+            else:
+                if conf_high:
+                    confidence_db += '>= 80 '
+                else:
+                    return {'status': 1, 'message': 'at least one confidence level must be passed'}
+
+        cur.execute("select id,cam,archive_file1,archive_file2,start_timestamp,end_timestamp,type,confidence,reaction,date,file_offset_sec from events where {cam}"
+                    .format(cam=cameras_database) + ' and  start_timestamp >=' + str(start_time) + ' and ' + 'end_timestamp <=' + str(end_time)
+                    + confidence_db + types_db + reacts_db + ';')
+
+        rows = cur.fetchall()
+        conn.close()
+
+        if skip != 0:
+            rows = rows[skip:]
+
+        result = []
+        for event in rows:
+            result.append({'id': event[0],
+                           'cam': event[1],
+                           'archiveStartHint': event[2],
+                           'archiveEndHint': event[3],
+                           'startTs': event[4],
+                           'endTs': event[5],
+                           'type': event[6],
+                           'conf': event[7],
+                           'react': event[8],
+                           'date': event[9],
+                           'offset': event[10]
+                           }
+                          )
+        return result
+
+
 def save_supervisor_config():
     with open(SUPERVISOR_CAMERAS_CONF, 'w') as f:
         config.write(f)
@@ -391,8 +475,9 @@ app = Flask(__name__)
 api = Api(app)
 #api = CORS(api)
 api.add_resource(Cam, '/')
-api.add_resource(Stat, '/stat', endpoint='events_stat')
 api.add_resource(Stat_fs, '/stat_fs')
+api.add_resource(Stat, '/stat', endpoint='events_stat')
+api.add_resource(Archive, '/archive', endpoint='events_archive')
 api.add_resource(DatabaseData, '/db/<string:data>', endpoint='db_data')
 api.add_resource(DatabaseEventsData, '/archivedb/<string:data>', endpoint='db_arhcive_data')
 api.add_resource(Thumb, '/thumb/<int:cam_id>/<int:time>/')
