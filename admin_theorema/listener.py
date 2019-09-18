@@ -482,8 +482,8 @@ class ArchiveVideo(Resource):
         result = []
         for record in rows:
             result.append({
-                'startTs': record[0],
-                'endTs': record[1],
+                'start': record[0],
+                'end': record[1],
                 'date': record[2],
                 'archivePostfix': record[3],
                 'cam': record[4],
