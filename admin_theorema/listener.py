@@ -455,13 +455,20 @@ class ArchiveVideo(Resource):
         skip = args['skip'] if args['skip'] else 0
         limit = args['limit'] if args['limit'] else 100
 
-        start_time_val = datetime.datetime.utcfromtimestamp(int(start_time[:-3])).time().strftime('%H:%M')
-        end_time_val = datetime.datetime.utcfromtimestamp(int(end_time[:-3])).time().strftime('%H:%M')
+        start_dt = datetime.datetime.utcfromtimestamp(int(start_time[:-3]))
+        end_dt = datetime.datetime.utcfromtimestamp(int(end_time[:-3]))
+        start_dt_time = start_dt.time().strftime('%H:%M')
+        end_dt_time = end_dt.time().strftime('%H:%M')
+        start_dt_date = start_dt.date().strftime('%Y-%m-%d')
+        end_dt_date = end_dt.date().strftime('%Y-%m-%d')
 
-        start_time_database = ' and start_time >=' + str((int(start_time_val[0:2]) * 60 + int(start_time_val[3:])) * 60 * 999)\
-                              if start_time_val != '00-00' else ''
-        end_time_database = ' and end_time >=' + str((int(end_time_val[0:2]) * 60 + int(end_time_val[3:])) * 60 * 999) \
-                            if end_time_val != '00-00' else ''
+        start_time_db = ' and start_time >=' + str((int(start_dt_time[0:2]) * 60 + int(start_dt_time[3:])) * 60 * 999)\
+            if start_dt_time != '00-00' else ''
+        end_time_db = ' and end_time >=' + str((int(end_dt_time[0:2]) * 60 + int(end_dt_time[3:])) * 60 * 999) \
+            if end_dt_time != '00-00' else ''
+
+        start_date_db = ' and date >= ' + str(DateTime(start_dt_date.replace('-', '/') + ' UTC').JulianDay())
+        end_date_db = ' and date <= ' + str(DateTime(end_dt_date.replace('-', '/') + ' UTC').JulianDay())
 
         conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
         cur = conn.cursor()
@@ -473,7 +480,7 @@ class ArchiveVideo(Resource):
         cameras_database = 'records.cam in ' + '({})'.format(', '.join(cameras))
 
         cur.execute("select start_time,end_time,date, video_archive,cam,id from records where {cam}"
-                    .format(cam=cameras_database) + str(start_time_database) + str(end_time_database)
+                    .format(cam=cameras_database) + str(start_time_db) + str(end_time_db) + str(start_date_db + str(end_date_db))
                     + ' order by date,start_time offset {offset_int} limit {limit_int};'.format(offset_int=skip, limit_int=limit))
 
         rows = cur.fetchall()
