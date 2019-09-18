@@ -354,7 +354,7 @@ class DatabaseEventsData(Resource):
         return list
 
 
-class Archive(Resource):
+class ArchiveEvents(Resource):
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('startTs', type=str)
@@ -366,6 +366,7 @@ class Archive(Resource):
         parser.add_argument('conf_medium', type=int)
         parser.add_argument('conf_high', type=int)
         parser.add_argument('skip', type=int)
+        parser.add_argument('limit', type=int)
         args = parser.parse_args()
         print(args, flush=True)
 
@@ -377,7 +378,8 @@ class Archive(Resource):
         conf_low = args['conf_low']
         conf_medium = args['conf_medium']
         conf_high = args['conf_high']
-        skip = args['skip']
+        skip = args['skip'] if args['skip'] else 0
+        limit = args['limit'] if args['limit'] else 100
 
         conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
         cur = conn.cursor()
@@ -411,13 +413,12 @@ class Archive(Resource):
 
         cur.execute("select id,cam,archive_file1,archive_file2,start_timestamp,end_timestamp,type,confidence,reaction,date,file_offset_sec from events where {cam}"
                     .format(cam=cameras_database) + ' and  start_timestamp >=' + str(start_time) + ' and ' + 'end_timestamp <=' + str(end_time)
-                    + confidence_db + types_db + reacts_db + ';')
+                    + confidence_db + types_db + reacts_db + 'offset {offset_int} limit {limit_int};'
+                    .format(offset_int=skip, limit_int=limit))
 
         rows = cur.fetchall()
         conn.close()
 
-        if skip != 0:
-            rows = rows[skip:]
 
         result = []
         for event in rows:
@@ -434,6 +435,61 @@ class Archive(Resource):
                            'offset': event[10]
                            }
                           )
+        return result
+
+
+class ArchiveVideo(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('startTs', type=str)
+        parser.add_argument('endTs', type=str)
+        parser.add_argument('cameras', type=str)
+        parser.add_argument('skip', type=int)
+        parser.add_argument('limit', type=int)
+        args = parser.parse_args()
+        print(args, flush=True)
+
+        start_time = args['startTs']
+        end_time = args['endTs']
+        cameras_list = args['cameras'].split(',')
+        skip = args['skip'] if args['skip'] else 0
+        limit = args['limit'] if args['limit'] else 100
+
+        start_time_val = datetime.datetime.utcfromtimestamp(int(start_time[:-3])).time().strftime('%H:%M')
+        end_time_val = datetime.datetime.utcfromtimestamp(int(end_time[:-3])).time().strftime('%H:%M')
+
+        start_time_database = ' and start_time >=' + str((int(start_time_val[0:2]) * 60 + int(start_time_val[3:])) * 60 * 999)\
+                              if start_time_val != '00-00' else ''
+        end_time_database = ' and end_time >=' + str((int(end_time_val[0:2]) * 60 + int(end_time_val[3:])) * 60 * 999) \
+                            if end_time_val != '00-00' else ''
+
+        conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
+        cur = conn.cursor()
+
+        cameras = []
+        for x in range(len(cameras_list)):
+            cameras.append("'cam{}'".format(cameras_list[x]))
+
+        cameras_database = 'records.cam in ' + '({})'.format(', '.join(cameras))
+
+        cur.execute("select start_time,end_time,date, video_archive,cam,id from records where {cam}"
+                    .format(cam=cameras_database) + str(start_time_database) + str(end_time_database)
+                    + ' order by start_time offset {offset_int} limit {limit_int};'.format(offset_int=skip, limit_int=limit))
+
+        rows = cur.fetchall()
+        conn.close()
+
+        result = []
+        for record in rows:
+            result.append({
+                'startTs': record[0],
+                'endTs': record[1],
+                'date': record[2],
+                'archivePostfix': record[3],
+                'cam': record[4],
+                'id': record[5]
+            })
+
         return result
 
 
@@ -477,7 +533,8 @@ api = Api(app)
 api.add_resource(Cam, '/')
 api.add_resource(Stat_fs, '/stat_fs')
 api.add_resource(Stat, '/stat', endpoint='events_stat')
-api.add_resource(Archive, '/archive', endpoint='events_archive')
+api.add_resource(ArchiveEvents, '/archive', endpoint='events_archive')
+api.add_resource(ArchiveVideo, '/archive_video', endpoint='video_archive')
 api.add_resource(DatabaseData, '/db/<string:data>', endpoint='db_data')
 api.add_resource(DatabaseEventsData, '/archivedb/<string:data>', endpoint='db_arhcive_data')
 api.add_resource(Thumb, '/thumb/<int:cam_id>/<int:time>/')
