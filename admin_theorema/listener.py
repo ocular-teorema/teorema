@@ -474,7 +474,7 @@ class ArchiveVideo(Resource):
 
         cur.execute("select start_time,end_time,date, video_archive,cam,id from records where {cam}"
                     .format(cam=cameras_database) + str(start_time_database) + str(end_time_database)
-                    + ' order by start_time offset {offset_int} limit {limit_int};'.format(offset_int=skip, limit_int=limit))
+                    + ' order by date,start_time offset {offset_int} limit {limit_int};'.format(offset_int=skip, limit_int=limit))
 
         rows = cur.fetchall()
         conn.close()
