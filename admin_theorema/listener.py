@@ -44,6 +44,7 @@ SUPERVISOR_ERROR_TEXT = '''
 
 CAM_PREFIX = 'cam'
 QUAD_PREFIX = 'quad'
+VIDEO_DIR = '/home/_VideoArchive'
 
 def get_obj_name(numeric_id, obj_type):
     return obj_type + str(numeric_id)
@@ -488,13 +489,21 @@ class ArchiveVideo(Resource):
 
         result = []
         for record in rows:
+            archive_path = record[3]
+            full_path = os.path.join(VIDEO_DIR, archive_path[1:])
+            try:
+                fs = os.stat(full_path).st_size
+            except FileNotFoundError:
+                fs = 0
+
             result.append({
                 'start': record[0],
                 'end': record[1],
                 'date': record[2],
-                'archivePostfix': record[3],
+                'archivePostfix': archive_path,
                 'cam': record[4],
-                'id': record[5]
+                'id': record[5],
+                'fileSize': fs
             })
 
         return result
