@@ -456,8 +456,8 @@ class ArchiveVideo(Resource):
         skip = args['skip'] if args['skip'] else 0
         limit = args['limit'] if args['limit'] else 100
 
-        start_dt = datetime.datetime.utcfromtimestamp(int(start_time[:-3]))
-        end_dt = datetime.datetime.utcfromtimestamp(int(end_time[:-3]))
+        start_dt = datetime.datetime.fromtimestamp(int(start_time[:-3]))
+        end_dt = datetime.datetime.fromtimestamp(int(end_time[:-3]))
         start_dt_time = start_dt.time().strftime('%H:%M')
         end_dt_time = end_dt.time().strftime('%H:%M')
         start_dt_date = start_dt.date().strftime('%Y-%m-%d')
