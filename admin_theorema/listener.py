@@ -464,9 +464,9 @@ class ArchiveVideo(Resource):
         end_dt_date = end_dt.date().strftime('%Y-%m-%d')
 
         start_time_db = ' and start_time >=' + str((int(start_dt_time[0:2]) * 60 + int(start_dt_time[3:])) * 60 * 999)\
-            if start_dt_time != '00-00' else ''
-        end_time_db = ' and end_time <=' + str((int(end_dt_time[0:2]) * 60 + int(end_dt_time[3:])) * 60 * 999) \
-            if end_dt_time != '00-00' else ''
+            if start_dt_time != '00:00' else ''
+        end_time_db = ' and end_time <=' + str((int(end_dt_time[0:2]) * 60 + int(end_dt_time[3:])) * 60 * 1001) \
+            if end_dt_time != '00:00' else ''
 
         start_date_db = ' and date >= ' + str(DateTime(start_dt_date.replace('-', '/') + ' UTC').JulianDay())
         end_date_db = ' and date <= ' + str(DateTime(end_dt_date.replace('-', '/') + ' UTC').JulianDay())
