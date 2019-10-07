@@ -471,6 +471,9 @@ class ArchiveVideo(Resource):
         start_date_db = ' and date >= ' + str(DateTime(start_dt_date.replace('-', '/') + ' UTC').JulianDay())
         end_date_db = ' and date <= ' + str(DateTime(end_dt_date.replace('-', '/') + ' UTC').JulianDay())
 
+        start_posix_time = ' and  start_posix_time >=' + str(start_time)
+        end_posix_time = ' and end_posix_time >=' + str(end_time)
+
         conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
         cur = conn.cursor()
 
@@ -480,10 +483,12 @@ class ArchiveVideo(Resource):
 
         cameras_database = 'records.cam in ' + '({})'.format(', '.join(cameras))
 
-        cur.execute("select start_time,end_time,date, video_archive,cam,id from records where {cam}"
-                    .format(cam=cameras_database) + str(start_time_db) + str(end_time_db) + str(start_date_db + str(end_date_db))
-                    + ' order by date,start_time offset {offset_int} limit {limit_int};'.format(offset_int=skip, limit_int=limit))
+        db_query_str = ("select start_time,end_time,date,video_archive,cam,id,start_posix_time,end_posix_time from records where {cam}"
+                        .format(cam=cameras_database) + str(start_posix_time) + str(end_posix_time)
+                        + ' order by start_time offset {offset_int} limit {limit_int};'.format(offset_int=skip, limit_int=limit))
+        print(db_query_str, flush=True)
 
+        cur.execute(db_query_str)
         rows = cur.fetchall()
         conn.close()
 
