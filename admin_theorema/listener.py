@@ -471,8 +471,8 @@ class ArchiveVideo(Resource):
         start_date_db = ' and date >= ' + str(DateTime(start_dt_date.replace('-', '/') + ' UTC').JulianDay())
         end_date_db = ' and date <= ' + str(DateTime(end_dt_date.replace('-', '/') + ' UTC').JulianDay())
 
-        start_posix_time = ' and  start_posix_time >=' + str(start_time)
-        end_posix_time = ' and end_posix_time <=' + str(end_time)
+        start_posix_time = ' and  start_posix_time >=' + str(start_time)[:-3]
+        end_posix_time = ' and end_posix_time <=' + str(end_time)[:-3]
 
         conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
         cur = conn.cursor()
