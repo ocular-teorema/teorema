@@ -112,6 +112,7 @@ def add_cams(request):
         pass
     return Response({'status':'none'})
 
+
 class QuadratorViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Quadrator.objects.all()
@@ -120,12 +121,15 @@ class QuadratorViewSet(ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         quadr_access = self.request.user.quadrator_access
-        if not self.request.user.is_staff and not self.request.user.is_organization_admin:
-            return queryset.filter(organization=self.request.user.organization, id__in=quadr_access)
         param = self.request.query_params.get('organization', None)
-        if param is not None:
+        if self.request.user.is_staff:
+            return queryset
+        elif self.request.user.is_organization_admin:
+            return queryset.filter(organization=self.request.user.organization)
+        elif param is not None:
             return queryset.filter(organization__id=param)
-        return queryset
+        else:
+            return queryset.filter(organization=self.request.user.organization, id__in=quadr_access)
 
     def destroy(self, request, pk=None):
         try:
