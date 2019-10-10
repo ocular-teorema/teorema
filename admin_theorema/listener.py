@@ -412,11 +412,12 @@ class ArchiveEvents(Resource):
                 else:
                     return {'status': 1, 'message': 'at least one confidence level must be passed'}
 
-        cur.execute("select id,cam,archive_file1,archive_file2,start_timestamp,end_timestamp,type,confidence,reaction,date,file_offset_sec from events where {cam}"
-                    .format(cam=cameras_database) + ' and  start_timestamp >=' + str(start_time) + ' and ' + 'end_timestamp <=' + str(end_time)
-                    + confidence_db + types_db + reacts_db + 'offset {offset_int} limit {limit_int};'
-                    .format(offset_int=skip, limit_int=limit))
+        db_query_str = ("select id,cam,archive_file1,archive_file2,start_timestamp,end_timestamp,type,confidence,reaction,date,file_offset_sec from events where {cam}"
+                        .format(cam=cameras_database) + ' and  start_timestamp >=' + str(start_time) + ' and ' + 'end_timestamp <=' + str(end_time)
+                        + confidence_db + types_db + reacts_db + 'order by start_timestamp desc offset {offset_int} limit {limit_int};'
+                        .format(offset_int=skip, limit_int=limit))
 
+        cur.execute(db_query_str)
         rows = cur.fetchall()
         conn.close()
 
