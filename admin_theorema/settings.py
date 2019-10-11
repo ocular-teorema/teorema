@@ -23,10 +23,11 @@ Valid%20motion%20bin%20height=8
 Use%20virtual%20date=false
 DebugImageIndex=0
 Debug%20objects=false
-Produce%20Debug=false
+Produce%20debug=false
 
 Motion%20based%20analysis={motion_analysis}
 Difference%20based%20analysis={diff_analysis}
+False%20event%20coeff=20.0
 
 [PipelineParams]
 
