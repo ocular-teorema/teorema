@@ -48,7 +48,7 @@ Processing%20Interval%20Sec=600
 Statistic%20Interval%20Sec=600
 
 
-Server%20address=127.0.0.1
+Server%20address={server_address}
 Notification%20smtp%20address=
 Notification%20smtp%20login=
 Notification%20smtp%20password=

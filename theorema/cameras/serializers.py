@@ -114,6 +114,11 @@ class CameraSerializer(M2MHelperSerializer):
             worker_data = {k:v for k,v in validated_data.items()}
             worker_data['ws_video_url'] = represented_data['ws_video_url'].replace('/video_ws/?port=', ':')
             worker_data['rtmp_video_url'] = represented_data['rtmp_video_url']
+
+            # worker_data['ws_video_url'] = 'ws://%s/video_ws/?port=%s' % (serv_addr, camera.port + 50)
+            # worker_data['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (serv_addr, camera.id)
+
+
             worker_data.pop('server')
             worker_data.pop('camera_group')
             worker_data.pop('organization')
