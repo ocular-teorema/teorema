@@ -70,6 +70,8 @@ def save_cam_config(path, req):
             id = req['id'],
             name = req['name'],
             address = req['address'],
+            ws_address=req['ws_video_url'],
+            rmtp_address=req['rtmp_video_url'],
             fps = 0, # req['fps']
             storage_life = req['storage_life'] if not req['indefinitely'] else 1000,
             compress_level = req['compress_level'] + 27,

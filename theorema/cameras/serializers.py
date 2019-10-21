@@ -105,10 +105,15 @@ class CameraSerializer(M2MHelperSerializer):
                 validated_data['camera_group'] = camera_group
         port = Camera.objects.last().port + 200 if Camera.objects.exists() else 15000
         validated_data['port'] = port
+        # validated_data['server'] = SERVERS.index(self.context['request'].get_host()) + 1
+        # validated_data['server'] = Server.objects.get(id = validated_data['server']).parent_server_id
         res = super().create(validated_data)
 
         try:
+            represented_data = self.to_representation(res)
             worker_data = {k:v for k,v in validated_data.items()}
+            worker_data['ws_video_url'] = represented_data['ws_video_url']
+            worker_data['rtmp_video_url'] = represented_data['rtmp_video_url']
             worker_data.pop('server')
             worker_data.pop('camera_group')
             worker_data.pop('organization')
