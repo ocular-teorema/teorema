@@ -177,6 +177,7 @@ class Cam(Resource):
     @with_lock
     def patch(self):
         req = request.get_json()
+        req['server_address'] = request.host
         obj_type = req.get('type', 'cam')
         obj_name = get_obj_name(req['id'], obj_type)
         path = get_path(obj_name)
