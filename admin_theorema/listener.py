@@ -182,6 +182,8 @@ class Cam(Resource):
         obj_name = get_obj_name(req['id'], obj_type)
         path = get_path(obj_name)
         try:
+            if not os.path.exists(path):
+                os.makedirs(path)
             save_config(obj_type, path, req)
             is_active = req.get('is_active', 1)
             if is_active and 'program:%s'%obj_name in config.sections():
