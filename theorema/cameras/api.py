@@ -54,8 +54,8 @@ class CameraViewSet(ModelViewSet):
 
     def destroy(self, request, pk=None):
         try:
-            worker_data={'id': pk, 'type': 'cam'}
             camera = Camera.objects.get(id=pk)
+            worker_data = {'id': pk, 'type': 'cam', 'add_time': camera.add_time}
             raw_response = requests.delete('http://{}:5005'.format(camera.server.address), json=worker_data)
             worker_response = json.loads(raw_response. content.decode())
 
