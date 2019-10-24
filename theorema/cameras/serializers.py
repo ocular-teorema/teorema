@@ -144,6 +144,9 @@ class CameraSerializer(M2MHelperSerializer):
 
     def update(self, camera, validated_data):
         try:
+            if not camera.add_time:
+                camera.add_time = '_' + str(datetime.now()).replace(' ', '_')
+                camera.save()
             if validated_data['server'].address != camera.server.address:
                 worker_data = {'id': camera.id, 'type': 'cam', 'add_time': camera.add_time}
                 raw_response = requests.delete('http://{}:5005'.format(camera.server.address), json=worker_data)
