@@ -102,7 +102,7 @@ def save_quad_config(path, req):
                                 "posY": cam['posY'],
                                 "width": cam['width'],
                                 "height": cam['height'],
-                                "streamUrl": 'rtmp://localhost:1935/vasrc/cam%s' % cam['port']
+                                "streamUrl": 'rtmp://%s:1935/vasrc/cam%s' % (cam['server_address'], cam['port'])
                         } for cam in req['cameras']
                 ]
         }, indent=4))
