@@ -176,7 +176,7 @@ class CameraSerializer(M2MHelperSerializer):
                 quad_data['output_quality'] = quadrator.quadrator.output_quality
                 quad_data['output_width'] = quadrator.quadrator.output_width
                 quad_data['cameras'] = []
-                for cam in Camera2Quadrator.objects.filter(quadrator=quadrator):
+                for cam in Camera2Quadrator.objects.filter(quadrator=quadrator.quadrator): # !!!!!
                     quad_data['cameras'].append(
                         {'name': 'cam%s' % cam.camera.id, 'posX': cam.x * quadrator.quadrator.output_width / quadrator.quadrator.num_cam_x,
                          'posY': cam.y * quadrator.quadrator.output_height / quadrator.quadrator.num_cam_y,
@@ -237,7 +237,7 @@ class CameraSerializer(M2MHelperSerializer):
         res['ws_video_url'] = 'ws://%s/video_ws/?port=%s' % (serv_addr, camera.port+50)
         res['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (serv_addr, str(camera.id))
         # res['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (serv_addr, str(camera.id) + camera.add_time)
-        res['m3u8_video_url'] = 'http://%s:8080/vasrc/cam%s/index.m3u8' % (serv_addr, str(camera.id)+camera.add_time)
+        res['m3u8_video_url'] = 'http://%s:8080/vasrc/cam%s/index.m3u8' % (serv_addr, str(camera.id))
         res['thumb_url'] = 'http://%s:5005/thumb/%s/' % (serv_addr, camera.id)
 
         return res
