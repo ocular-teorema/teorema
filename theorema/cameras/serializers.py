@@ -108,7 +108,7 @@ class CameraSerializer(M2MHelperSerializer):
         validated_data['port'] = port
         # validated_data['server'] = SERVERS.index(self.context['request'].get_host()) + 1
         # validated_data['server'] = Server.objects.get(id = validated_data['server']).parent_server_id
-        validated_data['add_time'] = '_' + str(datetime.now()).replace(' ', '_')
+        #validated_data['add_time'] = '_' + str(datetime.now()).replace(' ', '_')
         res = super().create(validated_data)
 
         try:
@@ -144,15 +144,17 @@ class CameraSerializer(M2MHelperSerializer):
 
     def update(self, camera, validated_data):
         try:
-            if not camera.add_time:
-                camera.add_time = '_' + str(datetime.now()).replace(' ', '_')
-                camera.save()
+            # if not camera.add_time:
+            #     camera.add_time = '_' + str(datetime.now()).replace(' ', '_')
+            #     camera.save()
             if validated_data['server'].address != camera.server.address:
-                worker_data = {'id': camera.id, 'type': 'cam', 'add_time': camera.add_time}
+                # worker_data = {'id': camera.id, 'type': 'cam', 'add_time': camera.add_time}
+                worker_data = {'id': camera.id, 'type': 'cam'}
                 raw_response = requests.delete('http://{}:5005'.format(camera.server.address), json=worker_data)
             worker_data = {k:v for k,v in validated_data.items()}
             worker_data['ws_video_url'] = 'ws://%s:%s' % (validated_data['server'].address, camera.port+50)
-            worker_data['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (validated_data['server'].address, str(camera.id)+camera.add_time)
+            worker_data['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (validated_data['server'].address, str(camera.id))
+            # worker_data['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (validated_data['server'].address, str(camera.id) + camera.add_time)
             worker_data.pop('server')
             worker_data.pop('camera_group')
             worker_data.pop('organization')
@@ -160,7 +162,7 @@ class CameraSerializer(M2MHelperSerializer):
             worker_data['notify_time_stop'] = str(worker_data.get('notify_time_stop', '00:00:00'))
             worker_data['id'] = camera.id
             worker_data['port'] = camera.port
-            worker_data['add_time'] = camera.add_time
+            # worker_data['add_time'] = camera.add_time
             raw_response = requests.patch('http://{}:5005'.format(validated_data['server'].address), json=worker_data)
 
 
@@ -180,7 +182,15 @@ class CameraSerializer(M2MHelperSerializer):
                          'posY': cam.y * quadrator.quadrator.output_height / quadrator.quadrator.num_cam_y,
                          'width': cam.cols * quadrator.quadrator.output_width / quadrator.quadrator.num_cam_x,
                          'height': cam.rows * quadrator.quadrator.output_height / quadrator.quadrator.num_cam_y, 'port': cam.camera.id,
-                         'server_address': cam.camera.server.address, 'add_time': cam.camera.add_time})
+                         'server_address': cam.camera.server.address})
+                    # quad_data['cameras'].append(
+                    #     {'name': 'cam%s' % cam.camera.id,
+                    #      'posX': cam.x * quadrator.quadrator.output_width / quadrator.quadrator.num_cam_x,
+                    #      'posY': cam.y * quadrator.quadrator.output_height / quadrator.quadrator.num_cam_y,
+                    #      'width': cam.cols * quadrator.quadrator.output_width / quadrator.quadrator.num_cam_x,
+                    #      'height': cam.rows * quadrator.quadrator.output_height / quadrator.quadrator.num_cam_y,
+                    #      'port': cam.camera.id,
+                    #      'server_address': cam.camera.server.address, 'add_time': cam.camera.add_time})
                 raw_response = requests.patch('http://{}:5005'.format(quadrator.quadrator.server.address),
                                               json=quad_data, timeout=5)
 
@@ -225,7 +235,8 @@ class CameraSerializer(M2MHelperSerializer):
             serv_addr = camera.server.address
 
         res['ws_video_url'] = 'ws://%s/video_ws/?port=%s' % (serv_addr, camera.port+50)
-        res['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (serv_addr, str(camera.id)+camera.add_time)
+        res['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (serv_addr, str(camera.id))
+        # res['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (serv_addr, str(camera.id) + camera.add_time)
         res['m3u8_video_url'] = 'http://%s:8080/vasrc/cam%s/index.m3u8' % (serv_addr, str(camera.id)+camera.add_time)
         res['thumb_url'] = 'http://%s:5005/thumb/%s/' % (serv_addr, camera.id)
 
@@ -270,7 +281,8 @@ class QuadratorSerializer(serializers.ModelSerializer):
                 c = Camera.objects.get(id=camera_id)
                 cam['camera'] = c;
                 cam['quadrator'] = res;
-                worker_data['cameras'].append({'name': 'cam%s' % c.id, 'posX': cam['x'] * res.output_width / res.num_cam_x, 'posY': cam['y'] * res.output_height / res.num_cam_y, 'width': cam['cols'] * res.output_width / res.num_cam_x, 'height': cam['rows'] * res.output_height / res.num_cam_y, 'port': c.id, 'server_address': c.server.address, 'add_time': c.add_time})
+                # worker_data['cameras'].append({'name': 'cam%s' % c.id, 'posX': cam['x'] * res.output_width / res.num_cam_x, 'posY': cam['y'] * res.output_height / res.num_cam_y, 'width': cam['cols'] * res.output_width / res.num_cam_x, 'height': cam['rows'] * res.output_height / res.num_cam_y, 'port': c.id, 'server_address': c.server.address, 'add_time': c.add_time})
+                worker_data['cameras'].append({'name': 'cam%s' % c.id, 'posX': cam['x'] * res.output_width / res.num_cam_x, 'posY': cam['y'] * res.output_height / res.num_cam_y, 'width': cam['cols'] * res.output_width / res.num_cam_x, 'height': cam['rows'] * res.output_height / res.num_cam_y, 'port': c.id, 'server_address': c.server.address})
             print('worker_data cameras:', worker_data['cameras']);
             raw_response = requests.post('http://{}:5005'.format(validated_data['server'].address), json=worker_data, timeout=5)
             worker_response = json.loads(raw_response.content.decode())
@@ -322,7 +334,8 @@ class QuadratorSerializer(serializers.ModelSerializer):
                 c = Camera.objects.get(id=camera_id)
                 cam['camera'] = c;
                 cam['quadrator'] = res;
-                worker_data['cameras'].append({'name': 'cam%s' % c.id, 'posX': cam['x'] * res.output_width / res.num_cam_x, 'posY': cam['y'] * res.output_height / res.num_cam_y, 'width': cam['cols'] * res.output_width / res.num_cam_x, 'height': cam['rows'] * res.output_height / res.num_cam_y, 'port': c.id, 'server_address': c.server.address, 'add_time': c.add_time})
+                # worker_data['cameras'].append({'name': 'cam%s' % c.id, 'posX': cam['x'] * res.output_width / res.num_cam_x, 'posY': cam['y'] * res.output_height / res.num_cam_y, 'width': cam['cols'] * res.output_width / res.num_cam_x, 'height': cam['rows'] * res.output_height / res.num_cam_y, 'port': c.id, 'server_address': c.server.address, 'add_time': c.add_time})
+                worker_data['cameras'].append({'name': 'cam%s' % c.id, 'posX': cam['x'] * res.output_width / res.num_cam_x, 'posY': cam['y'] * res.output_height / res.num_cam_y, 'width': cam['cols'] * res.output_width / res.num_cam_x, 'height': cam['rows'] * res.output_height / res.num_cam_y, 'port': c.id, 'server_address': c.server.address})
             print('worker_data cameras:', worker_data['cameras']);
             worker_data['port'] = quadrator.port
             raw_response = requests.patch('http://{}:5005'.format(validated_data['server'].address), json=worker_data, timeout=5)
