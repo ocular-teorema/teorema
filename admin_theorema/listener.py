@@ -146,6 +146,10 @@ class Cam(Resource):
         req['server_address'] = request.host
         obj_type = req.get('type', 'cam')
         # obj_name = get_obj_name(req['id'], obj_type, req['add_time'])
+        # if obj_type != 'cam':
+        #     obj_name = get_obj_name(req['id'], obj_type)
+        # else:
+        #     obj_name = get_obj_name(str(req['id']) + req['add_time'], obj_type)
         obj_name = get_obj_name(req['id'], obj_type)
         path = get_path(obj_name)
         try:
@@ -166,6 +170,10 @@ class Cam(Resource):
         req = request.get_json()
         obj_type = req.get('type', 'cam')
         # obj_name = get_obj_name(req['id'], obj_type, req['add_time'])
+        # if obj_type != 'cam':
+        #     obj_name = get_obj_name(req['id'], obj_type)
+        # else:
+        #     obj_name = get_obj_name(str(req['id']) + req['add_time'], obj_type)
         obj_name = get_obj_name(req['id'], obj_type)
         path = get_path(obj_name)
         try:
@@ -185,6 +193,10 @@ class Cam(Resource):
         req['server_address'] = request.host
         obj_type = req.get('type', 'cam')
         # obj_name = get_obj_name(req['id'], obj_type, req['add_time'])
+        # if obj_type != 'cam':
+        #     obj_name = get_obj_name(req['id'], obj_type)
+        # else:
+        #     obj_name = get_obj_name(str(req['id']) + req['add_time'], obj_type)
         obj_name = get_obj_name(req['id'], obj_type)
         path = get_path(obj_name)
         try:

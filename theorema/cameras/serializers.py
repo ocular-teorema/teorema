@@ -164,6 +164,7 @@ class CameraSerializer(M2MHelperSerializer):
             worker_data['port'] = camera.port
             # worker_data['add_time'] = camera.add_time
             raw_response = requests.patch('http://{}:5005'.format(validated_data['server'].address), json=worker_data)
+            worker_response = json.loads(raw_response.content.decode())
 
 
             for quadrator in Camera2Quadrator.objects.filter(camera=camera):
@@ -323,6 +324,10 @@ class QuadratorSerializer(serializers.ModelSerializer):
         print(cameras, flush=True)
         res = super().update(quadrator, validated_data)
         try:
+            if validated_data['server'].address != quadrator.server.address:
+                # worker_data = {'id': camera.id, 'type': 'cam', 'add_time': camera.add_time}
+                worker_data = {'id': quadrator.id, 'type': 'quad'}
+                raw_response = requests.delete('http://{}:5005'.format(quadrator.server.address), json=worker_data)
             worker_data = {k:v for k,v in validated_data.items()}
             worker_data.pop('server')
             worker_data.pop('organization')
