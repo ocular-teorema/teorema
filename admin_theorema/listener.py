@@ -97,15 +97,15 @@ def save_quad_config(path, req):
                 "borderWidth":  4,
                 "camList": [
                         {
-                                # "name": cam['name'] + cam['add_time'],
-                                "name": cam['name'],
+                                "name": cam['name'] + cam['add_time'],
+                                # "name": cam['name'],
                                 "posX": cam['posX'],
                                 "posY": cam['posY'],
                                 "width": cam['width'],
                                 "height": cam['height'],
-                                # "streamUrl": 'rtmp://%s:1935/vasrc/cam%s' % (cam['server_address'], str(cam['port']) + cam['add_time']),
-                            "streamUrl": 'rtmp://%s:1935/vasrc/cam%s' % (
-                            cam['server_address'], str(cam['port']))
+                                "streamUrl": 'rtmp://%s:1935/vasrc/cam%s' % (cam['server_address'], str(cam['port']) + cam['add_time']),
+                            # "streamUrl": 'rtmp://%s:1935/vasrc/cam%s' % (
+                            # cam['server_address'], str(cam['port']))
                         } for cam in req['cameras']
                 ]
         }, indent=4))
@@ -146,11 +146,11 @@ class Cam(Resource):
         req['server_address'] = request.host
         obj_type = req.get('type', 'cam')
         # obj_name = get_obj_name(req['id'], obj_type, req['add_time'])
-        # if obj_type != 'cam':
-        #     obj_name = get_obj_name(req['id'], obj_type)
-        # else:
-        #     obj_name = get_obj_name(str(req['id']) + req['add_time'], obj_type)
-        obj_name = get_obj_name(req['id'], obj_type)
+        if obj_type != 'cam':
+            obj_name = get_obj_name(req['id'], obj_type)
+        else:
+            obj_name = get_obj_name(str(req['id']) + req['add_time'], obj_type)
+        # obj_name = get_obj_name(req['id'], obj_type)
         path = get_path(obj_name)
         try:
             os.makedirs(path)
@@ -170,11 +170,11 @@ class Cam(Resource):
         req = request.get_json()
         obj_type = req.get('type', 'cam')
         # obj_name = get_obj_name(req['id'], obj_type, req['add_time'])
-        # if obj_type != 'cam':
-        #     obj_name = get_obj_name(req['id'], obj_type)
-        # else:
-        #     obj_name = get_obj_name(str(req['id']) + req['add_time'], obj_type)
-        obj_name = get_obj_name(req['id'], obj_type)
+        if obj_type != 'cam':
+            obj_name = get_obj_name(req['id'], obj_type)
+        else:
+            obj_name = get_obj_name(str(req['id']) + req['add_time'], obj_type)
+        # obj_name = get_obj_name(req['id'], obj_type)
         path = get_path(obj_name)
         try:
             del_autostart(obj_name)
@@ -193,11 +193,11 @@ class Cam(Resource):
         req['server_address'] = request.host
         obj_type = req.get('type', 'cam')
         # obj_name = get_obj_name(req['id'], obj_type, req['add_time'])
-        # if obj_type != 'cam':
-        #     obj_name = get_obj_name(req['id'], obj_type)
-        # else:
-        #     obj_name = get_obj_name(str(req['id']) + req['add_time'], obj_type)
-        obj_name = get_obj_name(req['id'], obj_type)
+        if obj_type != 'cam':
+            obj_name = get_obj_name(req['id'], obj_type)
+        else:
+            obj_name = get_obj_name(str(req['id']) + req['add_time'], obj_type)
+        # obj_name = get_obj_name(req['id'], obj_type)
         path = get_path(obj_name)
         try:
             if not os.path.exists(path):
