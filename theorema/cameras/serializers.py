@@ -247,6 +247,7 @@ class CameraSerializer(M2MHelperSerializer):
         res['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (serv_addr, str(camera.id) + camera.add_time)
         res['m3u8_video_url'] = 'http://%s:8080/vasrc/cam%s/index.m3u8' % (serv_addr, str(camera.id))
         res['thumb_url'] = 'http://%s:5005/thumb/%s/' % (serv_addr, camera.id)
+        res['subscribe_id'] = str(camera.id) + camera.add_time
 
         return res
 

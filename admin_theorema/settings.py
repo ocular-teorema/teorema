@@ -31,7 +31,7 @@ False%20event%20coeff=20.0
 
 [PipelineParams]
 
-Pipeline%20Name=cam{id}
+Pipeline%20Name={full_id}
 Camera%20name={name}
 Input%20Stream%20Url={address}
 Output%20Url={ws_address}

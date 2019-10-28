@@ -68,6 +68,7 @@ def save_cam_config(path, req):
         f.write(TEMPLATE.format(
             port = req['port'],
             id = req['id'],
+            full_id=req['rtmp_video_url'].split('/')[-1],
             name = req['name'],
             address = req['address'],
             ws_address=req['ws_video_url'],
