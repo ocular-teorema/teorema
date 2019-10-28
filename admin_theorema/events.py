@@ -12,7 +12,7 @@ from settings import *
 
 config = configparser.ConfigParser()
 config.read(SUPERVISOR_CAMERAS_CONF)
-raw_cams =[{'id': int(k[len('program:cam'):]), 'directory': v['directory']} for k,v in config.items() if k.startswith('program:cam')]
+raw_cams =[{'id': str(k[len('program:cam'):]), 'directory': v['directory']} for k,v in config.items() if k.startswith('program:cam')]
 
 cams = []
 for c in raw_cams:
@@ -35,7 +35,7 @@ class CamListener(Protocol):
 
     def dataReceived(self, data):
         print(self.camera_id, data, flush=True)
-        [x for x in cams if x['id'] == self.camera_id][0]['connection'] = self # kill me
+        [x for x in cams if str(x['id']) == str(self.camera_id)][0]['connection'] = self # kill me
         try:
             j = json.loads(data.strip(b'\0').decode())
             j['camera_id'] = self.camera_id
@@ -71,7 +71,7 @@ class CamSender(Protocol):
         j = json.loads(data.decode())
         if 'reaction' in j:
             camera_id = j.pop('camera_id')
-            [x for x in cams if x['id'] == camera_id][0]['connection'].transport.write(json.dumps(j).encode()) # kill me 2
+            [x for x in cams if str(x['id']) == str(camera_id)][0]['connection'].transport.write(json.dumps(j).encode()) # kill me 2
             print('reaction sent to camera', camera_id, flush=True)
 
 
