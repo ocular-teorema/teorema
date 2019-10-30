@@ -58,7 +58,7 @@ class WSP(WebSocketServerProtocol):
             self.cameras = set(message['subscribe'])
             print('subscribe ok', flush=True)
         if 'reaction' in message:
-            server_address = Camera.objects.get(id=message['camera_id']).server.address
+            server_address = Camera.objects.get(id=int(message['camera_id'].split('_')[0])).server.address
             if server_address in worker_servers:
                 worker_servers[server_address].transport.write(payload)
                 print('reaction sent to worker server', flush=True)
