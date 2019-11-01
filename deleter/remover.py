@@ -10,7 +10,7 @@ from delvideo import VIDEO_DIR
 #bite
 ratio = 1000000000
 #basic file weigth file in directory
-middle_file = 40*ratio
+middle_file = 150*ratio
 
 
 
@@ -24,7 +24,7 @@ def deleter_main():
     total_by_hour = (sum(filter(None,files_by_hour)))
     print('size files by hour'+str(total_by_hour/ratio)+"gb")
     #return value
-    limit_for_delete = total_by_hour*4
+    limit_for_delete = total_by_hour*10
     print('limit today is'+str(limit_for_delete/ratio )+'gb')
     #return list
     older_files = filter(None,map(find_older,videos))
