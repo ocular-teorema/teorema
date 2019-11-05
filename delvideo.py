@@ -4,7 +4,7 @@ import re
 import configparser
 import datetime
 import psycopg2
-from datetime import datetime
+import datetime
 import julian
 
 config = configparser.ConfigParser()
@@ -22,7 +22,7 @@ def delvideo():
         dirname = os.path.join(PROCESS_DIR, subdirname)
         if not os.path.isdir(dirname):
             continue
-        print('work on %s' % dirname, 'at', str(datetime.isoformat(datetime.now(),sep='_'))[:19])
+        print('work on %s' % dirname, 'at', str(datetime.datetime.isoformat(datetime.datetime.now(),sep='_'))[:19])
 
         os_storage = os.statvfs(VIDEO_DIR)
         storage_free = os_storage.f_bavail * os_storage.f_frsize
@@ -31,11 +31,11 @@ def delvideo():
         # fp_oldest = path_info['oldest_four'][0]
 
         if storage_free < du_limit:
-            print('free storage is %s' % storage_free, 'at', str(datetime.isoformat(datetime.now(),sep='_'))[:19])
+            print('free storage is %s' % storage_free, 'at', str(datetime.datetime.isoformat(datetime.datetime.now(),sep='_'))[:19])
             space_to_free = du_limit - storage_free
             f_count = calc_amount_to_delete(dirname, space_to_free)
             f_paths = find_oldest(dirname, f_count)
-            print('will be deleted %s files in  %s' % (f_count, dirname), 'at', str(datetime.isoformat(datetime.now(),sep='_'))[:19])
+            print('will be deleted %s files in  %s' % (f_count, dirname), 'at', str(datetime.datetime.isoformat(datetime.datetime.now(),sep='_'))[:19])
             for video in f_paths:
                 try:
                     os.remove(video)
@@ -53,16 +53,16 @@ def delvideo():
         if storage_life == 0:
             continue
 
-        print('removing too old db records/events at', str(datetime.isoformat(datetime.now(), sep='_'))[:19])
+        print('removing too old db records/events at', str(datetime.datetime.isoformat(datetime.datetime.now(), sep='_'))[:19])
 
         limit = int(julian.to_jd(datetime.datetime.now() - datetime.timedelta(days=storage_life + GAP)))
-        print('deleting from events at {}, can take a while'.format(str(datetime.isoformat(datetime.now(),sep='_'))[:19]))
+        print('deleting from events at {}, can take a while'.format(str(datetime.datetime.isoformat(datetime.datetime.now(),sep='_'))[:19]))
         cur.execute("delete from events where archive_file1 like '/%s%%' and date < %s;" % (subdirname, limit))
         conn.commit()
-        print('deleting from records at {}, can take a while'.format(str(datetime.isoformat(datetime.now(),sep='_'))[:19]))
+        print('deleting from records at {}, can take a while'.format(str(datetime.datetime.isoformat(datetime.datetime.now(),sep='_'))[:19]))
         cur.execute("delete from records where video_archive like '/%s%%' and date < %s;" % (subdirname, limit))
         conn.commit()
-        print('removing old files with related db records/events at', str(datetime.isoformat(datetime.now(),sep='_'))[:19])
+        print('removing old files with related db records/events at', str(datetime.datetime.isoformat(datetime.datetime.now(),sep='_'))[:19])
 
         videodirname = os.path.join(VIDEO_DIR, subdirname)
         try:
@@ -80,7 +80,7 @@ def delvideo():
             if (now - fdate).days <= storage_life:
                 continue
 
-            print('removing', fpath, 'at', str(datetime.isoformat(datetime.now(),sep='_'))[:19])
+            print('removing', fpath, 'at', str(datetime.datetime.isoformat(datetime.datetime.now(),sep='_'))[:19])
             try:
                 os.remove(fpath)
             except Exception as e:
