@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 #module has function for delete with specific conditions
 
@@ -21,17 +22,17 @@ def delete_handler(files, limit,middle_file,ratio,free_space = 1,):
     for i in files:
         for key, value in i.items():
             delete_paths.append(value)
-    print(str(len(files))+' files for delete')
+    print(str(len(files))+' files for delete', 'at', str(datetime.isoformat(datetime.now(),sep='_'))[:19])
     free_space = find_free_space()
     try:
        while free_space< limit:
             if free_space>= limit:
-                print("you have enough space "+ str(free_space/ratio)+'gb')
+                print("you have enough space "+ str(free_space/ratio)+'gb', 'at', str(datetime.isoformat(datetime.now(),sep='_'))[:19])
             free_space = find_free_space()
             delete_file(delete_paths[counter])
             counter+=1
             print(delete_paths[counter])
     except:
         print('*'*50)
-        print('files'+str(counter)+'deleted')
+        print('files'+str(counter)+'deleted', 'at', str(datetime.isoformat(datetime.now(),sep='_'))[:19])
         pass
