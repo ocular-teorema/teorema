@@ -92,6 +92,8 @@ def delvideo():
                 "delete from events where archive_file1='%s' or archive_file2='%s';" % (bd_filename, bd_filename))
             conn.commit()
 
+    conn.close()
+
 
 def usage_for_list(video_list):
     return sum(os.stat(vid).st_size for vid in video_list)
