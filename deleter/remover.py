@@ -20,6 +20,8 @@ def deleter_main():
     #each func must me for single and call with map)
     #return list
     videos = find_videos(VIDEO_DIR)
+    if videos == []:
+        print('no videos', flush=True)
     #return list
     files_by_hour = map(find_size,videos)
     total_by_hour = (sum(filter(None,files_by_hour)))

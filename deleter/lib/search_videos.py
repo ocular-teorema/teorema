@@ -8,7 +8,7 @@ def find_all_files(_PATH):
     # r=root, d=directories, f = files
     for r, d, f in os.walk(_PATH):
         for file in f:
-            if re.match(r'\w{1,3}.{1,29}_\d\d_\d\d_\d{4}___\d\d_\d\d_\d\d.mp4', file):
+            if re.match(r'\w{1,3}.{1,30}_\d\d_\d\d_\d{4}___\d\d_\d\d_\d\d.mp4', file):
                 files.append(os.path.join(r, file))
     return files
 
