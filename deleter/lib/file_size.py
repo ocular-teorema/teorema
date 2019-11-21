@@ -27,6 +27,15 @@ def find_files_older(name_path,time_limit):
               continue
 
 
+def find_files_earlier(name_path, time_limit):
+    for name, path in name_path.items():
+        time_creation = convert_name_to_datetime(name)
+        if time_creation > time_limit:
+            return path
+        else:
+            continue
+
+
 def convert_name_to_datetime(name):
     # print('NAME =', name, flush=True)
     pattern = r'\w{1,3}.{1,30}_\d\d_\d\d_\d{4}___\d\d_\d\d_\d\d'
@@ -52,6 +61,6 @@ def find_size(filename):
   time_limit = create_limit()
   name = return_name(filename)
   name_path = create_name_path(name, filename)
-  file_older_one_hour = find_files_older(name_path,time_limit)
+  file_older_one_hour = find_files_earlier(name_path,time_limit)
   weight = find_weight(file_older_one_hour)
   return weight

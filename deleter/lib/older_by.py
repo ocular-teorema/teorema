@@ -35,7 +35,7 @@ def sort_pairs_by_date(pairs):
 
 def find_older(last_day, video_file):
     delay = last_day_limit(last_day)
-    print('delay', delay, flush=True)
+    # print('delay', delay, flush=True)
     name = return_name(video_file)
     name_path = create_name_path(name,video_file)
     older_video = find_files_older(name_path,delay)

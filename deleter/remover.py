@@ -11,7 +11,7 @@ from datetime import datetime
 #bite
 ratio = 1000000000
 #basic file weigth file in directory
-middle_file = 150*ratio
+middle_file = 100*ratio
 
 
 
@@ -27,7 +27,7 @@ def deleter_main():
     total_by_hour = (sum(filter(None,files_by_hour)))
     print('size files by hour'+str(total_by_hour/ratio)+"gb", 'at', str(datetime.isoformat(datetime.now(),sep='_'))[:19], flush=True)
     #return value
-    limit_for_delete = total_by_hour*10
+    limit_for_delete = total_by_hour*7
     print('limit today is'+str(limit_for_delete/ratio )+'gb', 'at', str(datetime.isoformat(datetime.now(),sep='_'))[:19], flush=True)
     #return list
     last_day = find_last_day(videos)
