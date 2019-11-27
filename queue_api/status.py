@@ -3,23 +3,21 @@ import psutil
 import subprocess
 from supervisor.xmlrpc import SupervisorTransport
 from xmlrpc import client as xmlrpc_client
-from queue_api.common import QueueEndpoint
-from queue_api.pika_handler import send_in_queue
+from queue_api.common import QueueEndpoint, send_in_queue
 from theorema.cameras.models import Server
 
 
-class StatusRequest(QueueEndpoint):
+class StatusMessages(QueueEndpoint):
 
-    def get(self, params):
-        status_message = StatusResponse()
-        status_message.send(params)
-        return {'message received'}
-
-
-class StatusResponse(QueueEndpoint):
     queue = 'status_queue'
 
-    def send(self, params):
+    def handle_request(self, params):
+        print('message received', flush=True)
+        self.send_response(params)
+        return {'message received'}
+
+    def send_response(self, params):
+        print('sending message', flush=True)
         request_uid = params['request_uid']
 
         # hardware info

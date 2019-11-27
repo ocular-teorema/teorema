@@ -1,46 +1,38 @@
 import queue
 import pika
 import os
+import sys
 import traceback
 import threading
 import json
-
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'theorema.settings')
 import django
 django.setup()
 
-from queue_api.status import StatusRequest
-
-
-def pika_setup_connection():
-    connection = pika.BlockingConnection(pika.ConnectionParameters(
-        'localhost',
-        5672,
-        'ocular',
-        pika.PlainCredentials('ocular', 'ocular'),
-        heartbeat_interval=0
-    ))
-    return connection
-
-
-def send_in_queue(message, type, queue):
-    connection = pika_setup_connection()
-
-    channel = connection.channel()
-    channel.queue_declare(queue=queue, durable=True, auto_delete=False, exclusive=False)
-    channel.basic_publish(
-        exchange='',
-        routing_key=queue,
-        body=json.dumps(message),
-        properties=pika.BasicProperties(type=type)
-    )
-    connection.close()
+from queue_api.status import StatusMessages
+from queue_api.common import pika_setup_connection
 
 
 class PikaHandler(threading.Thread):
 
     def __init__(self):
         super().__init__()
+
+    def callback(self, ch, method, properties, body):
+        print('received', body, properties, method, flush=True)
+        try:
+            message = json.loads(body.decode())
+            getattr(self, properties.type, self.unknown_handler)(message)
+        except Exception as e:
+            print('\n'.join(traceback.format_exception(*sys.exc_info())),
+                  flush=True)
+        else:
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+
+    def unknown_handler(self, message):
+        print('unknown message', message, flush=True)
 
     def run(self):
         connection = pika_setup_connection()
@@ -53,8 +45,8 @@ class PikaHandler(threading.Thread):
             exclusive=False
         )
         channel.basic_consume(
+            'status',
             self.callback,
-            queue='status'
         )
 
         print('receiver start', flush=True)
@@ -66,7 +58,10 @@ class PikaHandler(threading.Thread):
         request_uid = message['request_uid']
         print(request_uid, flush=True)
 
-        status_request = StatusRequest()
-        status_request.get(message)
+        status_request = StatusMessages()
+        status_request.handle_request(message)
         print('message ok', flush=True)
 
+
+pika_handler = PikaHandler()
+pika_handler.start()
