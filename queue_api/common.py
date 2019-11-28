@@ -6,17 +6,20 @@ class QueueEndpoint:
     pass
 
 
-def send_in_queue(message, type, queue):
+def send_in_queue(routing_key, message):
     connection = pika_setup_connection()
 
     channel = connection.channel()
-    channel.queue_declare(queue=queue, durable=True, auto_delete=False, exclusive=False)
+    channel.exchange_declare(exchange='ocular', exchange_type='topic')
+
+    message = message
     channel.basic_publish(
-        exchange='',
-        routing_key=queue,
-        body=json.dumps(message),
-        properties=pika.BasicProperties(type=type)
+        exchange='ocular',
+        routing_key=routing_key,
+        body=message,
+#        properties=pika.BasicProperties(type=type)
     )
+    print("sent message %r:%r" % (routing_key, message))
     connection.close()
 
 

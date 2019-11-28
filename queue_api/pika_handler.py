@@ -14,17 +14,25 @@ django.setup()
 from queue_api.status import StatusMessages
 from queue_api.common import pika_setup_connection
 
+base_topics = [
+    'ocular/server_name/status/request',
+#    'ocular.server_name.cameras'
+]
+
 
 class PikaHandler(threading.Thread):
 
-    def __init__(self):
+    def __init__(self, base_topic):
         super().__init__()
+        self.base_topic = base_topic
 
     def callback(self, ch, method, properties, body):
         print('received', body, properties, method, flush=True)
         try:
             message = json.loads(body.decode())
-            getattr(self, properties.type, self.unknown_handler)(message)
+            routing_key = method.routing_key.split('/')[2:]
+            method = '_'.join(routing_key)
+            getattr(self, method, self.unknown_handler)(message)
         except Exception as e:
             print('\n'.join(traceback.format_exception(*sys.exc_info())),
                   flush=True)
@@ -35,21 +43,24 @@ class PikaHandler(threading.Thread):
         print('unknown message', message, flush=True)
 
     def run(self):
+        print('starting receiver', flush=True)
         connection = pika_setup_connection()
 
         channel = connection.channel()
-        channel.queue_declare(
-            queue='status',
-            durable=True,
-            auto_delete=False,
-            exclusive=False
-        )
+        channel.exchange_declare(exchange='ocular', exchange_type='topic')
+        result = channel.queue_declare('', exclusive=True)
+
+        queue_name = result.method.queue
+
+        channel.queue_bind(exchange='ocular', queue=queue_name, routing_key=self.base_topic)
+
         channel.basic_consume(
-            'status',
-            self.callback,
+            queue=queue_name,
+            on_message_callback=self.callback,
+            auto_ack=True
         )
 
-        print('receiver start', flush=True)
+        print('receiver started', flush=True)
         channel.start_consuming()
 
     def status_request(self, message):
@@ -63,5 +74,6 @@ class PikaHandler(threading.Thread):
         print('message ok', flush=True)
 
 
-pika_handler = PikaHandler()
-pika_handler.start()
+for topic in base_topics:
+    pika_handler = PikaHandler(topic)
+    pika_handler.start()
