@@ -23,6 +23,9 @@ class CameraGroup(models.Model):
     organization = models.ForeignKey(Organization)
 
 
+class Storage(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    path = models.CharField(max_length=150)
 
 
 CameraAnalysisTypes = [
@@ -64,6 +67,7 @@ class Camera(models.Model):
     indefinitely = models.BooleanField(default=False)
     archive_path=models.CharField(max_length=512, blank=True, null=True)
     add_time = models.CharField(max_length=50, default='')
+    storage = models.ForeignKey(Storage, on_delete=models.SET_NULL, null=True)
 
 
 class Camera2CameraGroup(models.Model):

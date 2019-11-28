@@ -12,6 +12,7 @@ import django
 django.setup()
 
 from queue_api.status import StatusMessages
+from queue_api.storages import StorageMessages
 from queue_api.common import pika_setup_connection
 
 
@@ -61,6 +62,37 @@ class PikaHandler(threading.Thread):
         status_request = StatusMessages()
         status_request.handle_request(message)
         print('message ok', flush=True)
+
+    def storage_add_request(self, message):
+        print('storage add request', flush=True)
+        print('message', message, flush=True)
+        request_uid = message['request_uid']
+        print(request_uid, flush=True)
+
+        status_request = StorageMessages()
+        status_request.handle_add_request(message)
+        print('message ok', flush=True)
+
+    def storage_delete_request(self, message):
+        print('storage delete request', flush=True)
+        print('message', message, flush=True)
+        request_uid = message['request_uid']
+        print(request_uid, flush=True)
+
+        status_request = StorageMessages()
+        status_request.handle_delete_request(message)
+        print('message ok', flush=True)
+
+    def storage_get_request(self, message):
+        print('storage get request', flush=True)
+        print('message', message, flush=True)
+        request_uid = message['request_uid']
+        print(request_uid, flush=True)
+
+        status_request = StorageMessages()
+        status_request.handle_get_request(message)
+        print('message ok', flush=True)
+
 
 
 pika_handler = PikaHandler()

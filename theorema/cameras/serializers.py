@@ -5,7 +5,7 @@ import json
 import random
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
-from .models import Server, Camera, CameraGroup, NotificationCamera, Quadrator, Camera2Quadrator
+from .models import Server, Camera, CameraGroup, NotificationCamera, Quadrator, Camera2Quadrator, Storage
 from theorema.m2mhelper import M2MHelperSerializer
 from theorema.orgs.models import OcularUser
 from rest_framework.response import Response
@@ -13,6 +13,11 @@ from rest_framework import status
 from datetime import datetime
 
 CAM_TYPES={1:'s', 2:'a', 3:'f'}
+
+class StorageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Storage
+        fields = ('id', 'name', 'path')
 
 class ServerSerializer(serializers.ModelSerializer):
     class Meta:
