@@ -18,7 +18,12 @@ class StorageMessages(QueueEndpoint):
 
     def handle_get_request(self, params):
         print('message received', flush=True)
-        self.send_delete_response(params)
+        self.send_get_response(params)
+        return {'message received'}
+
+    def handle_update_request(self, params):
+        print('message received', flush=True)
+        self.send_update_response(params)
         return {'message received'}
 
     def send_add_response(self, params):
@@ -41,24 +46,24 @@ class StorageMessages(QueueEndpoint):
             'success': True
         }
 
-        send_in_queue(message, 'response', self.queue)
+        send_in_queue(self.queue, message)
 
 
     def send_delete_response(self, params):
         print('sending message', flush=True)
 
-        storage = Storage.objects.filter(name=params['name']).first()
+        storage = Storage.objects.filter(id=params['id']).first()
         if storage:
             storage.delete()
         else:
-            raise Exception('storage name does not exist')
+            raise Exception('storage does not exist')
 
         message = {
             'request_uid': params['request_uid'],
             'success': True
         }
 
-        send_in_queue(message, 'response', self.queue)
+        send_in_queue(self.queue, message)
 
 
     def send_get_response(self, params):
@@ -79,5 +84,31 @@ class StorageMessages(QueueEndpoint):
             }
             message['storage_list'].append(data)
 
-        send_in_queue(message, 'response', self.queue)
+        send_in_queue(self.queue, message)
+
+    def send_update_response(self, params):
+        print('sending message', flush=True)
+
+        serializer_params = {
+            'name': params['storage']['name'],
+            'path': params['storage']['path']
+        }
+
+        storage = Storage.objects.filter(id=params['id']).first()
+        if storage:
+            serializer = StorageSerializer(data=serializer_params)
+            if serializer.is_valid():
+                storage.name = params['name']
+                storage.path = params['path']
+        else:
+            raise Exception('storage does not exist')
+
+        message = {
+            'request_uid': params['request_uid'],
+            'success': True
+        }
+
+        send_in_queue(self.queue, message)
+
+
 
