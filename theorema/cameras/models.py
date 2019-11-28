@@ -68,6 +68,7 @@ class Camera(models.Model):
     archive_path=models.CharField(max_length=512, blank=True, null=True)
     add_time = models.CharField(max_length=50, default='')
     storage = models.ForeignKey(Storage, on_delete=models.SET_NULL, null=True)
+    uid = models.CharField(max_length=50, default='')
 
 
 class Camera2CameraGroup(models.Model):

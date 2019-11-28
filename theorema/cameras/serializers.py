@@ -115,6 +115,8 @@ class CameraSerializer(M2MHelperSerializer):
         # validated_data['server'] = Server.objects.get(id = validated_data['server']).parent_server_id
         validated_data['add_time'] = '_' + str(datetime.now()).replace(' ', '_').replace(':', '-')
         res = super().create(validated_data)
+        res.uid = 'cam' + str(res.id) + res.add_time
+        res.save()
 
         try:
             represented_data = self.to_representation(res)
@@ -151,6 +153,9 @@ class CameraSerializer(M2MHelperSerializer):
         try:
             if not camera.add_time:
                 camera.add_time = '_' + str(datetime.now()).replace(' ', '_').replace(':', '-')
+                camera.save()
+            if not camera.uid:
+                camera.uid = 'cam' + str(camera.id) + camera.add_time
                 camera.save()
             if validated_data['server'].address != camera.server.address:
                 worker_data = {'id': camera.id, 'type': 'cam', 'add_time': camera.add_time}
