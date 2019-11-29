@@ -83,8 +83,6 @@ class CameraListMessages(QueueEndpoint):
             'success': True
         }
 
-        # print(message)
-
         send_in_queue(self.queue, message)
 
     def send_start_response(self, params):
@@ -114,8 +112,6 @@ class CameraListMessages(QueueEndpoint):
             'request_uid': params['request_uid'],
             'success': True
         }
-
-        # print(message)
 
         send_in_queue(self.queue, message)
 
@@ -157,7 +153,5 @@ class CameraListMessages(QueueEndpoint):
             'request_uid': params['request_uid'],
             'success': True
         }
-
-        # print(message)
 
         send_in_queue(self.queue, message)
