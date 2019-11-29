@@ -227,6 +227,10 @@ class CameraSerializer(M2MHelperSerializer):
 
         return res
 
+    def basic_to_representation(self, camera):
+        res = super().to_representation(camera)
+        return res
+
     def to_representation(self, camera, with_group=True):
         res = super().to_representation(camera)
         if with_group:
