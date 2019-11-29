@@ -76,7 +76,7 @@ class CameraListMessages(QueueEndpoint):
             try:
                 CameraSerializer().update(camera, data)
             except:
-                raise Exception('fail in stopping camera')
+                raise Exception('fail in camera stopping')
 
         message = {
             'request_uid': params['request_uid'],
@@ -108,7 +108,7 @@ class CameraListMessages(QueueEndpoint):
             try:
                 CameraSerializer().update(camera, data)
             except:
-                raise Exception('fail in stopping camera')
+                raise Exception('fail in camera starting')
 
         message = {
             'request_uid': params['request_uid'],
