@@ -135,6 +135,16 @@ class PikaHandler(threading.Thread):
         cameras_request.handle_start_request(message)
         print('message ok', flush=True)
 
+    def cameras_delete_response(self, message):
+        print('storage get request', flush=True)
+        print('message', message, flush=True)
+        request_uid = message['request_uid']
+        print(request_uid, flush=True)
+
+        cameras_request = CameraListMessages()
+        cameras_request.handle_delete_request(message)
+        print('message ok', flush=True)
+
 for topic in base_topics:
     pika_handler = PikaHandler(topic)
     pika_handler.start()
