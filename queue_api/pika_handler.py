@@ -13,11 +13,12 @@ django.setup()
 
 from queue_api.status import StatusMessages
 from queue_api.storages import StorageMessages
-from queue_api.cameras import CameraListMessages
+from queue_api.cameras import CameraAddMessages, CameraSetRecordingMessages, CameraDeleteMessages
 from queue_api.common import pika_setup_connection
 
 base_topics = [
-    'ocular/server_name/status/request',
+    'ocular/server_name/cameras/add/request',
+#    'ocular/server_name/status/request',
 #    'ocular.server_name.cameras'
 ]
 
@@ -38,8 +39,8 @@ class PikaHandler(threading.Thread):
         except Exception as e:
             print('\n'.join(traceback.format_exception(*sys.exc_info())),
                   flush=True)
-        else:
-            ch.basic_ack(delivery_tag=method.delivery_tag)
+#        else:
+#            ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def unknown_handler(self, message):
         print('unknown message', message, flush=True)
@@ -64,6 +65,15 @@ class PikaHandler(threading.Thread):
 
         print('receiver started', flush=True)
         channel.start_consuming()
+
+
+    def cameras_add_request(self, message):
+        print('camera add request message received', flush=True)
+
+        camera_message = CameraAddMessages()
+        camera_message.handle_request(message)
+        print('message ok', flush=True)
+
 
     def status_request(self, message):
         print('status request message received', flush=True)
@@ -121,7 +131,7 @@ class PikaHandler(threading.Thread):
         request_uid = message['request_uid']
         print(request_uid, flush=True)
 
-        cameras_request = CameraListMessages()
+        cameras_request = CameraSetRecordingMessages()
         cameras_request.handle_stop_request(message)
         print('message ok', flush=True)
 
@@ -131,7 +141,7 @@ class PikaHandler(threading.Thread):
         request_uid = message['request_uid']
         print(request_uid, flush=True)
 
-        cameras_request = CameraListMessages()
+        cameras_request = CameraSetRecordingMessages()
         cameras_request.handle_start_request(message)
         print('message ok', flush=True)
 
@@ -141,10 +151,12 @@ class PikaHandler(threading.Thread):
         request_uid = message['request_uid']
         print(request_uid, flush=True)
 
-        cameras_request = CameraListMessages()
+        cameras_request = CameraDeleteMessages()
         cameras_request.handle_delete_request(message)
         print('message ok', flush=True)
 
-for topic in base_topics:
-    pika_handler = PikaHandler(topic)
-    pika_handler.start()
+
+if __name__ == '__main__':
+    for topic in base_topics:
+        pika_handler = PikaHandler(topic)
+        pika_handler.start()

@@ -67,6 +67,7 @@ class Camera(models.Model):
     indefinitely = models.BooleanField(default=False)
     archive_path=models.CharField(max_length=512, blank=True, null=True)
     add_time = models.CharField(max_length=50, default='')
+    from_queue_api = models.BooleanField(default=False)
     storage = models.ForeignKey(Storage, on_delete=models.SET_NULL, null=True)
     uid = models.CharField(max_length=50, default='')
 

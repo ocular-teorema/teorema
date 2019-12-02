@@ -1,5 +1,5 @@
 import os
-import psutil
+#import psutil
 import subprocess
 from supervisor.xmlrpc import SupervisorTransport
 from xmlrpc import client as xmlrpc_client
@@ -35,17 +35,17 @@ class StatusMessages(QueueEndpoint):
 
         load_average = os.getloadavg()
 
-        cpu_usage = psutil.cpu_percent()
+#        cpu_usage = psutil.cpu_percent()
         default_archive_path = '/home/_VideoArchive'
-        disk_usage = psutil.disk_usage(default_archive_path)
+#        disk_usage = psutil.disk_usage(default_archive_path)
 
         hw_info = {
             'local_ip_address': local_ip_address,
             'ocular_version': 'v1.0.0',
             'uptime': uptime,
             'load_average': load_average,
-            'cpu_utilization_perc': cpu_usage,
-            'disk_usage_pec': disk_usage,
+#            'cpu_utilization_perc': cpu_usage,
+#            'disk_usage_pec': disk_usage,
             'default_archive_path': default_archive_path
 
         }

@@ -237,19 +237,24 @@ class CameraSerializer(M2MHelperSerializer):
             res['camera_group'] = CameraGroupSerializer().to_representation(camera.camera_group)
         else:
             res.pop('camera_group')
+        from_queue_api = res['from_queue_api'] if 'from_queue_api' in res else False
         try:
-            if not self.context['request'].user.is_staff and not self.context['request'].user.is_organization_admin:
-                for key in list(res.keys()):
-                    if key.startswith('notify'):
-                        res.pop(key)
+            if not from_queue_api:
+                if not self.context['request'].user.is_staff and not self.context['request'].user.is_organization_admin:
+                    for key in list(res.keys()):
+                        if key.startswith('notify'):
+                            res.pop(key)
         except:
             pass
 
-        x_real_ip = self.context['request'].META.get('HTTP_X_REAL_IP')
-        if x_real_ip:
-            ip = x_real_ip.split(',')[0]
+        if not from_queue_api:
+            x_real_ip = self.context['request'].META.get('HTTP_X_REAL_IP')
+            if x_real_ip:
+                ip = x_real_ip.split(',')[0]
+            else:
+                ip = self.context['request'].META.get('REMOTE_ADDR')
         else:
-            ip = self.context['request'].META.get('REMOTE_ADDR')
+            ip = '10.10.110.1'
 
         if ip.startswith('10') or ip.startswith('192.168') or ip.startswith('172.16'):
             serv_addr = camera.server.local_address

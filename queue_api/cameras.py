@@ -1,13 +1,16 @@
-from queue_api.common import QueueEndpoint, send_in_queue
-from theorema.cameras.serializers import CameraSerializer, Camera
 import requests
 import json
+
 from theorema.users.models import CamSet
+from theorema.orgs.models import Organization
+from theorema.cameras.models import CameraGroup, Server, Camera, Storage
+from theorema.cameras.serializers import CameraSerializer
+
+from queue_api.common import QueueEndpoint, send_in_queue
+from queue_api.errors import RequestParamValidationError
 
 
-class CameraListMessages(QueueEndpoint):
-    camera_group = 'default'
-    organization = 'Ocular'
+class CameraAddMessages(QueueEndpoint):
 
     routing_keys = {
         'stop': 'ocular/{server_name}/cameras/{cam_id}/delete/response',
@@ -15,37 +18,87 @@ class CameraListMessages(QueueEndpoint):
         'delete': 'ocular/{server_name}/cameras/{cam_id}/delete/response'
     }
 
-    def handle_request(self, params):
+    request_required_params = [
+        'name', 'address_primary',
+        'analysis_type', 'storage_days'
+    ]
+    response_topic = 'ocular/server_name/cameras/add/response'
+
+    def __init__(self):
+        self.default_org = Organization.objects.all().first()
+        self.default_serv = Server.objects.all().first()
+        cgroup = CameraGroup.objects.all().first()
+        if cgroup is None:
+            cgroup = 'default'
+        else:
+            cgroup = cgroup.id
+        self.default_camera_group = cgroup
+        self.default_storage = Storage.objects.all().first()
+
+    def handle_request(self, message):
         print('message received', flush=True)
+        self.request_uid = message['request_uid']
+        params = message['camera']
+        print('request uid', self.request_uid, flush=True)
+        print('params', params, flush=True)
+
+        if not self.check_request_params(params):
+            return
 
         name = params['name']
         address_primary = params['address_primary']
-        # address_secondary = params['address_secondary']
         analysis_type = params['analysis_type']
         storage_days = params['storage_days']
-        # storage_id = params['storage_id']
+
+        # for backward compatibility
+        storage_indefinitely = True if storage_days == 1000 else False
+        compress_level = 1
+
+        if 'storage_id' in params:
+            storage_id = params['storage_id']
+            storage = Storage.objects.filter(id=storage_id)
+            if not storage:
+                error = RequestParamValidationError('storage with id {id} not found'.format(id=storage_id))
+                self.send_error_response(error)
+                return
+        else:
+            storage = self.default_storage
+
+        # disabled for now
+        #
         # schedule_id = params['schedule_id']
+        # address_secondary = params['address_secondary']
 
         serializer_params = {
             'name': name,
-            'organization': self.organization,
-            'camera_group': self.camera_group,
+            'organization': self.default_org.id,
+            'server': self.default_serv.id,
+            'camera_group': self.default_camera_group,
             'address': address_primary,
             'analysis': analysis_type,
-            'storage_life': storage_days
-
+            'storage_life': storage_days,
+            'indefinitely': storage_indefinitely,
+            'compress_level': compress_level,
+            'archive_path': storage.path,
+            'from_queue_api': True
+            # 'storage'
         }
 
-        serializer = CameraSerializer(data=serializer_params)
+        camera_serializer = CameraSerializer(data=serializer_params)
 
-        if serializer.is_valid():
-            camera = serializer.save()
+        if camera_serializer.is_valid():
+            camera = camera_serializer.save()
             camera.save()
         else:
-            raise Exception('serializer is wrong')
+            errors = camera_serializer.errors
+            msg = RequestParamValidationError('Validation error: "err"'.format(err=errors))
+            self.send_error_response(msg)
 
-        print('camera', camera, flush=True)
-        return {'message sended'}
+        self.send_success_response()
+        return {'message sent'}
+
+
+class CameraSetRecordingMessages(QueueEndpoint):
 
     def handle_stop_request(self, params):
         print('message received', flush=True)
@@ -55,11 +108,6 @@ class CameraListMessages(QueueEndpoint):
     def handle_start_request(self, params):
         print('message received', flush=True)
         self.send_start_response(params)
-        return {'message received'}
-
-    def handle_delete_request(self, params):
-        print('message received', flush=True)
-        self.send_delete_response(params)
         return {'message received'}
 
     def send_stop_response(self, params):
@@ -145,6 +193,16 @@ class CameraListMessages(QueueEndpoint):
 
 
         send_in_queue(self.routing_keys['start'].format(cam_id=camera.uid), message)
+
+
+class CameraDeleteMessages(QueueEndpoint):
+    camera_group = 'default'
+    organization = 'Ocular'
+
+    def handle_delete_request(self, params):
+        print('message received', flush=True)
+        self.send_delete_response(params)
+        return {'message received'}
 
     def send_delete_response(self, params):
         print('sending message', flush=True)
