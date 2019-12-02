@@ -28,7 +28,11 @@ class PikaHandler(threading.Thread):
 
     def __init__(self, base_topic):
         super().__init__()
-        self.base_topic = base_topic
+
+        self.server_name = uuid.getnode()
+        print('server name: {name}'.format(name=self.server_name), flush=True)
+
+        self.base_topic = base_topic.format(server_name=self.server_name)
         print(self.base_topic, flush=True)
 
     def callback(self, ch, method, properties, body):
@@ -160,12 +164,6 @@ class PikaHandler(threading.Thread):
 
 if __name__ == '__main__':
 
-    server_name = uuid.getnode()
-    print('server name: {name}'.format(name=server_name), flush=True)
-
     for topic in base_topics:
-
-        server_topic = topic.format(server_name=server_name)
-
-        pika_handler = PikaHandler(server_topic)
+        pika_handler = PikaHandler(topic)
         pika_handler.start()
