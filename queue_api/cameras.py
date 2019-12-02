@@ -38,7 +38,7 @@ class CameraAddMessages(QueueEndpoint):
         print('request uid', self.request_uid, flush=True)
         print('params', params, flush=True)
 
-        if not self.check_request_params(params):
+        if self.check_request_params(params):
             return
 
         name = params['name']
@@ -85,6 +85,7 @@ class CameraAddMessages(QueueEndpoint):
 
         if camera_serializer.is_valid():
             camera = camera_serializer.save()
+            camera.storage = storage
             camera.save()
         else:
             errors = camera_serializer.errors
