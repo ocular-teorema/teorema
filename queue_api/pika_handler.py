@@ -14,11 +14,12 @@ django.setup()
 
 from queue_api.status import StatusMessages
 from queue_api.storages import StorageMessages
-from queue_api.cameras import CameraAddMessages, CameraSetRecordingMessages, CameraDeleteMessages
+from queue_api.cameras import CameraAddMessages, CameraListMessages, CameraSetRecordingMessages, CameraDeleteMessages
 from queue_api.common import pika_setup_connection
 
 base_topics = [
     'ocular/{server_name}/cameras/add/request',
+    'ocular/{server_name}/cameras/list/request',
     'ocular/{server_name}/status/request',
 #    'ocular.server_name.cameras'
 ]
@@ -72,7 +73,6 @@ class PikaHandler(threading.Thread):
         print('receiver started', flush=True)
         channel.start_consuming()
 
-
     def cameras_add_request(self, message):
         print('camera add request message received', flush=True)
 
@@ -80,6 +80,12 @@ class PikaHandler(threading.Thread):
         camera_message.handle_request(message)
         print('message ok', flush=True)
 
+    def cameras_list_request(self, message):
+        print('camera list request message received', flush=True)
+
+        camera_message = CameraListMessages(self.server_name)
+        camera_message.handle_request(message)
+        print('message ok', flush=True)
 
     def status_request(self, message):
         print('status request message received', flush=True)

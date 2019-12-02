@@ -1,5 +1,7 @@
 import json
 import pika
+from supervisor.xmlrpc import SupervisorTransport
+from xmlrpc import client as xmlrpc_client
 
 from queue_api.errors import RequiredParamError
 
@@ -20,8 +22,9 @@ class QueueEndpoint:
         for param in self.request_required_params:
             if param not in actual_keys:
                 message = RequiredParamError(param, self.request_uid)
+                print(message, flush=True)
                 self.send_error_response(message)
-                return False
+                return True
 
     def send_success_response(self):
         message = {
@@ -61,3 +64,30 @@ def pika_setup_connection():
         # heartbeat_interval=heartbeat
     ))
     return connection
+
+
+def get_supervisor_processes():
+    supervisor_transport = SupervisorTransport(None, None, serverurl='unix:///run/supervisor.sock')
+    supervisor_proxy = xmlrpc_client.ServerProxy('http://127.0.0.1', transport=supervisor_transport)
+
+    supervisor_processes = supervisor_proxy.supervisor.getAllProcessInfo()
+
+    services = {}
+    cameras = []
+    for process in supervisor_processes:
+        name = process['name']
+
+        res = {
+            'status': process['statename']
+        }
+
+        if 'cam' not in name:
+            services[name] = res
+        else:
+            res['id'] = name
+            cameras.append(res)
+
+    return {
+        'services': services,
+        'cameras': cameras
+    }

@@ -6,8 +6,8 @@ from theorema.orgs.models import Organization
 from theorema.cameras.models import CameraGroup, Server, Camera, Storage
 from theorema.cameras.serializers import CameraSerializer
 
-from queue_api.common import QueueEndpoint, send_in_queue
-from queue_api.errors import RequestParamValidationError, ObjectDoesNotExistError
+from queue_api.common import QueueEndpoint, send_in_queue, get_supervisor_processes
+from queue_api.errors import RequestParamValidationError
 
 
 class CameraAddMessages(QueueEndpoint):
@@ -30,7 +30,6 @@ class CameraAddMessages(QueueEndpoint):
             cgroup = cgroup.id
         self.default_camera_group = cgroup
         self.default_storage = Storage.objects.all().first()
-
 
     def handle_request(self, message):
         print('message received', flush=True)
@@ -56,6 +55,7 @@ class CameraAddMessages(QueueEndpoint):
             storage = Storage.objects.filter(id=storage_id)
             if not storage:
                 error = RequestParamValidationError('storage with id {id} not found'.format(id=storage_id))
+                print(error, flush=True)
                 self.send_error_response(error)
                 return
         else:
@@ -89,11 +89,65 @@ class CameraAddMessages(QueueEndpoint):
         else:
             errors = camera_serializer.errors
             msg = RequestParamValidationError('Validation error: "err"'.format(err=errors))
+            print(msg, flush=True)
             self.send_error_response(msg)
             return
 
         self.send_success_response()
         return {'message sent'}
+
+
+class CameraListMessages(QueueEndpoint):
+
+    response_topic = 'ocular/{server_name}/cameras/list/response'
+
+    def handle_request(self, params):
+        print('message received', flush=True)
+        self.send_response(params)
+        return {'message received'}
+
+    def send_response(self, params):
+        print('message received', flush=True)
+        self.request_uid = params['request_uid']
+
+        all_cameras = Camera.objects.all()
+
+        camera_list = []
+        for cam in all_cameras:
+            stream_address = 'rtmp://{host}:1935/vasrc/{cam}'.format(
+                host=cam.server.address,
+                cam=cam.uid
+            )
+
+            status = None
+            supervisor_cameras = get_supervisor_processes()['cameras']
+            for x in supervisor_cameras:
+                if x['id'] == cam.uid:
+                    status = x['status']
+
+            camera_list.append({
+                'id': cam.uid,
+                'name': cam.name,
+                'address_primary': cam.address,
+                # 'address_secondary': cam.address_secondary,
+                'storage_id': cam.storage.id,
+                # 'schedule_id': cam.schedule.id,
+                'storage_days': cam.storage_life,
+                'analysis_type': cam.analysis,
+                'stream_address': stream_address,
+                'status': status,
+                'enabled': cam.is_active
+                })
+
+        print(self.request_uid, flush=True)
+        print(camera_list, flush=True)
+        message = {
+            'request_uid': self.request_uid,
+            'camera_list': camera_list
+        }
+        send_in_queue(self.response_topic, json.dumps(message))
+
+        return
 
 
 class CameraSetRecordingMessages(QueueEndpoint):
