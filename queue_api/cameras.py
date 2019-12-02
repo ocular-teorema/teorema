@@ -9,6 +9,12 @@ class CameraListMessages(QueueEndpoint):
     camera_group = 'default'
     organization = 'Ocular'
 
+    routing_keys = {
+        'stop': 'ocular/{server_name}/cameras/{cam_id}/delete/response',
+        'start': 'ocular/{server_name}/cameras/{cam_id}/delete/response',
+        'delete': 'ocular/{server_name}/cameras/{cam_id}/delete/response'
+    }
+
     def handle_request(self, params):
         print('message received', flush=True)
 
@@ -83,7 +89,7 @@ class CameraListMessages(QueueEndpoint):
             'success': True
         }
 
-        send_in_queue(self.queue, message)
+        send_in_queue(self.routing_keys['stop'], message)
 
     def send_start_response(self, params):
         print('sending message', flush=True)
@@ -113,7 +119,7 @@ class CameraListMessages(QueueEndpoint):
             'success': True
         }
 
-        send_in_queue(self.queue, message)
+        send_in_queue(self.routing_keys['start'], message)
 
     def send_delete_response(self, params):
         print('sending message', flush=True)
@@ -154,4 +160,4 @@ class CameraListMessages(QueueEndpoint):
             'success': True
         }
 
-        send_in_queue(self.queue, message)
+        send_in_queue(self.routing_keys['delete'], message)

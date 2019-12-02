@@ -4,7 +4,12 @@ from theorema.cameras.serializers import StorageSerializer, Storage
 
 class StorageMessages(QueueEndpoint):
 
-    queue = 'storage_queue'
+    routing_keys = {
+        'stop': 'ocular/{server_name}/storages/add/response',
+        'start': 'ocular/{server_name}/storages/delete/response',
+        'delete': 'ocular/{server_name}/storages/list/response',
+        'update': 'ocular/{server_name}/storages/update/response'
+    }
 
     def handle_add_request(self, params):
         print('message received', flush=True)
@@ -46,7 +51,7 @@ class StorageMessages(QueueEndpoint):
             'success': True
         }
 
-        send_in_queue(self.queue, message)
+        send_in_queue(self.routing_keys['add'], message)
 
 
     def send_delete_response(self, params):
@@ -63,7 +68,7 @@ class StorageMessages(QueueEndpoint):
             'success': True
         }
 
-        send_in_queue(self.queue, message)
+        send_in_queue(self.routing_keys['delete'], message)
 
 
     def send_get_response(self, params):
@@ -84,7 +89,7 @@ class StorageMessages(QueueEndpoint):
             }
             message['storage_list'].append(data)
 
-        send_in_queue(self.queue, message)
+        send_in_queue(self.routing_keys['list'], message)
 
     def send_update_response(self, params):
         print('sending message', flush=True)
@@ -108,7 +113,7 @@ class StorageMessages(QueueEndpoint):
             'success': True
         }
 
-        send_in_queue(self.queue, message)
+        send_in_queue(self.routing_keys['update'], message)
 
 
 
