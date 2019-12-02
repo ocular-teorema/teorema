@@ -12,7 +12,6 @@ from queue_api.errors import RequestParamValidationError
 
 class CameraAddMessages(QueueEndpoint):
 
-
     request_required_params = [
         'name', 'address_primary',
         'analysis_type', 'storage_days'

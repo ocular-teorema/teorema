@@ -5,6 +5,7 @@ import sys
 import traceback
 import threading
 import json
+import uuid
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'theorema.settings')
@@ -17,7 +18,7 @@ from queue_api.cameras import CameraAddMessages, CameraSetRecordingMessages, Cam
 from queue_api.common import pika_setup_connection
 
 base_topics = [
-    'ocular/server_name/cameras/add/request',
+    'ocular/{server_name}/cameras/add/request',
 #    'ocular/server_name/status/request',
 #    'ocular.server_name.cameras'
 ]
@@ -28,6 +29,7 @@ class PikaHandler(threading.Thread):
     def __init__(self, base_topic):
         super().__init__()
         self.base_topic = base_topic
+        print(self.base_topic, flush=True)
 
     def callback(self, ch, method, properties, body):
         print('received', body, properties, method, flush=True)
@@ -157,6 +159,13 @@ class PikaHandler(threading.Thread):
 
 
 if __name__ == '__main__':
+
+    server_name = uuid.getnode()
+    print('server name: {name}'.format(name=server_name), flush=True)
+
     for topic in base_topics:
-        pika_handler = PikaHandler(topic)
+
+        server_topic = topic.format(server_name=server_name)
+
+        pika_handler = PikaHandler(server_topic)
         pika_handler.start()
