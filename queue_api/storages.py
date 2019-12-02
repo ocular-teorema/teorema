@@ -7,7 +7,8 @@ import json
 
 class StorageAddMessages(QueueEndpoint):
     request_required_params = [
-        'storage'
+        'name',
+        'path'
     ]
 
     response_topic = 'ocular/{server_name}/storages/add/request'
@@ -18,10 +19,11 @@ class StorageAddMessages(QueueEndpoint):
     def handle_request(self, params):
         print('message received', flush=True)
         self.request_uid = params['request_uid']
+        checking_params = params['storage']
         print('request uid', self.request_uid, flush=True)
         print('params', params, flush=True)
 
-        if not self.check_request_params(params):
+        if self.check_request_params(checking_params):
             return
 
         serializer_params = {
@@ -59,7 +61,7 @@ class StorageDeleteMessage(QueueEndpoint):
         print('request uid', self.request_uid, flush=True)
         print('params', params, flush=True)
 
-        if not self.check_request_params(params):
+        if self.check_request_params(params):
             return
 
         storage = Storage.objects.filter(id=params['id']).first()
@@ -109,7 +111,8 @@ class StorageListMessage(QueueEndpoint):
 
 class StorageUpdateMessage(QueueEndpoint):
     request_required_params = [
-        'storage'
+        'name',
+        'path'
     ]
     response_topic = 'ocular/{server_name}/storages/update/request'
 
@@ -119,10 +122,11 @@ class StorageUpdateMessage(QueueEndpoint):
     def handle_request(self, params):
         print('message received', flush=True)
         self.request_uid = params['request_uid']
+        checking_params = params['storage']
         print('request uid', self.request_uid, flush=True)
         print('params', params, flush=True)
 
-        if not self.check_request_params(params):
+        if self.check_request_params(checking_params):
             return
 
         serializer_params = {

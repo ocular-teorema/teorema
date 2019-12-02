@@ -13,7 +13,7 @@ import django
 django.setup()
 
 from queue_api.status import StatusMessages
-from queue_api.storages import StorageMessages
+from queue_api.storages import StorageListMessage, StorageDeleteMessage, StorageAddMessages, StorageUpdateMessage
 from queue_api.cameras import CameraAddMessages, CameraListMessages, CameraSetRecordingMessages, CameraDeleteMessages
 from queue_api.common import pika_setup_connection
 
@@ -98,63 +98,53 @@ class PikaHandler(threading.Thread):
         print('message ok', flush=True)
 
     def storages_add_request(self, message):
-        print('storage add request', flush=True)
+        print('storage add request message received', flush=True)
         print('message', message, flush=True)
         request_uid = message['request_uid']
         print(request_uid, flush=True)
 
-        storages_request = StorageMessages()
-        storages_request.handle_add_request(message)
+        storages_request = StorageAddMessages(self.server_name)
+        storages_request.handle_request(message)
         print('message ok', flush=True)
 
     def storages_delete_request(self, message):
-        print('storage delete request', flush=True)
+        print('storage delete request message received', flush=True)
         print('message', message, flush=True)
         request_uid = message['request_uid']
         print(request_uid, flush=True)
 
-        storages_request = StorageMessages()
-        storages_request.handle_delete_request(message)
+        storages_request = StorageDeleteMessage(self.server_name)
+        storages_request.handle_request(message)
         print('message ok', flush=True)
 
     def storages_get_request(self, message):
-        print('storage get request', flush=True)
+        print('storage get request message received', flush=True)
         print('message', message, flush=True)
         request_uid = message['request_uid']
         print(request_uid, flush=True)
 
-        storages_request = StorageMessages()
-        storages_request.handle_get_request(message)
+        storages_request = StorageListMessage(self.server_name)
+        storages_request.handle_request(message)
         print('message ok', flush=True)
 
     def storages_update_request(self, message):
-        print('storage get request', flush=True)
+        print('storage get request message received', flush=True)
         print('message', message, flush=True)
         request_uid = message['request_uid']
         print(request_uid, flush=True)
 
-        storages_request = StorageMessages()
-        storages_request.handle_update_request(message)
+        storages_request = StorageUpdateMessage(self.server_name)
+        storages_request.handle_request(message)
         print('message ok', flush=True)
 
-    def cameras_stop_response(self, message):
+    def cameras_set_recordin_response(self, message):
         print('storage get request', flush=True)
         print('message', message, flush=True)
         request_uid = message['request_uid']
         print(request_uid, flush=True)
 
-        cameras_request = CameraSetRecordingMessages()
-        cameras_request.handle_stop_request(message)
-        print('message ok', flush=True)
-
-    def cameras_start_response(self, message):
-        print('storage get request', flush=True)
-        print('message', message, flush=True)
-        request_uid = message['request_uid']
-        print(request_uid, flush=True)
-
-        cameras_request = CameraSetRecordingMessages()
-        cameras_request.handle_start_request(message)
+        cameras_request = CameraSetRecordingMessages(self.server_name)
+        cameras_request.handle_request(message)
         print('message ok', flush=True)
 
     def cameras_delete_response(self, message):
@@ -163,8 +153,8 @@ class PikaHandler(threading.Thread):
         request_uid = message['request_uid']
         print(request_uid, flush=True)
 
-        cameras_request = CameraDeleteMessages()
-        cameras_request.handle_delete_request(message)
+        cameras_request = CameraDeleteMessages(self.server_name)
+        cameras_request.handle_request(message)
         print('message ok', flush=True)
 
 
