@@ -117,7 +117,7 @@ class PikaHandler(threading.Thread):
         storages_request.handle_request(message)
         print('message ok', flush=True)
 
-    def storages_get_request(self, message):
+    def storages_list_request(self, message):
         print('storage get request message received', flush=True)
         print('message', message, flush=True)
         request_uid = message['request_uid']
