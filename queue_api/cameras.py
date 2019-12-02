@@ -81,15 +81,27 @@ class CameraListMessages(QueueEndpoint):
 
             try:
                 CameraSerializer().update(camera, data)
+                message = {
+                    'request_uid': params['request_uid'],
+                    'success': True
+                }
             except:
-                raise Exception('fail in camera stopping')
+                # raise Exception('fail in camera stopping')
+                message = {
+                    'request_uid': params['request_uid'],
+                    'success': False,
+                    'code': 2,
+                    'error': 'Some error occurred'
+                }
+        else:
+            message = {
+                'request_uid': params['request_uid'],
+                'success': False,
+                'code': 2,
+                'error': 'Some error occurred'
+            }
 
-        message = {
-            'request_uid': params['request_uid'],
-            'success': True
-        }
-
-        send_in_queue(self.routing_keys['stop'], message)
+        send_in_queue(self.routing_keys['stop'].format(cam_id=camera.uid), message)
 
     def send_start_response(self, params):
         print('sending message', flush=True)
@@ -111,15 +123,28 @@ class CameraListMessages(QueueEndpoint):
 
             try:
                 CameraSerializer().update(camera, data)
+                message = {
+                    'request_uid': params['request_uid'],
+                    'success': True
+                }
             except:
-                raise Exception('fail in camera starting')
+                # raise Exception('fail in camera starting')
+                message = {
+                    'request_uid': params['request_uid'],
+                    'success': False,
+                    'code': 2,
+                    'error': 'Some error occurred'
+                }
+        else:
+            message = {
+                'request_uid': params['request_uid'],
+                'success': False,
+                'code': 2,
+                'error': 'Some error occurred'
+            }
 
-        message = {
-            'request_uid': params['request_uid'],
-            'success': True
-        }
 
-        send_in_queue(self.routing_keys['start'], message)
+        send_in_queue(self.routing_keys['start'].format(cam_id=camera.uid), message)
 
     def send_delete_response(self, params):
         print('sending message', flush=True)
@@ -144,11 +169,29 @@ class CameraListMessages(QueueEndpoint):
                     camset.save()
 
         except Exception as e:
-            raise Exception(code=400, detail={'message': str(e)})
+            # raise Exception(code=400, detail={'message': str(e)})
+            message = {
+                'request_uid': params['request_uid'],
+                'success': False,
+                'code': 2,
+                'error': 'Some error occurred'
+            }
+            send_in_queue(self.routing_keys['delete'].format(cam_id=pk), message)
+            return
 
 
         if worker_response['status']:
-            raise Exception(code=400, detail={'message': worker_response['message']})
+            # raise Exception(code=400, detail={'message': worker_response['message']})
+            message = {
+                'request_uid': params['request_uid'],
+                'success': False,
+                'code': 2,
+                'error': 'Some error occurred'
+            }
+            send_in_queue(self.routing_keys['delete'].format(cam_id=pk), message)
+            return
+
+        cam_id = camera.uid
 
         camera.delete()
 
@@ -160,4 +203,4 @@ class CameraListMessages(QueueEndpoint):
             'success': True
         }
 
-        send_in_queue(self.routing_keys['delete'], message)
+        send_in_queue(self.routing_keys['delete'].format(cam_id=pk), message)

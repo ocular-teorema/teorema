@@ -43,13 +43,18 @@ class StorageMessages(QueueEndpoint):
         if serializer.is_valid():
             storage = serializer.save()
             storage.save()
+            message = {
+                'request_uid': params['request_uid'],
+                'success': True
+            }
         else:
-            raise Exception('serializer is wrong')
-
-        message = {
-            'request_uid': params['request_uid'],
-            'success': True
-        }
+            # raise Exception('serializer is wrong')
+            message = {
+                'request_uid': params['request_uid'],
+                'success': False,
+                'code': 2,
+                'error': 'Some error occurred'
+            }
 
         send_in_queue(self.routing_keys['add'], message)
 
@@ -60,13 +65,18 @@ class StorageMessages(QueueEndpoint):
         storage = Storage.objects.filter(id=params['id']).first()
         if storage:
             storage.delete()
+            message = {
+                'request_uid': params['request_uid'],
+                'success': True
+            }
         else:
-            raise Exception('storage does not exist')
-
-        message = {
-            'request_uid': params['request_uid'],
-            'success': True
-        }
+            # raise Exception('storage does not exist')
+            message = {
+                'request_uid': params['request_uid'],
+                'success': False,
+                'code': 2,
+                'error': 'Some error occurred'
+            }
 
         send_in_queue(self.routing_keys['delete'], message)
 
@@ -105,13 +115,26 @@ class StorageMessages(QueueEndpoint):
             if serializer.is_valid():
                 storage.name = params['name']
                 storage.path = params['path']
+                message = {
+                    'request_uid': params['request_uid'],
+                    'success': True
+                }
+            else:
+                message = {
+                    'request_uid': params['request_uid'],
+                    'success': False,
+                    'code': 2,
+                    'error': 'Some error occurred'
+                }
         else:
-            raise Exception('storage does not exist')
+            # raise Exception('storage does not exist')
+            message = {
+                'request_uid': params['request_uid'],
+                'success': False,
+                'code': 2,
+                'error': 'Some error occurred'
+            }
 
-        message = {
-            'request_uid': params['request_uid'],
-            'success': True
-        }
 
         send_in_queue(self.routing_keys['update'], message)
 
