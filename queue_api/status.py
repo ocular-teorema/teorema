@@ -1,6 +1,7 @@
 import os
 #import psutil
 import subprocess
+import json
 from supervisor.xmlrpc import SupervisorTransport
 from xmlrpc import client as xmlrpc_client
 from queue_api.common import QueueEndpoint, send_in_queue
@@ -9,7 +10,7 @@ from theorema.cameras.models import Server
 
 class StatusMessages(QueueEndpoint):
 
-    queue = 'status_queue'
+    response_topic = 'ocular/{server_name}/status/response'
 
     def handle_request(self, params):
         print('message received', flush=True)
@@ -76,6 +77,6 @@ class StatusMessages(QueueEndpoint):
             'services': services,
             'cameras': cameras
         }
-        send_in_queue(message, 'response', 'status_queue')
+        send_in_queue(self.response_topic, json.dumps(message))
 
         return {'message sended'}

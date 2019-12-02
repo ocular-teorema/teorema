@@ -16,9 +16,11 @@ class CameraAddMessages(QueueEndpoint):
         'name', 'address_primary',
         'analysis_type', 'storage_days'
     ]
-    response_topic = 'ocular/server_name/cameras/add/response'
+    response_topic = 'ocular/{server_name}/cameras/add/response'
 
-    def __init__(self):
+    def __init__(self, server_name):
+        super().__init__(server_name=server_name)
+
         self.default_org = Organization.objects.all().first()
         self.default_serv = Server.objects.all().first()
         cgroup = CameraGroup.objects.all().first()
@@ -28,6 +30,7 @@ class CameraAddMessages(QueueEndpoint):
             cgroup = cgroup.id
         self.default_camera_group = cgroup
         self.default_storage = Storage.objects.all().first()
+
 
     def handle_request(self, message):
         print('message received', flush=True)
@@ -87,6 +90,7 @@ class CameraAddMessages(QueueEndpoint):
             errors = camera_serializer.errors
             msg = RequestParamValidationError('Validation error: "err"'.format(err=errors))
             self.send_error_response(msg)
+            return
 
         self.send_success_response()
         return {'message sent'}

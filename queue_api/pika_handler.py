@@ -19,7 +19,7 @@ from queue_api.common import pika_setup_connection
 
 base_topics = [
     'ocular/{server_name}/cameras/add/request',
-#    'ocular/server_name/status/request',
+    'ocular/{server_name}/status/request',
 #    'ocular.server_name.cameras'
 ]
 
@@ -76,7 +76,7 @@ class PikaHandler(threading.Thread):
     def cameras_add_request(self, message):
         print('camera add request message received', flush=True)
 
-        camera_message = CameraAddMessages()
+        camera_message = CameraAddMessages(self.server_name)
         camera_message.handle_request(message)
         print('message ok', flush=True)
 
@@ -87,7 +87,7 @@ class PikaHandler(threading.Thread):
         request_uid = message['request_uid']
         print(request_uid, flush=True)
 
-        status_request = StatusMessages()
+        status_request = StatusMessages(self.server_name)
         status_request.handle_request(message)
         print('message ok', flush=True)
 

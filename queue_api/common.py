@@ -6,9 +6,14 @@ from queue_api.errors import RequiredParamError
 
 class QueueEndpoint:
 
+    server_name = None
     request_uid = None
     response_topic = None
     request_required_params = None
+
+    def __init__(self, server_name):
+        self.server_name = server_name
+        self.response_topic = self.response_topic.format(server_name=self.server_name)
 
     def check_request_params(self, actual):
         actual_keys = actual.keys()
@@ -17,7 +22,6 @@ class QueueEndpoint:
                 message = RequiredParamError(param, self.request_uid)
                 self.send_error_response(message)
                 return False
-
 
     def send_success_response(self):
         message = {
