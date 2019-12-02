@@ -44,3 +44,4 @@ class RequestParamValidationError(QueueErrorMessage):
             message=self.message.format(info=info),
             request_uid=request_uid
         )
+

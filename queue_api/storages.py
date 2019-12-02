@@ -1,38 +1,26 @@
 from queue_api.common import QueueEndpoint, send_in_queue
 from theorema.cameras.serializers import StorageSerializer, Storage
 
+from queue_api.errors import RequestParamValidationError, RequiredParamError
+import json
 
-class StorageMessages(QueueEndpoint):
 
-    routing_keys = {
-        'stop': 'ocular/{server_name}/storages/add/response',
-        'start': 'ocular/{server_name}/storages/delete/response',
-        'delete': 'ocular/{server_name}/storages/list/response',
-        'update': 'ocular/{server_name}/storages/update/response'
-    }
+class StorageAddMessages(QueueEndpoint):
+    request_required_params = [
+        'name',
+        'path',
+    ]
 
-    def handle_add_request(self, params):
+    response_topic = 'ocular/server_name/storages/add/request'
+
+    def handle_request(self, params):
         print('message received', flush=True)
-        self.send_add_response(params)
-        return {'message received'}
+        self.request_uid = params['request_uid']
+        print('request uid', self.request_uid, flush=True)
+        print('params', params, flush=True)
 
-    def handle_delete_request(self, params):
-        print('message received', flush=True)
-        self.send_delete_response(params)
-        return {'message received'}
-
-    def handle_get_request(self, params):
-        print('message received', flush=True)
-        self.send_get_response(params)
-        return {'message received'}
-
-    def handle_update_request(self, params):
-        print('message received', flush=True)
-        self.send_update_response(params)
-        return {'message received'}
-
-    def send_add_response(self, params):
-        print('sending message', flush=True)
+        # if not self.check_request_params(params):
+        #     return
 
         serializer_params = {
             'name': params['storage']['name'],
@@ -43,46 +31,55 @@ class StorageMessages(QueueEndpoint):
         if serializer.is_valid():
             storage = serializer.save()
             storage.save()
-            message = {
-                'request_uid': params['request_uid'],
-                'success': True
-            }
         else:
             # raise Exception('serializer is wrong')
-            message = {
-                'request_uid': params['request_uid'],
-                'success': False,
-                'code': 2,
-                'error': 'Some error occurred'
-            }
+            errors = serializer.errors
+            msg = RequiredParamError('Validation error: "err"'.format(err=errors))
+            self.send_error_response(msg)
+            return
 
-        send_in_queue(self.routing_keys['add'], message)
+        self.send_success_response()
+        return {'message sent'}
 
 
-    def send_delete_response(self, params):
-        print('sending message', flush=True)
+class StorageDeleteMessage(QueueEndpoint):
+    request_required_params = [
+        'id'
+    ]
+
+    response_topic = 'ocular/server_name/storages/delete/request'
+
+    def handle_request(self, params):
+        print('message received', flush=True)
+        self.request_uid = params['request_uid']
+        print('request uid', self.request_uid, flush=True)
+        print('params', params, flush=True)
+
+        # if not self.check_request_params(params):
+        #     return
 
         storage = Storage.objects.filter(id=params['id']).first()
         if storage:
             storage.delete()
-            message = {
-                'request_uid': params['request_uid'],
-                'success': True
-            }
         else:
             # raise Exception('storage does not exist')
-            message = {
-                'request_uid': params['request_uid'],
-                'success': False,
-                'code': 2,
-                'error': 'Some error occurred'
-            }
+            msg = RequiredParamError('Validation error: "err"'.format(err=errors))
+            self.send_error_response(msg)
+            return
 
-        send_in_queue(self.routing_keys['delete'], message)
+        self.send_success_response()
+        return {'message sent'}
 
 
-    def send_get_response(self, params):
-        print('sending message', flush=True)
+class StorageListMessage(QueueEndpoint):
+
+    response_topic = 'ocular/server_name/storages/list/request'
+
+    def handle_request(self, params):
+        print('message received', flush=True)
+        self.request_uid = params['request_uid']
+        print('request uid', self.request_uid, flush=True)
+        print('params', params, flush=True)
 
         storages = Storage.objects.all()
 
@@ -99,10 +96,20 @@ class StorageMessages(QueueEndpoint):
             }
             message['storage_list'].append(data)
 
-        send_in_queue(self.routing_keys['list'], message)
+        send_in_queue(self.response_topic, json.dumps(message))
+        return {'message sent'}
 
-    def send_update_response(self, params):
-        print('sending message', flush=True)
+
+
+class StorageUpdateMessage(QueueEndpoint):
+
+    response_topic = 'ocular/server_name/storages/update/request'
+
+    def handle_request(self, params):
+        print('message received', flush=True)
+        self.request_uid = params['request_uid']
+        print('request uid', self.request_uid, flush=True)
+        print('params', params, flush=True)
 
         serializer_params = {
             'name': params['storage']['name'],
@@ -115,28 +122,17 @@ class StorageMessages(QueueEndpoint):
             if serializer.is_valid():
                 storage.name = params['name']
                 storage.path = params['path']
-                message = {
-                    'request_uid': params['request_uid'],
-                    'success': True
-                }
             else:
-                message = {
-                    'request_uid': params['request_uid'],
-                    'success': False,
-                    'code': 2,
-                    'error': 'Some error occurred'
-                }
+                errors = serializer.errors
+                msg = RequiredParamError('Validation error: "err"'.format(err=errors))
+                self.send_error_response(msg)
+                return
         else:
             # raise Exception('storage does not exist')
-            message = {
-                'request_uid': params['request_uid'],
-                'success': False,
-                'code': 2,
-                'error': 'Some error occurred'
-            }
+            msg = RequiredParamError('Validation error: "err"'.format(err=errors))
+            self.send_error_response(msg)
+            return
 
-
-        send_in_queue(self.routing_keys['update'], message)
-
-
+        send_in_queue(self.response_topic, json.dumps(message))
+        return {'message sent'}
 
