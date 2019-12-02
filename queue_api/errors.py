@@ -44,14 +44,3 @@ class RequestParamValidationError(QueueErrorMessage):
             message=self.message.format(info=info),
             request_uid=request_uid
         )
-
-class ObjectDoesNotExistError(QueueErrorMessage):
-    code = 3
-    message = "Object does not exist: {object}"
-
-    def __init__(self, object, request_uid=None):
-        super().__init__(
-            message=self.message.format(object=object),
-            request_uid=request_uid
-        )
-

@@ -7,7 +7,7 @@ from theorema.cameras.models import CameraGroup, Server, Camera, Storage
 from theorema.cameras.serializers import CameraSerializer
 
 from queue_api.common import QueueEndpoint, send_in_queue
-from queue_api.errors import RequestParamValidationError
+from queue_api.errors import RequestParamValidationError, ObjectDoesNotExistError
 
 
 class CameraAddMessages(QueueEndpoint):
@@ -98,12 +98,16 @@ class CameraAddMessages(QueueEndpoint):
 
 class CameraSetRecordingMessages(QueueEndpoint):
 
-    response_topic = 'ocular/server_name/cameras/{cam_id}/set_recording/request'
+    response_topic = 'ocular/{server_name}/cameras/{cam_id}/set_recording/request'
+
+    def __init__(self, server_name):
+        super().__init__(server_name=server_name)
 
     def handle_request(self, params):
         print('message received', flush=True)
-        self.send_stop_response(params)
-        return {'message received'}
+        self.request_uid = params['request_uid']
+        print('request uid', self.request_uid, flush=True)
+        print('params', params, flush=True)
 
         self.response_topic = self.response_topic.format(cam_id=self.request_uid)
 
@@ -117,15 +121,19 @@ class CameraSetRecordingMessages(QueueEndpoint):
             data['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (camera.server.address, str(camera.id) + camera.add_time)
             data['m3u8_video_url'] = 'http://%s:8080/vasrc/cam%s/index.m3u8' % (camera.server.address, str(camera.id))
             data['camera_group'] = camera.camera_group.id
-            data['is_active'] = False
+            if camera.is_active:
+                data['is_active'] = False
+            else:
+                data['is_active'] = True
             data['server'] = camera.server
             data['organization'] = camera.organization
 
             CameraSerializer().update(camera, data)
 
         else:
-            msg = RequestParamValidationError('Validation error: "err"'.format(err=errors))
-            self.send_error_response(msg)
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=self.request_uid))
+            self.send_error_response(error)
+            return
 
         self.send_success_response()
         return {'message sent'}
@@ -134,7 +142,10 @@ class CameraSetRecordingMessages(QueueEndpoint):
 
 class CameraDeleteMessages(QueueEndpoint):
 
-    response_topic = 'ocular/server_name/cameras/{cam_id}/delete/request'
+    response_topic = 'ocular/{server_name}/cameras/{cam_id}/delete/request'
+
+    def __init__(self, server_name):
+        super().__init__(server_name=server_name)
 
     def handle_request(self, params):
         print('message received', flush=True)
@@ -164,18 +175,18 @@ class CameraDeleteMessages(QueueEndpoint):
 
             except Exception as e:
                 # raise Exception(code=400, detail={'message': str(e)})
-                msg = RequestParamValidationError('Validation error: "err"'.format(err=errors))
+                msg = RequestParamValidationError(str(e))
                 self.send_error_response(msg)
                 return
         else:
-            msg = RequestParamValidationError('Validation error: "err"'.format(err=errors))
-            self.send_error_response(msg)
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=self.request_uid))
+            self.send_error_response(error)
             return
 
 
         if worker_response['status']:
             # raise Exception(code=400, detail={'message': worker_response['message']})
-            msg = RequestParamValidationError('Validation error: "err"'.format(err=errors))
+            msg = RequestParamValidationError(worker_response['message'])
             self.send_error_response(msg)
             return
 
