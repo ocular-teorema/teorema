@@ -4,7 +4,7 @@ import subprocess
 import json
 from supervisor.xmlrpc import SupervisorTransport
 from xmlrpc import client as xmlrpc_client
-from queue_api.common import QueueEndpoint, send_in_queue
+from queue_api.common import QueueEndpoint, send_in_queue, get_supervisor_processes
 from theorema.cameras.models import Server
 
 
@@ -51,31 +51,13 @@ class StatusMessages(QueueEndpoint):
 
         }
 
-        supervisor_transport = SupervisorTransport(None, None, serverurl='unix:///run/supervisor.sock')
-        supervisor_proxy = xmlrpc_client.ServerProxy('http://127.0.0.1', transport=supervisor_transport)
-
-        supervisor_processes = supervisor_proxy.supervisor.getAllProcessInfo()
-
-        services = {}
-        cameras = []
-        for process in supervisor_processes:
-            name = process['name']
-
-            res = {
-                'status': process['statename']
-            }
-
-            if 'cam' not in name:
-                services[name] = res
-            else:
-                res['id'] = name
-                cameras.append(res)
+        supervisor_processes = get_supervisor_processes()
 
         message = {
             'request_uid': request_uid,
             'hardware': hw_info,
-            'services': services,
-            'cameras': cameras
+            'services': supervisor_processes['services'],
+            'cameras': supervisor_processes['cameras']
         }
         send_in_queue(self.response_topic, json.dumps(message))
 
