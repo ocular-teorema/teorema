@@ -12,11 +12,6 @@ from queue_api.errors import RequestParamValidationError
 
 class CameraAddMessages(QueueEndpoint):
 
-    routing_keys = {
-        'stop': 'ocular/{server_name}/cameras/{cam_id}/delete/response',
-        'start': 'ocular/{server_name}/cameras/{cam_id}/delete/response',
-        'delete': 'ocular/{server_name}/cameras/{cam_id}/delete/response'
-    }
 
     request_required_params = [
         'name', 'address_primary',
@@ -99,6 +94,11 @@ class CameraAddMessages(QueueEndpoint):
 
 
 class CameraSetRecordingMessages(QueueEndpoint):
+
+    routing_keys = {
+        'stop': 'ocular/{server_name}/cameras/{cam_id}/delete/response',
+        'start': 'ocular/{server_name}/cameras/{cam_id}/delete/response',
+    }
 
     def handle_stop_request(self, params):
         print('message received', flush=True)
@@ -196,6 +196,11 @@ class CameraSetRecordingMessages(QueueEndpoint):
 
 
 class CameraDeleteMessages(QueueEndpoint):
+
+    routing_keys = {
+        'delete': 'ocular/{server_name}/cameras/{cam_id}/delete/response'
+    }
+
     camera_group = 'default'
     organization = 'Ocular'
 
