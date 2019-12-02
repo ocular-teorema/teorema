@@ -100,7 +100,6 @@ class CameraSetRecordingMessages(QueueEndpoint):
 
     response_topic = 'ocular/server_name/cameras/{cam_id}/set_recording/request'
 
-
     def handle_request(self, params):
         print('message received', flush=True)
         self.send_stop_response(params)

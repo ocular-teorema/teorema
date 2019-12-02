@@ -100,7 +100,6 @@ class StorageListMessage(QueueEndpoint):
         return {'message sent'}
 
 
-
 class StorageUpdateMessage(QueueEndpoint):
 
     response_topic = 'ocular/server_name/storages/update/request'
