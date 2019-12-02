@@ -5,6 +5,7 @@ import sys
 import traceback
 import threading
 import json
+import uuid
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'theorema.settings')
@@ -17,8 +18,8 @@ from queue_api.cameras import CameraAddMessages, CameraSetRecordingMessages, Cam
 from queue_api.common import pika_setup_connection
 
 base_topics = [
-    'ocular/server_name/cameras/add/request',
-#    'ocular/server_name/status/request',
+    'ocular/{server_name}/cameras/add/request',
+    'ocular/{server_name}/status/request',
 #    'ocular.server_name.cameras'
 ]
 
@@ -27,7 +28,12 @@ class PikaHandler(threading.Thread):
 
     def __init__(self, base_topic):
         super().__init__()
-        self.base_topic = base_topic
+
+        self.server_name = uuid.getnode()
+        print('server name: {name}'.format(name=self.server_name), flush=True)
+
+        self.base_topic = base_topic.format(server_name=self.server_name)
+        print(self.base_topic, flush=True)
 
     def callback(self, ch, method, properties, body):
         print('received', body, properties, method, flush=True)
@@ -70,7 +76,7 @@ class PikaHandler(threading.Thread):
     def cameras_add_request(self, message):
         print('camera add request message received', flush=True)
 
-        camera_message = CameraAddMessages()
+        camera_message = CameraAddMessages(self.server_name)
         camera_message.handle_request(message)
         print('message ok', flush=True)
 
@@ -81,7 +87,7 @@ class PikaHandler(threading.Thread):
         request_uid = message['request_uid']
         print(request_uid, flush=True)
 
-        status_request = StatusMessages()
+        status_request = StatusMessages(self.server_name)
         status_request.handle_request(message)
         print('message ok', flush=True)
 
@@ -157,6 +163,7 @@ class PikaHandler(threading.Thread):
 
 
 if __name__ == '__main__':
+
     for topic in base_topics:
         pika_handler = PikaHandler(topic)
         pika_handler.start()
