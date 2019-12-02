@@ -18,8 +18,6 @@ class QueueEndpoint:
                 self.send_error_response(message)
                 return False
 
-        return True
-
 
     def send_success_response(self):
         message = {

@@ -177,6 +177,7 @@ class CameraDeleteMessages(QueueEndpoint):
             self.send_error_response(msg)
             return
 
+
         camera.delete()
 
         if camera_group_to_delete:
