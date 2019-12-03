@@ -17,11 +17,11 @@ from theorema.cameras.models import Camera, Storage
 from queue_api.status import StatusMessages
 from queue_api.storages import StorageListMessage, StorageDeleteMessage, StorageAddMessages, StorageUpdateMessage
 from queue_api.cameras import CameraAddMessages, CameraListMessages, CameraSetRecordingMessages, CameraDeleteMessages, CameraUpdateMessages
-from queue_api.common import pika_setup_connection, exchange_from_name
+from queue_api.common import pika_setup_connection, exchange_from_server_name, exchange_with_camera_name, exchange_with_storage_name
 
 base_topics = [
-    '/cameras/add/request',
-    '/cameras/list/request',
+#    '/cameras/add/request',
+#    '/cameras/list/request',
     '/cameras/{cam_id}/delete/request',
     '/status/request',
 #    'ocular.server_name.cameras'
@@ -30,21 +30,47 @@ base_topics = [
 
 class PikaHandler(threading.Thread):
 
-    def __init__(self, base_topic, topic_object=None):
+    def __init__(self):
         super().__init__()
 
         self.server_name = uuid.getnode()
         print('server name: {name}'.format(name=self.server_name), flush=True)
-        self.server_exchange = exchange_from_name(self.server_name)
+
+        self.server_exchange = exchange_from_server_name(self.server_name)
         print('exchange:', self.server_exchange, flush=True)
 
-        self.base_topic = base_topic
-        self.topic_object = topic_object
+        self.is_object_exchange = False
 
-        # self.base_topic = base_topic  # .format(server_name=self.server_name)
-        # self.topic_object = topic_object
+    def set_object_exchange(self, object_type, object_id):
 
-        print('base topic:', self.base_topic, flush=True)
+        if object_type == 'camera':
+            self.server_exchange = exchange_with_camera_name(self.server_exchange, object_id)
+        elif object_type == 'storage':
+            self.server_exchange = exchange_with_storage_name(self.server_exchange, object_id)
+
+        self.is_object_exchange = True
+        print('set object topic:', self.server_exchange, flush=True)
+
+    def run(self):
+        print('starting receiver', flush=True)
+        connection = pika_setup_connection()
+        channel = connection.channel()
+
+        channel.exchange_declare(exchange=self.server_exchange, exchange_type='topic')
+        result = channel.queue_declare('', exclusive=True)
+
+        queue_name = result.method.queue
+        # channel.queue_bind(exchange=self.server_exchange, queue=queue_name, routing_key=self.base_topic)
+        channel.queue_bind(exchange=self.server_exchange, queue=queue_name, routing_key='')
+
+        channel.basic_consume(
+            queue=queue_name,
+            on_message_callback=self.callback,
+            auto_ack=True
+        )
+
+        print('receiver started', flush=True)
+        channel.start_consuming()
 
     def callback(self, ch, method, properties, body):
         print('received', body, properties, method, flush=True)
@@ -65,26 +91,6 @@ class PikaHandler(threading.Thread):
 
     def unknown_handler(self, message):
         print('unknown message', message, flush=True)
-
-    def run(self):
-        print('starting receiver', flush=True)
-        connection = pika_setup_connection()
-        channel = connection.channel()
-
-        channel.exchange_declare(exchange=self.server_exchange, exchange_type='topic')
-        result = channel.queue_declare('', exclusive=True)
-
-        queue_name = result.method.queue
-        channel.queue_bind(exchange=self.server_exchange, queue=queue_name, routing_key=self.base_topic)
-
-        channel.basic_consume(
-            queue=queue_name,
-            on_message_callback=self.callback,
-            auto_ack=True
-        )
-
-        print('receiver started', flush=True)
-        channel.start_consuming()
 
     def cameras_add_request(self, message):
         print('camera add request message received', flush=True)
@@ -185,17 +191,15 @@ if __name__ == '__main__':
     print('cameras', cameras_ids, flush=True)
     print('storages', storages_ids, flush=True)
 
-    for topic in base_topics:
-        if '{cam_id}' in topic:
-            for cam_id in cameras_ids:
-                camera_topic = topic.format(cam_id=cam_id)
-                camera_receiver = PikaHandler(base_topic=camera_topic, topic_object=cam_id)
-                camera_receiver.start()
-        elif '{storage_id}' in topic:
-            for storage_id in storages_ids:
-                storage_topic = topic.format(storage_id=storage_id)
-                storage_receiver = PikaHandler(base_topic=storage_topic, topic_object=storage_id)
-                storage_receiver.start()
-        else:
-            receiver = PikaHandler(topic)
-            receiver.start()
+    for cam_id in cameras_ids:
+        camera_receiver = PikaHandler()
+        camera_receiver.set_object_exchange(object_type='camera', object_id=cam_id)
+        camera_receiver.start()
+
+    for storage_id in storages_ids:
+        storage_receiver = PikaHandler()
+        storage_receiver.set_object_exchange(object_type='storage', object_id=storage_id)
+        storage_receiver.start()
+    else:
+        receiver = PikaHandler()
+        receiver.start()

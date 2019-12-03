@@ -46,10 +46,6 @@ class QueueEndpoint:
         return base_send_in_queue(self.exchange, routing_key, message)
 
 
-def exchange_from_name(name):
-    return '/ocular/{server}'.format(server=name)
-
-
 def base_send_in_queue(exchange, routing_key, message):
     connection = pika_setup_connection()
 
@@ -103,3 +99,17 @@ def get_supervisor_processes():
         'services': services,
         'cameras': cameras
     }
+
+
+def exchange_from_server_name(name):
+    return '/ocular/{server}'.format(server=name)
+
+
+def exchange_with_camera_name(base_exchange, camera_id):
+    camera_postfix = '/cameras/{camera_id}'.format(camera_id=camera_id)
+    return exchange_from_server_name(base_exchange) + camera_postfix
+
+
+def exchange_with_storage_name(base_exchange, storage_id):
+    storage_postfix = '/storages/{storage_id}'.format(storage_id=storage_id)
+    return exchange_from_server_name(base_exchange) + storage_postfix
