@@ -16,7 +16,7 @@ from theorema.cameras.models import Camera, Storage
 
 from queue_api.status import StatusMessages
 from queue_api.storages import StorageListMessage, StorageDeleteMessage, StorageAddMessages, StorageUpdateMessage
-from queue_api.cameras import CameraAddMessages, CameraListMessages, CameraSetRecordingMessages, CameraDeleteMessages
+from queue_api.cameras import CameraAddMessages, CameraListMessages, CameraSetRecordingMessages, CameraDeleteMessages, CameraUpdateMessages
 from queue_api.common import pika_setup_connection, exchange_from_name
 
 base_topics = [
@@ -99,6 +99,13 @@ class PikaHandler(threading.Thread):
         camera_message = CameraListMessages(self.server_name)
         camera_message.handle_request(message)
         print('message ok', flush=True)
+
+    def cameras_update_request(self, message):
+        print('camera update request message received', flush=True)
+
+        camera_message = CameraUpdateMessages(self.server_name)
+        camera_message.handle_request(message)
+        print('message ok')
 
     def status_request(self, message):
         print('status request message received', flush=True)

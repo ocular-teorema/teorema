@@ -1,6 +1,8 @@
 import requests
 import json
 
+from django.core.exceptions import ObjectDoesNotExist
+
 from theorema.users.models import CamSet
 from theorema.orgs.models import Organization
 from theorema.cameras.models import CameraGroup, Server, Camera, Storage
@@ -10,13 +12,7 @@ from queue_api.common import QueueEndpoint, get_supervisor_processes
 from queue_api.errors import RequestParamValidationError
 
 
-class CameraAddMessages(QueueEndpoint):
-
-    request_required_params = [
-        'name', 'address_primary',
-        'analysis_type', 'storage_days'
-    ]
-    response_topic = '/cameras/add/response'
+class CameraQueueEndpoint(QueueEndpoint):
 
     def __init__(self, server_name):
         super().__init__(server_name=server_name)
@@ -30,6 +26,15 @@ class CameraAddMessages(QueueEndpoint):
             cgroup = cgroup.id
         self.default_camera_group = cgroup
         self.default_storage = Storage.objects.all().first()
+
+
+class CameraAddMessages(CameraQueueEndpoint):
+
+    request_required_params = [
+        'name', 'address_primary',
+        'analysis_type', 'storage_days'
+    ]
+    response_topic = '/cameras/add/response'
 
     def handle_request(self, message):
         print('message received', flush=True)
@@ -93,6 +98,75 @@ class CameraAddMessages(QueueEndpoint):
             print(msg, flush=True)
             self.send_error_response(msg)
             return
+
+        self.send_success_response()
+        return {'message sent'}
+
+
+class CameraUpdateMessages(CameraQueueEndpoint):
+
+    response_topic = '/cameras/{cam_id}/update/response'
+
+    def handle_request(self, message):
+        print('message received', flush=True)
+
+        self.request_uid = message['request_uid']
+        print('request uid', self.request_uid, flush=True)
+
+        camera_id = message['camera_id']
+        print('camera id', camera_id, flush=True)
+
+        camera = None
+        camera_repr = None
+        try:
+            camera = Camera.objects.get(uid=camera_id)
+            camera_repr = CameraSerializer().to_representation(camera)
+        except ObjectDoesNotExist:
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=camera_id))
+            print(error, flush=True)
+            self.send_error_response(error)
+            return
+
+        params = message['camera']
+        print('params', params, flush=True)
+
+        name = params['name'] if 'name' in params else camera_repr['name']
+        address_primary = params['address_primary'] if 'address_primary' in params else camera_repr['address']
+        analysis_type = params['analysis_type'] if 'analysis_type' in params else camera_repr['analysis_type']
+
+        if 'storage_days' in params:
+            storage_days = params['storage_days']
+            storage_indefinitely = True if storage_days == 1000 else False
+        else:
+            storage_days = camera_repr['storage_life']
+            storage_indefinitely = camera_repr['indefinitely']
+
+        if 'storage_id' in params:
+            storage_id = params['storage_id']
+
+            try:
+                storage = Storage.objects.get(id=storage_id)
+            except ObjectDoesNotExist:
+                error = RequestParamValidationError('storage with id {id} not found'.format(id=storage_id))
+                print(error, flush=True)
+                self.send_error_response(error)
+                return
+
+            camera.storage = storage
+
+        camera_repr['name'] = name
+        camera_repr['address'] = address_primary
+        camera_repr['analysis_type'] = analysis_type
+        camera_repr['storage_life'] = storage_days
+        camera_repr['indefinitely'] = storage_indefinitely
+
+        camera_serializer = CameraSerializer().update(camera, camera_repr)
+
+#            errors = camera_serializer.errors
+#            msg = RequestParamValidationError('Validation error: "err"'.format(err=errors))
+#            print(msg, flush=True)
+#            self.send_error_response(msg)
+#            return
 
         self.send_success_response()
         return {'message sent'}
