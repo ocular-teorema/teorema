@@ -9,13 +9,16 @@ from queue_api.errors import RequiredParamError
 class QueueEndpoint:
 
     server_name = None
+    exchange = None
+
     request_uid = None
     response_topic = None
     request_required_params = None
 
     def __init__(self, server_name):
         self.server_name = server_name
-        self.response_topic = self.response_topic.format(server_name=self.server_name)
+        self.exchange = exchange_from_name(self.server_name)
+        # self.response_topic = self.response_topic.format(server_name=self.server_name)
 
     def check_request_params(self, actual):
         actual_keys = actual.keys()
@@ -31,26 +34,33 @@ class QueueEndpoint:
             'success': True,
             'request_uid': self.request_uid
         }
-        send_in_queue(self.response_topic, json.dumps(message))
+        self.send_in_queue(self.response_topic, json.dumps(message))
 
     def send_error_response(self, message):
         message.request_uid = self.request_uid
-        send_in_queue(self.response_topic, str(message))
+        self.send_in_queue(self.response_topic, str(message))
+
+    def send_in_queue(self, routing_key, message):
+        return base_send_in_queue(self.exchange, routing_key, message)
 
 
-def send_in_queue(routing_key, message):
+def exchange_from_name(name):
+    return '/ocular/{server}'.format(server=name)
+
+
+def base_send_in_queue(exchange, routing_key, message):
     connection = pika_setup_connection()
 
     channel = connection.channel()
-    channel.exchange_declare(exchange='ocular', exchange_type='topic')
+    channel.exchange_declare(exchange=exchange, exchange_type='topic')
 
     channel.basic_publish(
-        exchange='ocular',
+        exchange=exchange,
         routing_key=routing_key,
         body=message,
         # properties=pika.BasicProperties(type=type)
     )
-    print("sent message %r:%r" % (routing_key, message), flush=True)
+    print("sent message %r : %r : %r" % (exchange, routing_key, message), flush=True)
     connection.close()
 
 
@@ -60,7 +70,7 @@ def pika_setup_connection():
         '10.10.110.1',
         5672,
         'ocular',
-        pika.PlainCredentials('ocular', 'ocular'),
+        pika.PlainCredentials('ocular', 'mC2QX0J7sx7i'),
         # heartbeat_interval=heartbeat
     ))
     return connection

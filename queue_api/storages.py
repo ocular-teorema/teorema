@@ -1,4 +1,4 @@
-from queue_api.common import QueueEndpoint, send_in_queue
+from queue_api.common import QueueEndpoint
 from theorema.cameras.serializers import StorageSerializer, Storage
 
 from queue_api.errors import RequestParamValidationError, RequiredParamError
@@ -11,7 +11,7 @@ class StorageAddMessages(QueueEndpoint):
         'path'
     ]
 
-    response_topic = 'ocular/{server_name}/storages/add/request'
+    response_topic = '/storages/add/request'
 
     def __init__(self, server_name):
         super().__init__(server_name=server_name)
@@ -50,7 +50,7 @@ class StorageDeleteMessage(QueueEndpoint):
         'id'
     ]
 
-    response_topic = 'ocular/{server_name}/storages/delete/request'
+    response_topic = '/storages/delete/request'
 
     def __init__(self, server_name):
         super().__init__(server_name=server_name)
@@ -79,7 +79,7 @@ class StorageDeleteMessage(QueueEndpoint):
 
 class StorageListMessage(QueueEndpoint):
 
-    response_topic = 'ocular/{server_name}/storages/list/request'
+    response_topic = '/storages/list/request'
 
     def __init__(self, server_name):
         super().__init__(server_name=server_name)
@@ -105,7 +105,7 @@ class StorageListMessage(QueueEndpoint):
             }
             message['storage_list'].append(data)
 
-        send_in_queue(self.response_topic, json.dumps(message))
+        self.send_in_queue(self.response_topic, json.dumps(message))
         return {'message sent'}
 
 
@@ -114,7 +114,7 @@ class StorageUpdateMessage(QueueEndpoint):
         'name',
         'path'
     ]
-    response_topic = 'ocular/{server_name}/storages/update/request'
+    response_topic = '/storages/update/request'
 
     def __init__(self, server_name):
         super().__init__(server_name=server_name)

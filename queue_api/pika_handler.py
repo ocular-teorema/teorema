@@ -15,12 +15,12 @@ django.setup()
 from queue_api.status import StatusMessages
 from queue_api.storages import StorageListMessage, StorageDeleteMessage, StorageAddMessages, StorageUpdateMessage
 from queue_api.cameras import CameraAddMessages, CameraListMessages, CameraSetRecordingMessages, CameraDeleteMessages
-from queue_api.common import pika_setup_connection
+from queue_api.common import pika_setup_connection, exchange_from_name
 
 base_topics = [
-    'ocular/{server_name}/cameras/add/request',
-    'ocular/{server_name}/cameras/list/request',
-    'ocular/{server_name}/status/request',
+    '/cameras/add/request',
+    '/cameras/list/request',
+    '/status/request',
 #    'ocular.server_name.cameras'
 ]
 
@@ -32,6 +32,8 @@ class PikaHandler(threading.Thread):
 
         self.server_name = uuid.getnode()
         print('server name: {name}'.format(name=self.server_name), flush=True)
+        self.server_exchange = exchange_from_name(self.server_name)
+        print('exchange:', self.server_exchange, flush=True)
 
         self.base_topic = base_topic.format(server_name=self.server_name)
         print(self.base_topic, flush=True)
@@ -40,8 +42,9 @@ class PikaHandler(threading.Thread):
         print('received', body, properties, method, flush=True)
         try:
             message = json.loads(body.decode())
-            routing_key = method.routing_key.split('/')[2:]
+            routing_key = method.routing_key[1:].split('/')
             method = '_'.join(routing_key)
+            print('method:', method, flush=True)
             getattr(self, method, self.unknown_handler)(message)
         except Exception as e:
             print('\n'.join(traceback.format_exception(*sys.exc_info())),
@@ -55,14 +58,13 @@ class PikaHandler(threading.Thread):
     def run(self):
         print('starting receiver', flush=True)
         connection = pika_setup_connection()
-
         channel = connection.channel()
-        channel.exchange_declare(exchange='ocular', exchange_type='topic')
+
+        channel.exchange_declare(exchange=self.server_exchange, exchange_type='topic')
         result = channel.queue_declare('', exclusive=True)
 
         queue_name = result.method.queue
-
-        channel.queue_bind(exchange='ocular', queue=queue_name, routing_key=self.base_topic)
+        channel.queue_bind(exchange=self.server_exchange, queue=queue_name, routing_key=self.base_topic)
 
         channel.basic_consume(
             queue=queue_name,

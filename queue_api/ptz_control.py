@@ -8,7 +8,7 @@ class PtzControlMessage(QueueEndpoint):
         'camera_id',
         'step'
     ]
-    response_topic = 'ocular/{server_name}/cameras/{cam_id}/ptz_control'
+    response_topic = '/cameras/{cam_id}/ptz_control'
 
     def __init__(self, server_name):
         super().__init__(server_name=server_name)

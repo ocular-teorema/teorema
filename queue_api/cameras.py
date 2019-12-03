@@ -6,7 +6,7 @@ from theorema.orgs.models import Organization
 from theorema.cameras.models import CameraGroup, Server, Camera, Storage
 from theorema.cameras.serializers import CameraSerializer
 
-from queue_api.common import QueueEndpoint, send_in_queue, get_supervisor_processes
+from queue_api.common import QueueEndpoint, get_supervisor_processes
 from queue_api.errors import RequestParamValidationError
 
 
@@ -16,7 +16,7 @@ class CameraAddMessages(QueueEndpoint):
         'name', 'address_primary',
         'analysis_type', 'storage_days'
     ]
-    response_topic = 'ocular/{server_name}/cameras/add/response'
+    response_topic = '/cameras/add/response'
 
     def __init__(self, server_name):
         super().__init__(server_name=server_name)
@@ -100,7 +100,7 @@ class CameraAddMessages(QueueEndpoint):
 
 class CameraListMessages(QueueEndpoint):
 
-    response_topic = 'ocular/{server_name}/cameras/list/response'
+    response_topic = '/cameras/list/response'
 
     def handle_request(self, params):
         print('message received', flush=True)
@@ -146,14 +146,14 @@ class CameraListMessages(QueueEndpoint):
             'request_uid': self.request_uid,
             'camera_list': camera_list
         }
-        send_in_queue(self.response_topic, json.dumps(message))
+        self.send_in_queue(self.response_topic, json.dumps(message))
 
         return
 
 
 class CameraSetRecordingMessages(QueueEndpoint):
 
-    response_topic = 'ocular/{server_name}/cameras/{cam_id}/set_recording/request'
+    response_topic = '/cameras/{cam_id}/set_recording/request'
 
     def __init__(self, server_name):
         super().__init__(server_name=server_name)
@@ -197,7 +197,7 @@ class CameraSetRecordingMessages(QueueEndpoint):
 
 class CameraDeleteMessages(QueueEndpoint):
 
-    response_topic = 'ocular/{server_name}/cameras/{cam_id}/delete/request'
+    response_topic = '/cameras/{cam_id}/delete/request'
 
     def __init__(self, server_name):
         super().__init__(server_name=server_name)
