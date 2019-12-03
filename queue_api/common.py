@@ -13,12 +13,13 @@ class QueueEndpoint:
     topic_object = None
 
     request_uid = None
-    response_topic = None
     request_required_params = None
+    response_topic = None
+    response_message_type = None
 
     def __init__(self, server_name, topic_object=None):
         self.server_name = server_name
-        self.exchange = exchange_from_name(self.server_name)
+        self.exchange = exchange_from_server_name(self.server_name)
         self.topic_object = topic_object
         # self.response_topic = self.response_topic.format(server_name=self.server_name)
 
@@ -26,27 +27,30 @@ class QueueEndpoint:
         actual_keys = actual.keys()
         for param in self.request_required_params:
             if param not in actual_keys:
-                message = RequiredParamError(param, self.request_uid)
+                message = RequiredParamError(param, self.request_uid, self.response_message_type)
                 print(message, flush=True)
                 self.send_error_response(message)
                 return True
 
     def send_success_response(self):
         message = {
-            'success': True,
-            'request_uid': self.request_uid
+            'request_uid': self.request_uid,
+            'type': self.response_message_type,
+            'data': {
+                'success': True
+            }
         }
-        self.send_in_queue(self.response_topic, json.dumps(message))
+        self.send_in_queue(json.dumps(message))
 
     def send_error_response(self, message):
         message.request_uid = self.request_uid
-        self.send_in_queue(self.response_topic, str(message))
+        self.send_in_queue(str(message))
 
-    def send_in_queue(self, routing_key, message):
-        return base_send_in_queue(self.exchange, routing_key, message)
+    def send_in_queue(self, message):
+        return base_send_in_queue(self.exchange, message, self.server_name)
 
 
-def base_send_in_queue(exchange, routing_key, message):
+def base_send_in_queue(exchange, message, app_id=None):
     connection = pika_setup_connection()
 
     channel = connection.channel()
@@ -54,11 +58,11 @@ def base_send_in_queue(exchange, routing_key, message):
 
     channel.basic_publish(
         exchange=exchange,
-        routing_key=routing_key,
+        routing_key='',
         body=message,
-        # properties=pika.BasicProperties(type=type)
+        properties=pika.BasicProperties(app_id=str(app_id))
     )
-    print("sent message %r : %r : %r" % (exchange, routing_key, message), flush=True)
+    print("sent message %r : %r" % (exchange, message), flush=True)
     connection.close()
 
 

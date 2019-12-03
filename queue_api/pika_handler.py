@@ -27,6 +27,9 @@ base_topics = [
 #    'ocular.server_name.cameras'
 ]
 
+class SelfPublished(Exception):
+    pass
+
 
 class PikaHandler(threading.Thread):
 
@@ -60,13 +63,12 @@ class PikaHandler(threading.Thread):
         result = channel.queue_declare('', exclusive=True)
 
         queue_name = result.method.queue
-        # channel.queue_bind(exchange=self.server_exchange, queue=queue_name, routing_key=self.base_topic)
         channel.queue_bind(exchange=self.server_exchange, queue=queue_name, routing_key='')
 
         channel.basic_consume(
             queue=queue_name,
             on_message_callback=self.callback,
-            auto_ack=True
+            # auto_ack=True
         )
 
         print('receiver started', flush=True)
@@ -75,19 +77,27 @@ class PikaHandler(threading.Thread):
     def callback(self, ch, method, properties, body):
         print('received', body, properties, method, flush=True)
         try:
-            message = json.loads(body.decode())
-            routing_key = method.routing_key[1:].split('/')
-            route_attr = '_'.join(routing_key)
-            print('topic obj:', self.topic_object, flush=True)
-            if self.topic_object is not None:
-                route_attr = route_attr.replace(self.topic_object + '_', '')
-            print('route:', route_attr, flush=True)
-            getattr(self, route_attr, self.unknown_handler)(message)
+            if not properties.app_id or int(properties.app_id) != self.server_name:
+                message = json.loads(body.decode())
+                message_type = message['type']
+                getattr(self, message_type, self.unknown_handler)(message)
+            else:
+                print('message published by self, skipping', flush=True)
+                raise SelfPublished
+
+            # routing_key = method.routing_key[1:].split('/')
+            # route_attr = '_'.join(routing_key)
+            # print('topic obj:', self.topic_object, flush=True)
+            # if self.topic_object is not None:
+            #     route_attr = route_attr.replace(self.topic_object + '_', '')
+            # print('route:', route_attr, flush=True)
+        except SelfPublished:
+            pass
         except Exception as e:
             print('\n'.join(traceback.format_exception(*sys.exc_info())),
                   flush=True)
-#        else:
-#            ch.basic_ack(delivery_tag=method.delivery_tag)
+        else:
+            ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def unknown_handler(self, message):
         print('unknown message', message, flush=True)

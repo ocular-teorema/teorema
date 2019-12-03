@@ -94,7 +94,8 @@ class CameraAddMessages(CameraQueueEndpoint):
             camera.save()
         else:
             errors = camera_serializer.errors
-            msg = RequestParamValidationError('Validation error: "err"'.format(err=errors))
+            error_str = 'Validation error: "err"'.format(err=errors)
+            msg = RequestParamValidationError(error_str, self.request_uid, self.response_message_type)
             print(msg, flush=True)
             self.send_error_response(msg)
             return

@@ -11,6 +11,7 @@ from theorema.cameras.models import Server
 class StatusMessages(QueueEndpoint):
 
     response_topic = '/status/response'
+    response_message_type = 'status_response'
 
     def handle_request(self, params):
         print('message received', flush=True)
@@ -57,10 +58,13 @@ class StatusMessages(QueueEndpoint):
 
         message = {
             'request_uid': request_uid,
-            'hardware': hw_info,
-            'services': supervisor_processes['services'],
-            'cameras': supervisor_processes['cameras']
+            'type': self.response_message_type,
+            'data': {
+                'hardware': hw_info,
+                'services': supervisor_processes['services'],
+                'cameras': supervisor_processes['cameras']
+            }
         }
-        self.send_in_queue(self.response_topic, json.dumps(message))
+        self.send_in_queue(json.dumps(message))
 
         return {'message sended'}
