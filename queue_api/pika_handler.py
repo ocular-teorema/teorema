@@ -12,6 +12,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'theorema.settings')
 import django
 django.setup()
 
+from theorema.cameras.models import Camera, Storage
+
 from queue_api.status import StatusMessages
 from queue_api.storages import StorageListMessage, StorageDeleteMessage, StorageAddMessages, StorageUpdateMessage
 from queue_api.cameras import CameraAddMessages, CameraListMessages, CameraSetRecordingMessages, CameraDeleteMessages
@@ -20,6 +22,7 @@ from queue_api.common import pika_setup_connection, exchange_from_name
 base_topics = [
     '/cameras/add/request',
     '/cameras/list/request',
+    '/cameras/{cam_id}/delete/request',
     '/status/request',
 #    'ocular.server_name.cameras'
 ]
@@ -27,7 +30,7 @@ base_topics = [
 
 class PikaHandler(threading.Thread):
 
-    def __init__(self, base_topic):
+    def __init__(self, base_topic, topic_object=None):
         super().__init__()
 
         self.server_name = uuid.getnode()
@@ -35,17 +38,25 @@ class PikaHandler(threading.Thread):
         self.server_exchange = exchange_from_name(self.server_name)
         print('exchange:', self.server_exchange, flush=True)
 
-        self.base_topic = base_topic.format(server_name=self.server_name)
-        print(self.base_topic, flush=True)
+        self.base_topic = base_topic
+        self.topic_object = topic_object
+
+        # self.base_topic = base_topic  # .format(server_name=self.server_name)
+        # self.topic_object = topic_object
+
+        print('base topic:', self.base_topic, flush=True)
 
     def callback(self, ch, method, properties, body):
         print('received', body, properties, method, flush=True)
         try:
             message = json.loads(body.decode())
             routing_key = method.routing_key[1:].split('/')
-            method = '_'.join(routing_key)
-            print('method:', method, flush=True)
-            getattr(self, method, self.unknown_handler)(message)
+            route_attr = '_'.join(routing_key)
+            print('topic obj:', self.topic_object, flush=True)
+            if self.topic_object is not None:
+                route_attr = route_attr.replace(self.topic_object + '_', '')
+            print('route:', route_attr, flush=True)
+            getattr(self, route_attr, self.unknown_handler)(message)
         except Exception as e:
             print('\n'.join(traceback.format_exception(*sys.exc_info())),
                   flush=True)
@@ -149,19 +160,35 @@ class PikaHandler(threading.Thread):
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
-    def cameras_delete_response(self, message):
+    def cameras_delete_request(self, message):
         print('storage get request', flush=True)
         print('message', message, flush=True)
         request_uid = message['request_uid']
         print(request_uid, flush=True)
 
-        cameras_request = CameraDeleteMessages(self.server_name)
+        cameras_request = CameraDeleteMessages(self.server_name, self.topic_object)
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
 
 if __name__ == '__main__':
 
+    cameras_ids = list(Camera.objects.all().values_list('uid', flat=True))
+    storages_ids = list(Storage.objects.all().values_list('id', flat=True))
+    print('cameras', cameras_ids, flush=True)
+    print('storages', storages_ids, flush=True)
+
     for topic in base_topics:
-        pika_handler = PikaHandler(topic)
-        pika_handler.start()
+        if '{cam_id}' in topic:
+            for cam_id in cameras_ids:
+                camera_topic = topic.format(cam_id=cam_id)
+                camera_receiver = PikaHandler(base_topic=camera_topic, topic_object=cam_id)
+                camera_receiver.start()
+        elif '{storage_id}' in topic:
+            for storage_id in storages_ids:
+                storage_topic = topic.format(storage_id=storage_id)
+                storage_receiver = PikaHandler(base_topic=storage_topic, topic_object=storage_id)
+                storage_receiver.start()
+        else:
+            receiver = PikaHandler(topic)
+            receiver.start()

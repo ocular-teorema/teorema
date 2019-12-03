@@ -197,10 +197,10 @@ class CameraSetRecordingMessages(QueueEndpoint):
 
 class CameraDeleteMessages(QueueEndpoint):
 
-    response_topic = '/cameras/{cam_id}/delete/request'
+    response_topic = '/cameras/{cam_id}/delete/response'
 
-    def __init__(self, server_name):
-        super().__init__(server_name=server_name)
+    def __init__(self, server_name, topic_object):
+        super().__init__(server_name=server_name, topic_object=topic_object)
 
     def handle_request(self, params):
         print('message received', flush=True)
@@ -208,7 +208,7 @@ class CameraDeleteMessages(QueueEndpoint):
         print('request uid', self.request_uid, flush=True)
         print('params', params, flush=True)
 
-        self.response_topic = self.response_topic.format(cam_id=self.request_uid)
+        self.response_topic = self.response_topic.format(cam_id=self.topic_object)
 
         camera = Camera.objects.filter(uid=self.request_uid).first()
         if camera:

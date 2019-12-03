@@ -10,14 +10,16 @@ class QueueEndpoint:
 
     server_name = None
     exchange = None
+    topic_object = None
 
     request_uid = None
     response_topic = None
     request_required_params = None
 
-    def __init__(self, server_name):
+    def __init__(self, server_name, topic_object=None):
         self.server_name = server_name
         self.exchange = exchange_from_name(self.server_name)
+        self.topic_object = topic_object
         # self.response_topic = self.response_topic.format(server_name=self.server_name)
 
     def check_request_params(self, actual):
