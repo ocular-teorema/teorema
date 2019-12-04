@@ -69,7 +69,7 @@ def pika_setup_connection():
     connection = pika.BlockingConnection(pika.ConnectionParameters(
         # 'localhost',
         '10.10.110.1',
-        5672,
+        15672,
         'ocular',
         pika.PlainCredentials('ocular', 'mC2QX0J7sx7i'),
         # heartbeat_interval=heartbeat
