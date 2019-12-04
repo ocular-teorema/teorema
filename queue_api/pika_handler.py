@@ -18,6 +18,7 @@ from queue_api.status import StatusMessages
 from queue_api.storages import StorageListMessage, StorageDeleteMessage, StorageAddMessages, StorageUpdateMessage
 from queue_api.cameras import CameraAddMessages, CameraListMessages, CameraSetRecordingMessages, CameraDeleteMessages, CameraUpdateMessages
 from queue_api.common import pika_setup_connection, exchange_from_server_name, exchange_with_camera_name, exchange_with_storage_name
+from queue_api.ptz_control import PanControlMessage, TiltControlMessage, ZoomControlMessage
 
 
 class SelfPublished(Exception):
@@ -190,6 +191,27 @@ class PikaHandler(threading.Thread):
         print('cameras delete request', flush=True)
 
         cameras_request = CameraDeleteMessages(self.server_exchange, self.server_name, self.object_exchange_id)
+        cameras_request.handle_request(message)
+        print('message ok', flush=True)
+
+    def horizontal_control_request(self, message):
+        print('cameras delete request', flush=True)
+
+        cameras_request = PanControlMessage(self.server_exchange, self.server_name, self.object_exchange_id)
+        cameras_request.handle_request(message)
+        print('message ok', flush=True)
+
+    def vertical_control_request(self, message):
+        print('cameras delete request', flush=True)
+
+        cameras_request = TiltControlMessage(self.server_exchange, self.server_name, self.object_exchange_id)
+        cameras_request.handle_request(message)
+        print('message ok', flush=True)
+
+    def zoom_control_request(self, message):
+        print('cameras delete request', flush=True)
+
+        cameras_request = ZoomControlMessage(self.server_exchange, self.server_name, self.object_exchange_id)
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 

@@ -76,7 +76,7 @@ class PanControlMessage(PtzControlQueueEndpoint):
             return
 
         try:
-            self.move(params['step'], 0, 0)
+            self.move(int(params['step']), 0, 0)
         except:
             print('some error', flush=True)
             error = RequestParamValidationError('camera with id {id} can not move'.format(id=self.topic_object))
@@ -108,7 +108,7 @@ class TiltControlMessage(PtzControlQueueEndpoint):
             return
 
         try:
-            self.move(0, params['step'], 0)
+            self.move(0, int(params['step']), 0)
         except:
             print('some error', flush=True)
             error = RequestParamValidationError('camera with id {id} can not move'.format(id=self.topic_object))
@@ -140,7 +140,7 @@ class ZoomControlMessage(PtzControlQueueEndpoint):
             return
 
         try:
-            self.move(0, 0, params['step'])
+            self.move(0, 0, int(params['step']))
         except:
             print('some error', flush=True)
             error = RequestParamValidationError('camera with id {id} can not move'.format(id=self.topic_object))
