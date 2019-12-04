@@ -226,9 +226,9 @@ class CameraSetRecordingMessages(CameraQueueEndpoint):
         print('preparing response', flush=True)
         self.request_uid = params['request_uid']
 
-        self.response_topic = self.response_topic.format(cam_id=self.request_uid)
+        self.response_topic = self.response_topic.format(cam_id=self.topic_object)
 
-        camera = Camera.objects.filter(uid=self.topic_object)
+        camera = Camera.objects.filter(uid=self.topic_object).first()
         if camera:
 
             data = dict(CameraSerializer().basic_to_representation(camera))

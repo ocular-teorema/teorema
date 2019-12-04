@@ -3,7 +3,13 @@ from onvif import ONVIFCamera
 import time
 
 
-class PtzControlMessage(QueueEndpoint):
+class PtzControlQueueEndpoint(QueueEndpoint):
+
+    def __init__(self, exchange, server_name, topic_object=None):
+        super().__init__(exchange=exchange, server_name=server_name, topic_object=topic_object)
+
+
+class PtzControlMessage(PtzControlQueueEndpoint):
     request_required_params = [
         # 'camera_id',
         'step'
@@ -11,8 +17,6 @@ class PtzControlMessage(QueueEndpoint):
     response_topic = '/cameras/{cam_id}/ptz_control'
     response_message_type = 'ptz_control'
 
-    def __init__(self, server_name):
-        super().__init__(server_name=server_name)
 
     def handle_request(self, params):
         print('message received', flush=True)
@@ -20,7 +24,7 @@ class PtzControlMessage(QueueEndpoint):
         print('request uid', self.request_uid, flush=True)
         print('params', params['data'], flush=True)
 
-        self.response_topic = self.response_topic.format(cam_id=self.request_uid)
+        self.response_topic = self.response_topic.format(cam_id=self.topic_object)
 
         if self.check_request_params(params['data']):
             return
