@@ -67,3 +67,4 @@ vine==1.1.4
 wcwidth==0.1.7
 Werkzeug==0.14.1
 zope.interface==4.5.0
+onvif-zeep==0.2.12
