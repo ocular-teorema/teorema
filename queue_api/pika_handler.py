@@ -152,7 +152,7 @@ class PikaHandler(threading.Thread):
         request_uid = message['request_uid']
         print(request_uid, flush=True)
 
-        storages_request = StorageDeleteMessage(self.server_exchange, self.server_name)
+        storages_request = StorageDeleteMessage(self.server_exchange, self.server_name, self.object_exchange_id)
         storages_request.handle_request(message)
         print('message ok', flush=True)
 
@@ -172,7 +172,7 @@ class PikaHandler(threading.Thread):
         request_uid = message['request_uid']
         print(request_uid, flush=True)
 
-        storages_request = StorageUpdateMessage(self.server_exchange, self.server_name)
+        storages_request = StorageUpdateMessage(self.server_exchange, self.server_name, self.object_exchange_id)
         storages_request.handle_request(message)
         print('message ok', flush=True)
 

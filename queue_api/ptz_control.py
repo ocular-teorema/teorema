@@ -5,10 +5,11 @@ import time
 
 class PtzControlMessage(QueueEndpoint):
     request_required_params = [
-        'camera_id',
+        # 'camera_id',
         'step'
     ]
     response_topic = '/cameras/{cam_id}/ptz_control'
+    response_message_type = 'ptz_control'
 
     def __init__(self, server_name):
         super().__init__(server_name=server_name)
@@ -17,11 +18,11 @@ class PtzControlMessage(QueueEndpoint):
         print('message received', flush=True)
         self.request_uid = params['request_uid']
         print('request uid', self.request_uid, flush=True)
-        print('params', params, flush=True)
+        print('params', params['data'], flush=True)
 
         self.response_topic = self.response_topic.format(cam_id=self.request_uid)
 
-        if self.check_request_params(params):
+        if self.check_request_params(params['data']):
             return
 
 
