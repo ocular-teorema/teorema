@@ -1,7 +1,8 @@
 from queue_api.common import QueueEndpoint
 from onvif import ONVIFCamera
 import time
-from queue_api.messages import RequestParamValidationError, RequiredParamError
+from queue_api.messages import RequestParamValidationError
+from theorema.cameras.models import Camera
 
 
 class PtzControlQueueEndpoint(QueueEndpoint):
@@ -10,8 +11,12 @@ class PtzControlQueueEndpoint(QueueEndpoint):
         super().__init__(exchange=exchange, server_name=server_name, topic_object=topic_object)
 
 
-    def move(self, x_coord, y_coord, zoom):
-        mycam = ONVIFCamera(IP, PORT, USER, PASS)
+    def move(self, x_coord, y_coord, zoom, address):
+        user = address.split('@')[0].split('/')[-1].split(':')[0]
+        password = address.split('@')[0].split('/')[-1].split(':')[1]
+        ip = address.split('@')[1].split('/')[0].split(':')[0]
+        port = address.split('@')[1].split('/')[0].split(':')[1]
+        mycam = ONVIFCamera(ip, port, user, password)
         # Create media service object
         media = mycam.create_media_service()
 
@@ -75,11 +80,17 @@ class PanControlMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params['data']):
             return
 
-        try:
-            self.move(int(params['step']), 0, 0)
-        except:
-            print('some error', flush=True)
-            error = RequestParamValidationError('camera with id {id} can not move'.format(id=self.topic_object))
+        camera = Camera.objects.filter(uid=self.topic_object).first()
+        if camera:
+            try:
+                self.move(int(params['step']), 0, 0, camera.address)
+            except:
+                print('some error', flush=True)
+                error = RequestParamValidationError('camera with id {id} can not move'.format(id=self.topic_object))
+                self.send_error_response(error)
+                return
+        else:
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=self.topic_object))
             self.send_error_response(error)
             return
 
@@ -107,11 +118,17 @@ class TiltControlMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params['data']):
             return
 
-        try:
-            self.move(0, int(params['step']), 0)
-        except:
-            print('some error', flush=True)
-            error = RequestParamValidationError('camera with id {id} can not move'.format(id=self.topic_object))
+        camera = Camera.objects.filter(uid=self.topic_object).first()
+        if camera:
+            try:
+                self.move(int(params['step']), 0, 0, camera.address)
+            except:
+                print('some error', flush=True)
+                error = RequestParamValidationError('camera with id {id} can not move'.format(id=self.topic_object))
+                self.send_error_response(error)
+                return
+        else:
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=self.topic_object))
             self.send_error_response(error)
             return
 
@@ -139,11 +156,17 @@ class ZoomControlMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params['data']):
             return
 
-        try:
-            self.move(0, 0, int(params['step']))
-        except:
-            print('some error', flush=True)
-            error = RequestParamValidationError('camera with id {id} can not move'.format(id=self.topic_object))
+        camera = Camera.objects.filter(uid=self.topic_object).first()
+        if camera:
+            try:
+                self.move(int(params['step']), 0, 0, camera.address)
+            except:
+                print('some error', flush=True)
+                error = RequestParamValidationError('camera with id {id} can not move'.format(id=self.topic_object))
+                self.send_error_response(error)
+                return
+        else:
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=self.topic_object))
             self.send_error_response(error)
             return
 
