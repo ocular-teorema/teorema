@@ -25,11 +25,11 @@ class QueueMessage:
 
 class QueueSuccessMessage(QueueMessage):
 
-    data = {
-        'success': True
-    }
-
     def __init__(self, request_uid=None, response_type=None):
+        self.data = {
+            'success': True
+        }
+
         super().__init__(request_uid, response_type, self.data)
 
 
@@ -39,11 +39,18 @@ class QueueErrorMessage(QueueMessage):
     error = None
 
     def __init__(self, request_uid=None, response_type=None, code=None, error=None):
-        super().__init__(request_uid, response_type, self.data)
         if code is not None:
             self.code = code
         if error is not None:
             self.error = error
+
+        self.data = {
+            'success': False,
+            'code': self.code,
+            'error': self.error
+        }
+
+        super().__init__(request_uid, response_type, self.data)
 
 
 class RequiredParamError(QueueErrorMessage):
@@ -63,6 +70,7 @@ class RequestParamValidationError(QueueErrorMessage):
     message = "Validation error: {info}"
 
     def __init__(self, info, request_uid=None, response_type=None):
+        print('info', info, flush=True)
         super().__init__(
             request_uid=request_uid,
             response_type=response_type,

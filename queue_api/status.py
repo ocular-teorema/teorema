@@ -8,8 +8,6 @@ from xmlrpc import client as xmlrpc_client
 from theorema.cameras.models import Server
 
 from queue_api.common import QueueEndpoint, get_supervisor_processes
-from queue_api.messages import QueueMessage
-
 
 
 class StatusMessages(QueueEndpoint):

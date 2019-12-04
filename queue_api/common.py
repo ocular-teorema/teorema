@@ -17,9 +17,9 @@ class QueueEndpoint:
     response_topic = None
     response_message_type = None
 
-    def __init__(self, server_name, topic_object=None):
+    def __init__(self, exchange, server_name, topic_object=None):
+        self.exchange = exchange
         self.server_name = server_name
-        self.exchange = exchange_from_server_name(self.server_name)
         self.topic_object = topic_object
         # self.response_topic = self.response_topic.format(server_name=self.server_name)
 
@@ -110,9 +110,9 @@ def exchange_from_server_name(name):
 
 def exchange_with_camera_name(base_exchange, camera_id):
     camera_postfix = '/cameras/{camera_id}'.format(camera_id=camera_id)
-    return exchange_from_server_name(base_exchange) + camera_postfix
+    return base_exchange + camera_postfix
 
 
 def exchange_with_storage_name(base_exchange, storage_id):
     storage_postfix = '/storages/{storage_id}'.format(storage_id=storage_id)
-    return exchange_from_server_name(base_exchange) + storage_postfix
+    return base_exchange + storage_postfix

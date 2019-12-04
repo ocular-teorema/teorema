@@ -14,8 +14,8 @@ from queue_api.messages import RequestParamValidationError
 
 class CameraQueueEndpoint(QueueEndpoint):
 
-    def __init__(self, server_name):
-        super().__init__(server_name=server_name)
+    def __init__(self, exchange, server_name, topic_object=None):
+        super().__init__(exchange=exchange, server_name=server_name, topic_object=topic_object)
 
         self.default_org = Organization.objects.all().first()
         self.default_serv = Server.objects.all().first()
@@ -35,12 +35,12 @@ class CameraAddMessages(CameraQueueEndpoint):
         'analysis_type', 'storage_days'
     ]
     response_topic = '/cameras/add/response'
+    response_message_type = 'cameras_add_response'
 
     def handle_request(self, message):
         print('message received', flush=True)
         self.request_uid = message['request_uid']
-        params = message['camera']
-        print('request uid', self.request_uid, flush=True)
+        params = message['data']
         print('params', params, flush=True)
 
         if self.check_request_params(params):
@@ -101,7 +101,6 @@ class CameraAddMessages(CameraQueueEndpoint):
             return
 
         self.send_success_response()
-        return {'message sent'}
 
 
 class CameraUpdateMessages(CameraQueueEndpoint):
@@ -110,15 +109,10 @@ class CameraUpdateMessages(CameraQueueEndpoint):
 
     def handle_request(self, message):
         print('message received', flush=True)
-
         self.request_uid = message['request_uid']
-        print('request uid', self.request_uid, flush=True)
 
-        camera_id = message['camera_id']
-        print('camera id', camera_id, flush=True)
+        camera_id = self.topic_object
 
-        camera = None
-        camera_repr = None
         try:
             camera = Camera.objects.get(uid=camera_id)
             camera_repr = CameraSerializer().to_representation(camera)
@@ -161,7 +155,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
         camera_repr['storage_life'] = storage_days
         camera_repr['indefinitely'] = storage_indefinitely
 
-        camera_serializer = CameraSerializer().update(camera, camera_repr)
+        CameraSerializer().update(camera, camera_repr)
 
 #            errors = camera_serializer.errors
 #            msg = RequestParamValidationError('Validation error: "err"'.format(err=errors))
@@ -170,20 +164,19 @@ class CameraUpdateMessages(CameraQueueEndpoint):
 #            return
 
         self.send_success_response()
-        return {'message sent'}
 
 
 class CameraListMessages(QueueEndpoint):
 
     response_topic = '/cameras/list/response'
+    response_message_type = 'cameras_list_response'
 
     def handle_request(self, params):
         print('message received', flush=True)
         self.send_response(params)
-        return {'message received'}
 
     def send_response(self, params):
-        print('message received', flush=True)
+        print('preparing response', flush=True)
         self.request_uid = params['request_uid']
 
         all_cameras = Camera.objects.all()
@@ -220,26 +213,22 @@ class CameraListMessages(QueueEndpoint):
         data = {
             'camera_list': camera_list
         }
-        self.send_response(data)
+        self.send_data_response(data)
         return
 
 
-class CameraSetRecordingMessages(QueueEndpoint):
+class CameraSetRecordingMessages(CameraQueueEndpoint):
 
     response_topic = '/cameras/{cam_id}/set_recording/request'
-
-    def __init__(self, server_name):
-        super().__init__(server_name=server_name)
+    response_message_type = 'set_recording_request'
 
     def handle_request(self, params):
-        print('message received', flush=True)
+        print('preparing response', flush=True)
         self.request_uid = params['request_uid']
-        print('request uid', self.request_uid, flush=True)
-        print('params', params, flush=True)
 
         self.response_topic = self.response_topic.format(cam_id=self.request_uid)
 
-        camera = Camera.objects.filter(uid=params['camera_id']).first()
+        camera = Camera.objects.filter(uid=self.topic_object)
         if camera:
 
             data = dict(CameraSerializer().basic_to_representation(camera))
@@ -259,31 +248,30 @@ class CameraSetRecordingMessages(QueueEndpoint):
             CameraSerializer().update(camera, data)
 
         else:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=self.request_uid))
+            print('errrrrrrrrrrrrrrr', flush=True)
+            error = RequestParamValidationError(info='camera with id {id} not found'.format(id=self.topic_object))
+            print(error, flush=True)
             self.send_error_response(error)
             return
 
         self.send_success_response()
-        return {'message sent'}
 
 
-
-class CameraDeleteMessages(QueueEndpoint):
+class CameraDeleteMessages(CameraQueueEndpoint):
 
     response_topic = '/cameras/{cam_id}/delete/response'
-
-    def __init__(self, server_name, topic_object):
-        super().__init__(server_name=server_name, topic_object=topic_object)
+    response_message_type = 'delete_response'
 
     def handle_request(self, params):
-        print('message received', flush=True)
+        print('preparing response', flush=True)
         self.request_uid = params['request_uid']
-        print('request uid', self.request_uid, flush=True)
+
         print('params', params, flush=True)
 
         self.response_topic = self.response_topic.format(cam_id=self.topic_object)
 
-        camera = Camera.objects.filter(uid=self.request_uid).first()
+        camera = Camera.objects.filter(uid=self.topic_object).first()
+
         if camera:
             try:
                 # camera = Camera.objects.get(uid=self.request_uid)
@@ -307,10 +295,9 @@ class CameraDeleteMessages(QueueEndpoint):
                 self.send_error_response(msg)
                 return
         else:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=self.request_uid))
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=self.topic_object))
             self.send_error_response(error)
             return
-
 
         if worker_response['status']:
             # raise Exception(code=400, detail={'message': worker_response['message']})
@@ -318,11 +305,9 @@ class CameraDeleteMessages(QueueEndpoint):
             self.send_error_response(msg)
             return
 
-
         camera.delete()
 
         if camera_group_to_delete:
             camera_group_to_delete.delete()
 
         self.send_success_response()
-        return {'message sent'}
