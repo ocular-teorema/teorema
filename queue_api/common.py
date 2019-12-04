@@ -3,7 +3,7 @@ import pika
 from supervisor.xmlrpc import SupervisorTransport
 from xmlrpc import client as xmlrpc_client
 
-from queue_api.errors import RequiredParamError
+from queue_api.messages import QueueMessage, QueueSuccessMessage, QueueErrorMessage, RequiredParamError
 
 
 class QueueEndpoint:
@@ -32,22 +32,21 @@ class QueueEndpoint:
                 self.send_error_response(message)
                 return True
 
+    def send_data_response(self, data):
+        message = QueueMessage(data=data)
+        self.send_in_queue(message)
+
     def send_success_response(self):
-        message = {
-            'request_uid': self.request_uid,
-            'type': self.response_message_type,
-            'data': {
-                'success': True
-            }
-        }
-        self.send_in_queue(json.dumps(message))
+        message = QueueSuccessMessage()
+        self.send_in_queue(message)
 
     def send_error_response(self, message):
-        message.request_uid = self.request_uid
-        self.send_in_queue(str(message))
+        self.send_in_queue(message)
 
     def send_in_queue(self, message):
-        return base_send_in_queue(self.exchange, message, self.server_name)
+        message.request_uid = self.request_uid
+        message.response_type = self.response_message_type
+        return base_send_in_queue(self.exchange, str(message), self.server_name)
 
 
 def base_send_in_queue(exchange, message, app_id=None):

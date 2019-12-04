@@ -4,8 +4,12 @@ import subprocess
 import json
 from supervisor.xmlrpc import SupervisorTransport
 from xmlrpc import client as xmlrpc_client
-from queue_api.common import QueueEndpoint, get_supervisor_processes
+
 from theorema.cameras.models import Server
+
+from queue_api.common import QueueEndpoint, get_supervisor_processes
+from queue_api.messages import QueueMessage
+
 
 
 class StatusMessages(QueueEndpoint):
@@ -16,11 +20,11 @@ class StatusMessages(QueueEndpoint):
     def handle_request(self, params):
         print('message received', flush=True)
         self.send_response(params)
-        return {'message received'}
 
     def send_response(self, params):
         print('sending message', flush=True)
-        request_uid = params['request_uid']
+        print('params', params, flush=True)
+        self.request_uid = params['request_uid']
 
         # hardware info
         local_ip_address = Server.objects.all().first().address
@@ -53,18 +57,12 @@ class StatusMessages(QueueEndpoint):
             'default_archive_path': default_archive_path
 
         }
-
         supervisor_processes = get_supervisor_processes()
 
-        message = {
-            'request_uid': request_uid,
-            'type': self.response_message_type,
-            'data': {
-                'hardware': hw_info,
-                'services': supervisor_processes['services'],
-                'cameras': supervisor_processes['cameras']
-            }
+        data = {
+            'hardware': hw_info,
+            'services': supervisor_processes['services'],
+            'cameras': supervisor_processes['cameras']
         }
-        self.send_in_queue(json.dumps(message))
 
-        return {'message sended'}
+        self.send_data_response(data)

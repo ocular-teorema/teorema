@@ -125,9 +125,6 @@ class PikaHandler(threading.Thread):
 
     def status_request(self, message):
         print('status request message received', flush=True)
-        print('message', message, flush=True)
-        request_uid = message['request_uid']
-        print(request_uid, flush=True)
 
         status_request = StatusMessages(self.server_name)
         status_request.handle_request(message)
@@ -201,15 +198,17 @@ if __name__ == '__main__':
     print('cameras', cameras_ids, flush=True)
     print('storages', storages_ids, flush=True)
 
-    for cam_id in cameras_ids:
-        camera_receiver = PikaHandler()
-        camera_receiver.set_object_exchange(object_type='camera', object_id=cam_id)
-        camera_receiver.start()
-
-    for storage_id in storages_ids:
-        storage_receiver = PikaHandler()
-        storage_receiver.set_object_exchange(object_type='storage', object_id=storage_id)
-        storage_receiver.start()
-    else:
-        receiver = PikaHandler()
-        receiver.start()
+    # for cam_id in cameras_ids:
+    #     camera_receiver = PikaHandler()
+    #     camera_receiver.set_object_exchange(object_type='camera', object_id=cam_id)
+    #     camera_receiver.start()
+    #
+    # for storage_id in storages_ids:
+    #     storage_receiver = PikaHandler()
+    #     storage_receiver.set_object_exchange(object_type='storage', object_id=storage_id)
+    #     storage_receiver.start()
+    # else:
+    #     receiver = PikaHandler()
+    #     receiver.start()
+    receiver = PikaHandler()
+    receiver.start()

@@ -1,7 +1,7 @@
 from queue_api.common import QueueEndpoint
 from theorema.cameras.serializers import StorageSerializer, Storage
 
-from queue_api.errors import RequestParamValidationError, RequiredParamError
+from queue_api.messages import RequestParamValidationError, RequiredParamError
 import json
 
 
@@ -12,6 +12,7 @@ class StorageAddMessages(QueueEndpoint):
     ]
 
     response_topic = '/storages/add/request'
+    response_message_type = 'storages_add_response'
 
     def __init__(self, server_name):
         super().__init__(server_name=server_name)
@@ -51,6 +52,7 @@ class StorageDeleteMessage(QueueEndpoint):
     ]
 
     response_topic = '/storages/delete/request'
+    response_message_type = 'storages_delete_request'
 
     def __init__(self, server_name):
         super().__init__(server_name=server_name)
@@ -80,6 +82,7 @@ class StorageDeleteMessage(QueueEndpoint):
 class StorageListMessage(QueueEndpoint):
 
     response_topic = '/storages/list/request'
+    response_message_type = 'storages_list_request'
 
     def __init__(self, server_name):
         super().__init__(server_name=server_name)
@@ -105,7 +108,7 @@ class StorageListMessage(QueueEndpoint):
             }
             message['storage_list'].append(data)
 
-        self.send_in_queue(self.response_topic, json.dumps(message))
+        self.send_in_queue(json.dumps(message))
         return {'message sent'}
 
 

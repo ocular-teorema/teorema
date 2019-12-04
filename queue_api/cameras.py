@@ -9,7 +9,7 @@ from theorema.cameras.models import CameraGroup, Server, Camera, Storage
 from theorema.cameras.serializers import CameraSerializer
 
 from queue_api.common import QueueEndpoint, get_supervisor_processes
-from queue_api.errors import RequestParamValidationError
+from queue_api.messages import RequestParamValidationError
 
 
 class CameraQueueEndpoint(QueueEndpoint):
@@ -217,12 +217,10 @@ class CameraListMessages(QueueEndpoint):
 
         print(self.request_uid, flush=True)
         print(camera_list, flush=True)
-        message = {
-            'request_uid': self.request_uid,
+        data = {
             'camera_list': camera_list
         }
-        self.send_in_queue(self.response_topic, json.dumps(message))
-
+        self.send_response(data)
         return
 
 
