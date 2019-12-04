@@ -68,10 +68,10 @@ def base_send_in_queue(exchange, message, app_id=None):
 def pika_setup_connection():
     connection = pika.BlockingConnection(pika.ConnectionParameters(
         # 'localhost',
-        '10.10.110.1',
-        15672,
-        'ocular',
-        pika.PlainCredentials('ocular', 'mC2QX0J7sx7i'),
+        host='10.10.110.1',
+        port=15672,
+        virtual_host='ocular',
+        credentials=pika.PlainCredentials('ocular', 'mC2QX0J7sx7i'),
         # heartbeat_interval=heartbeat
     ))
     return connection
