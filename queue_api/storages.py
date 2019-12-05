@@ -7,8 +7,8 @@ import json
 
 class StorageQueueEndpoint(QueueEndpoint):
 
-    def __init__(self, exchange, server_name, topic_object=None):
-        super().__init__(exchange=exchange, server_name=server_name, topic_object=topic_object)
+    def __init__(self, exchange, server_name):
+        super().__init__(exchange=exchange, server_name=server_name)
 
 
 class StorageAddMessages(StorageQueueEndpoint):
@@ -61,12 +61,12 @@ class StorageDeleteMessage(StorageQueueEndpoint):
         #if self.check_request_params(params):
         #    return
 
-        storage = Storage.objects.filter(id=message['storage_id']).first()
+        storage = Storage.objects.filter(id=params['storage_id']).first()
         if storage:
             storage.delete()
         else:
             # raise Exception('storage does not exist')
-            error = RequestParamValidationError('storage with id {id} not found'.format(id=message['storage_id']))
+            error = RequestParamValidationError('storage with id {id} not found'.format(id=params['storage_id']))
             self.send_error_response(error)
             return
 
@@ -120,7 +120,7 @@ class StorageUpdateMessage(StorageQueueEndpoint):
             'path': checking_params['path']
         }
 
-        storage = Storage.objects.filter(id=message['storage_id']).first()
+        storage = Storage.objects.filter(id=params['storage_id']).first()
         if storage:
             serializer = StorageSerializer(data=serializer_params)
             if serializer.is_valid():
@@ -133,7 +133,7 @@ class StorageUpdateMessage(StorageQueueEndpoint):
                 return
         else:
             # raise Exception('storage does not exist')
-            error = RequestParamValidationError('storage with id {id} not found'.format(id=message['storage_id']))
+            error = RequestParamValidationError('storage with id {id} not found'.format(id=params['storage_id']))
             self.send_error_response(error)
             return
 

@@ -7,9 +7,8 @@ from theorema.cameras.models import Camera
 
 class PtzControlQueueEndpoint(QueueEndpoint):
 
-    def __init__(self, exchange, server_name, topic_object=None):
-        super().__init__(exchange=exchange, server_name=server_name, topic_object=topic_object)
-
+    def __init__(self, exchange, server_name):
+        super().__init__(exchange=exchange, server_name=server_name)
 
     def move(self, x_coord, y_coord, zoom, address):
         user = address.split('@')[0].split('/')[-1].split(':')[0]
@@ -75,22 +74,22 @@ class PanControlMessage(PtzControlQueueEndpoint):
         print('request uid', self.uuid, flush=True)
         print('params', params['data'], flush=True)
 
-        self.response_topic = self.response_topic.format(cam_id=message['camera_id'])
+        #self.response_topic = self.response_topic.format(cam_id=message['camera_id'])
 
         if self.check_request_params(params['data']):
             return
 
-        camera = Camera.objects.filter(uid=message['camera_id']).first()
+        camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
             try:
                 self.move(int(params['step']), 0, 0, camera.address)
             except:
                 print('some error', flush=True)
-                error = RequestParamValidationError('camera with id {id} can not move'.format(id=message['camera_id']))
+                error = RequestParamValidationError('camera with id {id} can not move'.format(id=params['camera_id']))
                 self.send_error_response(error)
                 return
         else:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=message['camera_id']))
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
             self.send_error_response(error)
             return
 
@@ -113,22 +112,22 @@ class TiltControlMessage(PtzControlQueueEndpoint):
         print('request uid', self.uuid, flush=True)
         print('params', params['data'], flush=True)
 
-        self.response_topic = self.response_topic.format(cam_id=message['camera_id'])
+        #self.response_topic = self.response_topic.format(cam_id=message['camera_id'])
 
         if self.check_request_params(params['data']):
             return
 
-        camera = Camera.objects.filter(uid=message['camera_id']).first()
+        camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
             try:
                 self.move(0, int(params['step']), 0, camera.address)
             except:
                 print('some error', flush=True)
-                error = RequestParamValidationError('camera with id {id} can not move'.format(id=message['camera_id']))
+                error = RequestParamValidationError('camera with id {id} can not move'.format(id=params['camera_id']))
                 self.send_error_response(error)
                 return
         else:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=message['camera_id']))
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
             self.send_error_response(error)
             return
 
@@ -151,22 +150,22 @@ class ZoomControlMessage(PtzControlQueueEndpoint):
         print('request uid', self.uuid, flush=True)
         print('params', params['data'], flush=True)
 
-        self.response_topic = self.response_topic.format(cam_id=message['camera_id'])
+        #self.response_topic = self.response_topic.format(cam_id=message['camera_id'])
 
         if self.check_request_params(params['data']):
             return
 
-        camera = Camera.objects.filter(uid=message['camera_id']).first()
+        camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
             try:
                 self.move(0, 0, int(params['step']), camera.address)
             except:
                 print('some error', flush=True)
-                error = RequestParamValidationError('camera with id {id} can not move'.format(id=message['camera_id']))
+                error = RequestParamValidationError('camera with id {id} can not move'.format(id=params['camera_id']))
                 self.send_error_response(error)
                 return
         else:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=message['camera_id']))
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
             self.send_error_response(error)
             return
 
