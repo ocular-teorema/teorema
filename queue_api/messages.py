@@ -4,20 +4,20 @@ import json
 class QueueMessage:
 
     data = None
-    request_uid = None
+    uuid = None
     response_type = None
 
-    def __init__(self, request_uid=None, response_type=None, data=None):
+    def __init__(self, uuid=None, response_type=None, data=None):
         if data is not None:
             self.data = data
-        if request_uid is not None:
-            self.request_uid = request_uid
+        if uuid is not None:
+            self.uuid = uuid
         if response_type is not None:
-            self.response_type = request_uid
+            self.response_type = uuid
 
     def __repr__(self):
         return json.dumps({
-            'request_uid': self.request_uid,
+            'uuid': self.uuid,
             'type': self.response_type,
             'data': self.data
         })
@@ -25,12 +25,12 @@ class QueueMessage:
 
 class QueueSuccessMessage(QueueMessage):
 
-    def __init__(self, request_uid=None, response_type=None):
+    def __init__(self, uuid=None, response_type=None):
         self.data = {
             'success': True
         }
 
-        super().__init__(request_uid, response_type, self.data)
+        super().__init__(uuid, response_type, self.data)
 
 
 class QueueErrorMessage(QueueMessage):
@@ -38,7 +38,7 @@ class QueueErrorMessage(QueueMessage):
     code = None
     error = None
 
-    def __init__(self, request_uid=None, response_type=None, code=None, error=None):
+    def __init__(self, uuid=None, response_type=None, code=None, error=None):
         if code is not None:
             self.code = code
         if error is not None:
@@ -50,16 +50,16 @@ class QueueErrorMessage(QueueMessage):
             'error': self.error
         }
 
-        super().__init__(request_uid, response_type, self.data)
+        super().__init__(uuid, response_type, self.data)
 
 
 class RequiredParamError(QueueErrorMessage):
     code = 1
     message = "Required parameter not found: {param}"
 
-    def __init__(self, param, request_uid=None, response_type=None):
+    def __init__(self, param, uuid=None, response_type=None):
         super().__init__(
-            request_uid=request_uid,
+            uuid=uuid,
             response_type=response_type,
             error=self.message.format(param=param)
         )
@@ -69,10 +69,10 @@ class RequestParamValidationError(QueueErrorMessage):
     code = 2
     message = "Validation error: {info}"
 
-    def __init__(self, info, request_uid=None, response_type=None):
+    def __init__(self, info, uuid=None, response_type=None):
         print('info', info, flush=True)
         super().__init__(
-            request_uid=request_uid,
+            uuid=uuid,
             response_type=response_type,
             error=self.message.format(info=info)
         )

@@ -1,5 +1,5 @@
 import os
-#import psutil
+import psutil
 import subprocess
 import json
 from supervisor.xmlrpc import SupervisorTransport
@@ -12,8 +12,6 @@ from queue_api.common import QueueEndpoint, get_supervisor_processes
 
 class StatusMessages(QueueEndpoint):
 
-    response_topic = '/status/response'
-    response_message_type = 'status_response'
 
     def handle_request(self, params):
         print('message received', flush=True)
@@ -22,7 +20,7 @@ class StatusMessages(QueueEndpoint):
     def send_response(self, params):
         print('sending message', flush=True)
         print('params', params, flush=True)
-        self.request_uid = params['request_uid']
+        self.uuid = params['uuid']
 
         # hardware info
         local_ip_address = Server.objects.all().first().address
@@ -39,11 +37,11 @@ class StatusMessages(QueueEndpoint):
 
         load_average = os.getloadavg()
 
-        # cpu_usage = int(psutil.cpu_percent())
-        cpu_usage = int(32)
+        cpu_usage = int(psutil.cpu_percent())
+        #cpu_usage = int(32)
         default_archive_path = '/home/_VideoArchive'
-        # disk_usage = int(psutil.disk_usage(default_archive_path).percent)
-        disk_usage = 2
+        disk_usage = int(psutil.disk_usage(default_archive_path).percent)
+        #disk_usage = 2
 
         hw_info = {
             'local_ip_address': local_ip_address,
