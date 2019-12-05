@@ -81,8 +81,8 @@ class PikaHandler(threading.Thread):
     def callback(self, ch, method, properties, body):
         print('received', body, properties, method, flush=True)
         try:
-            #if not properties.app_id or int(properties.app_id) != self.server_name:
-            if properties.app_id and int(properties.app_id) == self.server_name:
+            # if not properties.app_id or int(properties.app_id) != self.server_name:
+            if properties.app_id and properties.app_id == str(self.server_name):
                 print('message published by self, skipping', flush=True)
                 raise SelfPublished
 
@@ -93,12 +93,6 @@ class PikaHandler(threading.Thread):
                 getattr(self, message_type, self.unknown_handler)(message)
 
 
-            # routing_key = method.routing_key[1:].split('/')
-            # route_attr = '_'.join(routing_key)
-            # print('topic obj:', self.topic_object, flush=True)
-            # if self.topic_object is not None:
-            #     route_attr = route_attr.replace(self.topic_object + '_', '')
-            # print('route:', route_attr, flush=True)
         except SelfPublished:
             pass
         except Exception as e:
