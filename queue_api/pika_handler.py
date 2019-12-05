@@ -20,6 +20,7 @@ from queue_api.cameras import CameraAddMessages, CameraListMessages, CameraSetRe
 from queue_api.common import pika_setup_connection, exchange_from_server_name, exchange_with_camera_name, exchange_with_storage_name
 from queue_api.ptz_control import PanControlMessage, TiltControlMessage, ZoomControlMessage
 from queue_api.archive import VideosGetMessage
+from queue_api.events import EventsSendMessage
 
 
 class SelfPublished(Exception):
@@ -214,6 +215,13 @@ class PikaHandler(threading.Thread):
         print('archive video request', flush=True)
 
         cameras_request = VideosGetMessage(self.server_exchange, self.server_name)
+        cameras_request.handle_request(message)
+        print('message ok', flush=True)
+
+    def cameras_event_request(self, message):
+        print('cameras event request', flush=True)
+
+        cameras_request = EventsSendMessage(self.server_exchange, self.server_name)
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 

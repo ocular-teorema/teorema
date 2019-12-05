@@ -10,6 +10,7 @@ from twisted.internet.endpoints import TCP4ServerEndpoint
 
 from settings import *
 
+
 config = configparser.ConfigParser()
 config.read(SUPERVISOR_CAMERAS_CONF)
 raw_cams =[{'id': str(k[len('program:cam'):]), 'directory': v['directory']} for k,v in config.items() if k.startswith('program:cam')]
@@ -35,6 +36,9 @@ class CamListener(Protocol):
 
     def dataReceived(self, data):
         print(self.camera_id, data, flush=True)
+        # if 'Hello from DataDirectory' not in data.decode():
+        #     # print(json.loads(data.decode()), flush=True)
+        #     some_func(data)
         [x for x in cams if str(x['id']) == str(self.camera_id)][0]['connection'] = self # kill me
         try:
             j = json.loads(data.strip(b'\0').decode())
