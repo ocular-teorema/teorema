@@ -218,7 +218,7 @@ class PikaHandler(threading.Thread):
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
-    def cameras_event_request(self, message):
+    def cameras_event(self, message):
         print('cameras event request', flush=True)
 
         cameras_request = EventsSendMessage(self.server_exchange, self.server_name)
