@@ -535,7 +535,9 @@ class ArchiveVideo(Resource):
                 'archivePostfix': archive_path,
                 'cam': record[4],
                 'id': record[5],
-                'fileSize': fs
+                'fileSize': fs,
+                'start_posix_time': record[6],
+                'end_posix_time': record[7]
             })
 
         return result

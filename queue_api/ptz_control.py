@@ -121,7 +121,7 @@ class TiltControlMessage(PtzControlQueueEndpoint):
         camera = Camera.objects.filter(uid=self.topic_object).first()
         if camera:
             try:
-                self.move(int(params['step']), 0, 0, camera.address)
+                self.move(0, int(params['step']), 0, camera.address)
             except:
                 print('some error', flush=True)
                 error = RequestParamValidationError('camera with id {id} can not move'.format(id=self.topic_object))
@@ -159,7 +159,7 @@ class ZoomControlMessage(PtzControlQueueEndpoint):
         camera = Camera.objects.filter(uid=self.topic_object).first()
         if camera:
             try:
-                self.move(int(params['step']), 0, 0, camera.address)
+                self.move(0, 0, int(params['step']), camera.address)
             except:
                 print('some error', flush=True)
                 error = RequestParamValidationError('camera with id {id} can not move'.format(id=self.topic_object))
