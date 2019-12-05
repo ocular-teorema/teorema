@@ -1,0 +1,133 @@
+channels:
+  config_export_request:
+    subscribe:
+      description: Send messages with request to expuort configuration
+      operationId: config_export_request
+      message:
+        name: config_export
+        title: Configuration export message request
+        summary: Request export current configuration
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - uuid
+            - type
+            - data
+          properties:
+            uuid:
+              $ref: 'base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'config_export'
+            data:
+              $ref: 'base_types.yml#/components/schemas/data_empty'
+  config_export_response:
+    publish:
+      description: Receive messages with exported configuration
+      operationId: config_export_response
+      message:
+        name: config_export
+        title: Message with exported configuration
+        summary: Receive exported configuration
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - uuid
+            - type
+            - data
+          properties:
+            uuid:
+              $ref: 'base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'config_export'
+            data:
+              $ref: '#/components/schemas/data_config'
+  config_import_request:
+    subscribe:
+      description: Send messages with request to import configuration
+      operationId: config_import_request
+      message:
+        name: config_import
+        title: Configuration export message request
+        summary: Request export current configuration
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - uuid
+            - type
+            - data
+          properties:
+            uuid:
+              $ref: 'base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'config_import'
+            data:
+              $ref: '#/components/schemas/data_config'
+  config_import_response:
+    publish:
+      description: Receive messages with status of importing configuration
+      operationId: config_import_response
+      message:
+        oneOf:
+          - $ref: '#/components/messages/import_error'
+          - $ref: '#/components/messages/import_error'
+
+
+components:
+  messages:
+    import_success:
+      name: config_import
+      title: Message with success status of request to import configuration
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - data
+        properties:
+          uuid:
+            $ref: 'base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'config_import'
+          data:
+            $ref: 'base_types.yml#/components/schemas/data_success'
+    import_error:
+      name: config_import
+      title: Message with error status of request to import configuration
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - data
+        properties:
+          uuid:
+            $ref: 'base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'config_import'
+          data:
+            $ref: 'base_types.yml#/components/schemas/data_error'
+        
+  schemas:
+    data_config:
+      type: object
+      description: Message with configuration
+      required:
+        - uuid
+        - organizations
+      properties:
+        uuid:
+          $ref: 'base_types.yml#/components/schemas/uuid'
+        organizations:
+          type: array
+          items:
+            $ref: 'base_types.yml#/components/schemas/organization_object'

@@ -1,0 +1,162 @@
+channels:
+  cameras_ptz_control:
+    subscribe:
+      description: Send messages to control PTZ camera
+      operationId: cameras_ptz_control
+      message:
+        oneOf:
+          - $ref: '#/components/messages/camera_ptz_move_horizontal_message'
+          - $ref: '#/components/messages/camera_ptz_move_vertical_message'
+          - $ref: '#/components/messages/camera_ptz_zoom_message'
+          - $ref: '#/components/messages/camera_ptz_tilt_message'
+          - $ref: '#/components/messages/camera_ptz_home_message'
+
+components:
+  messages:
+    camera_ptz_move_horizontal_message:
+      name: cameras_ptz_move_horizontal
+      title: Message for PTZ Camera to move in horizontal direction
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - camera_id
+          - data
+        properties:
+          uuid:
+            $ref: '../base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'cameras_ptz_move_horizontal'
+          camera_id:
+            $ref: '../base_types.yml#/components/schemas/camera_id'
+          data:
+            type: object
+            required:
+              - step
+            properties:
+              step:
+                type:
+                  string
+                description: step
+                examples:
+                  - "+8"
+                  - "-5"
+
+    camera_ptz_move_vertical_message:
+      name: cameras_ptz_move_vertical
+      title: Message for PTZ Camera to move in vertical direction
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - camera_id
+          - data
+        properties:
+          uuid:
+            $ref: '../base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'cameras_ptz_move_vertical'
+          camera_id:
+            $ref: '../base_types.yml#/components/schemas/camera_id'
+          data:
+            type: object
+            required:
+              - step
+            properties:
+              step:
+                type:
+                  string
+                description: step
+                examples:
+                  - "+8"
+                  - "-5"
+    camera_ptz_zoom_message:
+      name: cameras_ptz_zoom
+      title: Message for PTZ Camera to zoom in or out
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - camera_id
+          - data
+        properties:
+          uuid:
+            $ref: '../base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'cameras_ptz_zoom'
+          camera_id:
+            $ref: '../base_types.yml#/components/schemas/camera_id'
+          data:
+            type: object
+            required:
+              - step
+            properties:
+              step:
+                type:
+                  string
+                description: step
+                examples:
+                  - "+8"
+                  - "-5"
+    camera_ptz_tilt_message:
+      name: cameras_ptz_tilt
+      title: Message for PTZ Camera to tilt clockwize or counter-clockwize (if supported)
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - camera_id
+          - data
+        properties:
+          uuid:
+            $ref: '../base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'cameras_ptz_tilt'
+          camera_id:
+            $ref: '../base_types.yml#/components/schemas/camera_id'
+          data:
+            type: object
+            required:
+              - step
+            properties:
+              step:
+                type:
+                  string
+                description: step
+                examples:
+                  - "+8"
+                  - "-5"
+
+    camera_ptz_home_message:
+      name: cameras_ptz_home
+      title: Message for PTZ Camera to return to home position (if supported)
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - camera_id
+          - data
+        properties:
+          uuid:
+            $ref: '../base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'cameras_ptz_home'
+          camera_id:
+            $ref: '../base_types.yml#/components/schemas/camera_id'
+          data:
+            $ref: '../base_types.yml#/components/schemas/data_empty'

@@ -1,0 +1,45 @@
+channels:
+  cameras_list_request:
+    subscribe:
+      description: Send messages to request list of cameras
+      operationId: cameras_list
+      message:
+        name: cameras_list
+        title: Message to request list of cameras
+        payload:
+          type: object
+          required:
+            - uuid
+            - type
+            - data
+          properties:
+            uuid:
+              $ref: '../base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'cameras_list'
+            data:
+              $ref: '../base_types.yml#/components/schemas/data_empty'
+  cameras_list_response:
+    publish:
+      description: Receive messages with list of cameras
+      operationId: cameras_list
+      message:
+        name: camera_list
+        title: Message with list of cameras
+        payload:
+          type: object
+          properties:
+            uuid:
+              $ref: '../base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'cameras_list'
+            data:         
+              type: object
+              description: data with list of cameras
+              properties:
+                cameras:
+                  type: array
+                  items:
+                    $ref: '../base_types.yml#/components/schemas/camera_list_object'

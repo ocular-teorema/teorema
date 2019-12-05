@@ -1,0 +1,44 @@
+channels:
+  schedules_list_request:
+    subscribe:
+      description: Send messages to request list of schedules
+      operationId: schedules_list_request
+      message:
+        name: schedule_list
+        title: Message to request list of schedules
+        payload:
+          type: object
+          required:
+            - uuid
+            - type
+            - data
+          properties:
+            uuid:
+              $ref: '../base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'schedules_list'
+            data:
+              $ref: '../base_types.yml#/components/schemas/data_empty'
+
+  schedules_list_response:
+    publish:
+      description: Receive messages with list of schedules
+      operationId: schedules_list
+      message:
+        name: schedule_list
+        title: Message with list of schedules
+        payload:
+          type: object
+          required:
+            - uuid
+            - type
+            - data
+          properties:
+            uuid:
+              $ref: '../base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'schedules_list'
+            data:
+              $ref: '../base_types.yml#/components/schemas/schedules_list_object'

@@ -1,0 +1,83 @@
+channels:
+  storages_add_request:
+    subscribe:
+      description: Send messages to add new storage path
+      operationId: storages_add
+      message:
+        name: storage_add
+        title: Message to add storage
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - uuid
+            - type
+            - data
+          properties:
+            uuid:
+              $ref: '../base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'storages_add'
+            data:
+              type: object
+              required:
+                - storage
+              properties:
+                storage:
+                  type: object
+                  required:
+                    - name
+                    - path
+                  properties:
+                    name:
+                      $ref: '../base_types.yml#/components/schemas/storage_name'
+                    path:
+                      $ref: '../base_types.yml#/components/schemas/storage_path'
+  storages_add_response:
+    publish:
+      description: Receive messages with status of added storage
+      operationId: storage_add
+      message:
+        oneOf:
+          - $ref: '#/components/messages/success'
+          - $ref: '#/components/messages/error'
+
+components:
+  messages:
+    success:
+      name: storages_add
+      title: Message with success status of request to add storage
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - data
+        properties:
+          uuid:
+            $ref: '../base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'storages_add'
+          data:
+            $ref: '../base_types.yml#/components/schemas/data_success'
+    error:
+      name: storages_add
+      title: Message with error status of request to add storage
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - data
+        properties:
+          uuid:
+            $ref: '../base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'storages_add'
+          data:
+            $ref: '../base_types.yml#/components/schemas/data_error'

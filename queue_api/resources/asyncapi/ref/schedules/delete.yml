@@ -1,0 +1,80 @@
+channels:
+  schedules_delete_request:
+    subscribe:
+      description: Send messages to delete existing schedule
+      operationId: schedules_delete
+      message:
+        name: schedules_delete
+        title: Message to delete schedule
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - uuid
+            - type
+            - schedule_id
+            - data
+          properties:
+            uuid:
+              $ref: '../base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'schedules_delete'
+            schedule_id:
+              $ref: '../base_types.yml#/components/schemas/schedule_id'
+            data:
+                $ref: '../base_types.yml#/components/schemas/data_empty'
+  schedules_delete_response:
+    publish:
+      description: Receive messages with status of schedule deletion
+      operationId: schedules_delete_response
+      message:
+        oneOf:
+          - $ref: '#/components/messages/success'
+          - $ref: '#/components/messages/error'
+
+
+components:
+  messages:
+    success:
+      name: schedules_delete
+      title: Message with success status of request to delete schedule
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - schedule_id
+          - data
+        properties:
+          uuid:
+            $ref: '../base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'schedules_delete'
+          schedule_id:
+            $ref: '../base_types.yml#/components/schemas/schedule_id'
+          data:
+            $ref: '../base_types.yml#/components/schemas/data_success'
+    error:
+      name: schedules_delete
+      title: Message with error status of request to delete schedule
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - schedule_id
+          - data
+        properties:
+          uuid:
+            $ref: '../base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'schedules_delete'
+          schedule_id:
+            $ref: '../base_types.yml#/components/schemas/schedule_id'
+          data:
+            $ref: '../base_types.yml#/components/schemas/data_error'
