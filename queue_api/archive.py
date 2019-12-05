@@ -37,16 +37,19 @@ class VideosGetMessage(ArchiveQueueEndpoint):
             'limit': 10000 if 'limit' not in params['data'].keys() else params['data']['limit']
         }
 
-        response = requests.get('http://{}/archive_video'.format(self.default_serv.address), params=query_params)
+        response = requests.get('http://{}:5005/archive_video'.format(self.default_serv.address), params=query_params)
 
-        data = json.loads(response.content)
-        videos = {
-            'id': data['id'],
-            'camera': data['cam'],
-            'start_timestamp': data['start_posix_time'],
-            'stop_timestamp': data['end_posix_time'],
-            'file_size': data['fileSize']
-        }
+        response_data = json.loads(response.content.decode())
+        data = {'videos': []}
+        for video in response_data:
+            video_data = {
+                'id': video['id'],
+                'camera': video['cam'],
+                'start_timestamp': video['start_posix_time'],
+                'stop_timestamp': video['end_posix_time'],
+                'file_size': video['fileSize']
+            }
+            data['videos'].append(video_data)
 
-        self.send_data_response(videos)
+        self.send_data_response(data)
         return
