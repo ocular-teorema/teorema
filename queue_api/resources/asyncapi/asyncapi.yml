@@ -1,0 +1,191 @@
+asyncapi: 2.0.0
+info:
+  title: Ocular API
+  version: '1.1.1'
+  description: |
+    ## AsyncAPI specification for Ocular project
+
+    # Notes:
+    * All messages from subsribe channels must be sended with exchange "/ocular/{server_name}" and empty routing_key.
+    * All messages from publish channels will be sended to exchange "/ocular_driver/" and empty routing_key.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  production:
+    url: api.ocular.io:5672
+    protocol: rabbitmq
+    variables:
+      port:
+        description: Secure connection (TLS) is available through port 5672.
+        default: '5672'
+
+defaultContentType: application/json
+
+channels:
+#  ocular/{server_name}/:
+#    subscribe:
+#      description: Takes requests
+#      message:
+#        oneOf:
+#          - $ref: 'ref/status.yml#/components/messages/status_request'
+#          - $ref: 'ref/reset.yml#/components/messages/reset_request'
+#
+#  ocular_driver/:
+#    publish:
+#      description: Sends responses
+#      message:
+#        oneOf:
+#          - $ref: 'ref/status.yml#/components/messages/status_response'
+#          - $ref: 'ref/reset.yml#/components/messages/success'
+#          - $ref: 'ref/reset.yml#/components/messages/error'
+
+
+  /ocular/{server_name}/status:
+      $ref: 'ref/status.yml#/channels/status_request'
+  /ocular_driver/status:
+    $ref: 'ref/status.yml#/channels/status_response'
+
+  /ocular/{server_name}/reset:
+    $ref: 'ref/reset.yml#/channels/reset_request'
+  /ocular_driver/reset:
+    $ref: 'ref/reset.yml#/channels/reset_response'
+
+  /ocular/{server_name}/cameras/add:
+    $ref: 'ref/cameras/add.yml#/channels/cameras_add_request'
+  /ocular_driver/cameras/add:
+    $ref: 'ref/cameras/add.yml#/channels/cameras_add_response'
+  /ocular/{server_name}/cameras/list:
+    $ref: 'ref/cameras/list.yml#/channels/cameras_list_request'
+  /ocular_driver/cameras/lis:
+    $ref: 'ref/cameras/list.yml#/channels/cameras_list_response'
+
+  /ocular/{server_name}/cameras/update:
+    $ref: 'ref/cameras/update.yml#/channels/cameras_update_request'
+  /ocular_driver/cameras/update:
+    $ref: 'ref/cameras/update.yml#/channels/cameras_update_response'
+  /ocular/{server_name}/cameras/delete:
+    $ref: 'ref/cameras/delete.yml#/channels/cameras_delete_request'
+  /ocular_driver/cameras/delete:
+    $ref: 'ref/cameras/delete.yml#/channels/cameras_delete_response'
+
+  /ocular/{server_name}/cameras/connection_status:
+    $ref: 'ref/cameras/connection_events.yml#/channels/cameras_connection_status'
+  /ocular_driver/cameras/events:
+    $ref: 'ref/cameras/connection_events.yml#/channels/cameras_events'
+
+  /ocular/{server_name}/cameras/set_recording:
+    $ref: 'ref/cameras/set_recording.yml#/channels/cameras_set_recording_request'
+  /ocular_driver/cameras/set_recording:
+    $ref: 'ref/cameras/set_recording.yml#/channels/cameras_set_recording_response'
+
+  /ocular/{server_name}/cameras/ptz_control:
+    $ref: 'ref/cameras/ptz_control.yml#/channels/cameras_ptz_control'
+
+  /ocular/{server_name}/storages/add:
+    $ref: 'ref/storages/add.yml#/channels/storages_add_request'
+  /ocular_driver//storages/add:
+    $ref: 'ref/storages/add.yml#/channels/storages_add_response'
+  /ocular/{server_name}/storages/list:
+    $ref: 'ref/storages/list.yml#/channels/storages_list_request'
+  /ocular_driver/storages/list:
+    $ref: 'ref/storages/list.yml#/channels/storages_list_response'
+
+  /ocular/{server_name}/storages/update:
+    $ref: 'ref/storages/update.yml#/channels/storages_update_request'
+  /ocular_driver/storages/update:
+    $ref: 'ref/storages/update.yml#/channels/storages_update_response'
+  /ocular/{server_name}/storages/delete:
+    $ref: 'ref/storages/delete.yml#/channels/storages_delete_request'
+  /ocular_driver/storages/delete:
+    $ref: 'ref/storages/delete.yml#/channels/storages_delete_response'
+
+  /ocular/{server_name}/schedules/add:
+    $ref: 'ref/schedules/add.yml#/channels/schedules_add_request'
+  /ocular_driver/schedules/add:
+    $ref: 'ref/schedules/add.yml#/channels/schedules_add_response'
+  /ocular/{server_name}/schedules/list:
+    $ref: 'ref/schedules/list.yml#/channels/schedules_list_request'
+  /ocular_driver/schedules/list:
+    $ref: 'ref/schedules/list.yml#/channels/schedules_list_response'
+  /ocular/{server_name}/schedules/update:
+    $ref: 'ref/schedules/update.yml#/channels/schedules_update_request'
+  /ocular_driver/schedules/update:
+    $ref: 'ref/schedules/update.yml#/channels/schedules_update_response'
+  /ocular/{server_name}/schedules/delete:
+    $ref: 'ref/schedules/delete.yml#/channels/schedules_delete_request'
+  /ocular_driver/schedules/delete:
+    $ref: 'ref/schedules/delete.yml#/channels/schedules_delete_response'
+
+  /ocular/{server_name}/config/export:
+    $ref: 'ref/configuration.yml#/channels/config_export_request'
+  /ocular_driver/config/export:
+    $ref: 'ref/configuration.yml#/channels/config_export_response'
+  /ocular/{server_name}/config/import:
+    $ref: 'ref/configuration.yml#/channels/config_import_request'
+  /ocular_driver/config/import:
+    $ref: 'ref/configuration.yml#/channels/config_import_response'
+  
+  /ocular/{server_name}/archive/archive/video:
+    $ref: 'ref/archive.yml#/channels/archive_video_request'
+  /ocular_driver/archive/archive/video:
+    $ref: 'ref/archive.yml#/channels/archive_video_response'
+
+components:
+  messages:
+    message1:
+      name: status_request
+      title: Status message request
+      summary: Request information about system
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - data
+        properties:
+          uuid:
+            $ref: 'ref/base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'status_request'
+          data:
+            $ref: 'ref/base_types.yml#/components/schemas/data_empty'
+    message2:
+      name: status_request
+      title: Status message request
+      summary: Request information about system
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - data
+        properties:
+          uuid:
+            $ref: 'ref/base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'status_request'
+          data:
+            $ref: 'ref/base_types.yml#/components/schemas/data_empty'
+  parameters:
+    server_id:
+      description: Name of the server
+      schema:
+        type: string
+    camera_id:
+      description: ID of camera
+      schema:
+        type: string
+    storage_id:
+      description: ID of storage
+      schema:
+        type: integer
+    schedule_id:
+      description: ID of storage
+      schema:
+        type: integer

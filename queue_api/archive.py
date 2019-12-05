@@ -22,8 +22,8 @@ class VideosGetMessage(ArchiveQueueEndpoint):
 
     def handle_request(self, params):
         print('message received', flush=True)
-        self.request_uid = params['request_uid']
-        print('request uid', self.request_uid, flush=True)
+        self.uuid = params['uuid']
+        print('request uid', self.uuid, flush=True)
         print('params', params['data'], flush=True)
 
         if self.check_request_params(params['data']):

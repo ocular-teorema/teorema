@@ -7,9 +7,8 @@ from theorema.cameras.models import Camera
 
 class PtzControlQueueEndpoint(QueueEndpoint):
 
-    def __init__(self, exchange, server_name, topic_object=None):
-        super().__init__(exchange=exchange, server_name=server_name, topic_object=topic_object)
-
+    def __init__(self, exchange, server_name):
+        super().__init__(exchange=exchange, server_name=server_name)
 
     def move(self, x_coord, y_coord, zoom, address):
         user = address.split('@')[0].split('/')[-1].split(':')[0]
@@ -71,26 +70,26 @@ class PanControlMessage(PtzControlQueueEndpoint):
 
     def handle_request(self, params):
         print('message received', flush=True)
-        self.request_uid = params['request_uid']
-        print('request uid', self.request_uid, flush=True)
+        self.uuid = params['uuid']
+        print('request uid', self.uuid, flush=True)
         print('params', params['data'], flush=True)
 
-        self.response_topic = self.response_topic.format(cam_id=self.topic_object)
+        #self.response_topic = self.response_topic.format(cam_id=message['camera_id'])
 
         if self.check_request_params(params['data']):
             return
 
-        camera = Camera.objects.filter(uid=self.topic_object).first()
+        camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
             try:
                 self.move(int(params['step']), 0, 0, camera.address)
             except:
                 print('some error', flush=True)
-                error = RequestParamValidationError('camera with id {id} can not move'.format(id=self.topic_object))
+                error = RequestParamValidationError('camera with id {id} can not move'.format(id=params['camera_id']))
                 self.send_error_response(error)
                 return
         else:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=self.topic_object))
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
             self.send_error_response(error)
             return
 
@@ -109,26 +108,26 @@ class TiltControlMessage(PtzControlQueueEndpoint):
 
     def handle_request(self, params):
         print('message received', flush=True)
-        self.request_uid = params['request_uid']
-        print('request uid', self.request_uid, flush=True)
+        self.uuid = params['uuid']
+        print('request uid', self.uuid, flush=True)
         print('params', params['data'], flush=True)
 
-        self.response_topic = self.response_topic.format(cam_id=self.topic_object)
+        #self.response_topic = self.response_topic.format(cam_id=message['camera_id'])
 
         if self.check_request_params(params['data']):
             return
 
-        camera = Camera.objects.filter(uid=self.topic_object).first()
+        camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
             try:
                 self.move(0, int(params['step']), 0, camera.address)
             except:
                 print('some error', flush=True)
-                error = RequestParamValidationError('camera with id {id} can not move'.format(id=self.topic_object))
+                error = RequestParamValidationError('camera with id {id} can not move'.format(id=params['camera_id']))
                 self.send_error_response(error)
                 return
         else:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=self.topic_object))
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
             self.send_error_response(error)
             return
 
@@ -147,26 +146,26 @@ class ZoomControlMessage(PtzControlQueueEndpoint):
 
     def handle_request(self, params):
         print('message received', flush=True)
-        self.request_uid = params['request_uid']
-        print('request uid', self.request_uid, flush=True)
+        self.uuid = params['uuid']
+        print('request uid', self.uuid, flush=True)
         print('params', params['data'], flush=True)
 
-        self.response_topic = self.response_topic.format(cam_id=self.topic_object)
+        #self.response_topic = self.response_topic.format(cam_id=message['camera_id'])
 
         if self.check_request_params(params['data']):
             return
 
-        camera = Camera.objects.filter(uid=self.topic_object).first()
+        camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
             try:
                 self.move(0, 0, int(params['step']), camera.address)
             except:
                 print('some error', flush=True)
-                error = RequestParamValidationError('camera with id {id} can not move'.format(id=self.topic_object))
+                error = RequestParamValidationError('camera with id {id} can not move'.format(id=params['camera_id']))
                 self.send_error_response(error)
                 return
         else:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=self.topic_object))
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
             self.send_error_response(error)
             return
 

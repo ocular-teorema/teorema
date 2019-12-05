@@ -1,0 +1,53 @@
+channels:
+  status_request:
+    subscribe:
+      description: Returns message with info about server - ip, ocular version, uptime, cpu, load average
+      operationId: status
+      message:
+        name: status
+        title: Status message request
+        summary: Request information about system
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - uuid
+            - type
+            - data
+          properties:
+            uuid:
+              $ref: 'base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'status'
+            data:
+              $ref: 'base_types.yml#/components/schemas/data_empty'    
+  status_response:
+    description: Returns message with info about server - ip, ocular version, uptime, cpu, load average
+    publish:
+      operationId: status
+      message:
+        name: status
+        title: Status message response
+        summary: Message with information about running ocular instance
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            uuid:
+              $ref: 'base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'status'
+            data: 
+              type: object
+              properties:
+                hardware:
+                  $ref: 'base_types.yml#/components/schemas/status_hardware_object'
+                services:
+                  $ref: 'base_types.yml#/components/schemas/status_services_object'
+                cameras:
+                  type: array
+                  description: List of camera status objects
+                  items:
+                    $ref: 'base_types.yml#/components/schemas/camera_status_object'

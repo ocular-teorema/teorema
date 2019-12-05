@@ -1,0 +1,80 @@
+channels:
+  cameras_delete_request:
+    subscribe:
+      description: Send messages to delete existing camera
+      operationId: cameras_delete
+      message:
+        name: cameras_delete
+        title: Message to delete camera
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - uuid
+            - type
+            - camera_id
+            - data
+          properties:
+            uuid:
+              $ref: '../base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'cameras_delete'
+            camera_id:
+              $ref: '../base_types.yml#/components/schemas/camera_id'
+            data:
+                $ref: '../base_types.yml#/components/schemas/data_empty'
+  cameras_delete_response:
+    publish:
+      description: Receive messages with status of camera deletion
+      operationId: cameras_delete
+      message:
+        oneOf:
+          - $ref: '#/components/messages/success'
+          - $ref: '#/components/messages/error'
+
+
+components:
+  messages:
+    success:
+      name: cameras_delete
+      title: Message with success status of request to delete camera
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - camera_id
+          - data
+        properties:
+          uuid:
+            $ref: '../base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'cameras_delete'
+          camera_id:
+            $ref: '../base_types.yml#/components/schemas/camera_id'
+          data:
+            $ref: '../base_types.yml#/components/schemas/data_success'
+    error:
+      name: cameras_delete
+      title: Message with error status of request to delete camera
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - camera_id
+          - data
+        properties:
+          uuid:
+            $ref: '../base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'cameras_delete'
+          camera_id:
+            $ref: '../base_types.yml#/components/schemas/camera_id'
+          data:
+            $ref: '../base_types.yml#/components/schemas/data_error'

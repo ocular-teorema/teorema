@@ -1,0 +1,45 @@
+channels:
+  storages_list_request:
+    subscribe:
+      description: Send messages to request list of storages
+      operationId: storages_list_request
+      message:
+        name: storage_list
+        title: Message to request list of storages
+        payload:
+          type: object
+          required:
+            - uuid
+            - type
+            - data
+          properties:
+            uuid:
+              $ref: '../base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'storages_list'
+            data:
+              $ref: '../base_types.yml#/components/schemas/data_empty'
+  storages_list_response:
+    publish:
+      description: Receive messages with list of storages
+      operationId: storages_list
+      message:
+        name: storage_list
+        title: Message with list of storages
+        payload:
+          type: object
+          properties:
+            uuid:
+              $ref: '../base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'storages_list'
+            data:
+              type: object
+              description: data with list of storages
+              properties:
+                cameras:
+                  type: array
+                  items:
+                    $ref: '../base_types.yml#/components/schemas/storage_list_object'

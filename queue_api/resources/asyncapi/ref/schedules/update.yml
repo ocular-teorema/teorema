@@ -1,0 +1,161 @@
+channels:
+  schedules_update_request:
+    subscribe:
+      description: Send messages to update schedule
+      operationId: schedules_update_request
+      message:
+        oneOf:
+          - $ref: '#/components/messages/request_weekdays'
+          - $ref: '#/components/messages/request_timestamp'
+          - $ref: '#/components/messages/request_time'
+  schedules_update_response:
+    publish:
+      description: Receive messages with status of updated schedule
+      operationId: schedules_update_response
+      message:
+        oneOf:
+          - $ref: '#/components/messages/response_success'
+          - $ref: '#/components/messages/response_error'
+
+components:
+  messages:
+    request_weekdays:
+      name: schedule_update
+      title: Message to update schedule based on enabling camera on some weekdays
+      contentType: application/json
+      payload:
+        type: object
+        description: Message to update schedule based on on days of week
+        required:
+          - uuid
+          - type
+          - schedule_id
+          - data
+        properties:
+          uuid:
+            $ref: '../base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'schedules_update'
+          schedule_id:
+            $ref: '../base_types.yml#/components/schemas/schedule_id'
+          data:
+            type: object
+            required:
+              - schedule_type
+              - days
+            properties:
+              schedule_type:
+                $ref: '../base_types.yml#/components/schemas/schedule_type'
+              days:
+                $ref: '../base_types.yml#/components/schemas/schedule_weekdays'
+
+    request_timestamp:
+      name: schedule_update
+      title: Message to update schedule to enable camera on period of timestamp
+      contentType: application/json
+      payload:
+        type: object
+        description: Message to update schedule based on on timestamps
+        required:
+          - uuid
+          - type
+          - schedule_id
+          - data
+        properties:
+          uuid:
+            $ref: '../base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'schedules_update'
+          schedule_id:
+            $ref: '../base_types.yml#/components/schemas/schedule_id'
+          data:
+            type: object
+            required:
+              - schedule_type
+              - start_timestamp
+              - stop_timestamp
+            properties:
+              schedule_type:
+                $ref: '../base_types.yml#/components/schemas/schedule_type'
+              start_timestamp:
+                $ref: '../base_types.yml#/components/schemas/schedule_start_timestamp'
+              stop_timestamp:
+                $ref: '../base_types.yml#/components/schemas/schedule_stop_timestamp'
+    request_time:
+      name: schedule_update
+      title: Message to update schedule to enable camera between some time periods every day
+      contentType: application/json
+      payload:
+        type: object
+        description: Message to update schedule based on on timestamps
+        required:
+          - uuid
+          - type
+          - schedule_id
+          - data
+        properties:
+          uuid:
+            $ref: '../base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'schedules_update'
+          schedule_id:
+            $ref: '../base_types.yml#/components/schemas/schedule_id'
+          data:
+            type: object
+            required:
+              - schedule_type
+              - start_time
+              - stop_time
+            properties:
+              uuid:
+                $ref: '../base_types.yml#/components/schemas/uuid'
+              schedule_type:
+                $ref: '../base_types.yml#/components/schemas/schedule_type'
+              start_time:
+                $ref: '../base_types.yml#/components/schemas/schedule_start_time'
+              stop_time:
+                $ref: '../base_types.yml#/components/schemas/schedule_stop_time'
+
+    response_success:
+      name: schedule_update
+      title: Message with success status of request to update schedule
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - schedule_id
+          - data
+        properties:
+          uuid:
+            $ref: '../base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'schedules_update'
+          data:
+            $ref: '../base_types.yml#/components/schemas/data_success'
+    response_error:
+      name: schedule_update
+      title: Message with error status of request to update schedule
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - schedule_id
+          - data
+        properties:
+          uuid:
+            $ref: '../base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'schedules_update'
+          schedule_id:
+            $ref: '../base_types.yml#/components/schemas/schedule_id'
+          data:
+            $ref: '../base_types.yml#/components/schemas/data_error'

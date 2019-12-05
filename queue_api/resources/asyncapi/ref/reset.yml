@@ -1,0 +1,99 @@
+channels:
+  reset_request:
+    subscribe:
+      description: Allows to send command 'reset' on ocular server 
+      operationId: reset_request
+      message:
+        name: reset_request
+        title: Reset request
+        summary: Request to reset ocular instance
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - uuid
+            - type
+            - data
+          properties:
+            uuid:
+              $ref: 'base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'reset'
+            data:
+              $ref: 'base_types.yml#/components/schemas/data_empty'
+  reset_response:
+    description: Receive messages about requested reset
+    publish:
+      operationId: reset_response
+      message:
+        oneOf:
+          - $ref: '#/components/messages/success'
+          - $ref: '#/components/messages/error'
+
+
+components:
+  messages:
+    reset_request:
+      name: reset
+      title: Reset request
+      summary: Request to reset ocular instance
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - data
+        properties:
+          uuid:
+            $ref: 'base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'reset'
+          data:
+            $ref: 'base_types.yml#/components/schemas/data_empty'
+    success:
+      name: reset
+      title: Success message
+      summary: Reset message when it succeeded
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - data
+        properties:
+          uuid:
+            $ref: 'base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'reset'
+          data:
+            type: object
+            properties:
+              success:
+                $ref: 'base_types.yml#/components/schemas/data_success'
+    error:
+      name: reset
+      title: Error message
+      summary: Message with response of failed reset
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - data
+        properties:
+          uuid:
+            $ref: 'base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'reset'
+          data:
+            type: object
+            properties:
+              success:
+                $ref: 'base_types.yml#/components/schemas/data_error'

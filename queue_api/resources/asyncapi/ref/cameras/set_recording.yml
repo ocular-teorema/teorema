@@ -1,0 +1,90 @@
+channels:
+  cameras_set_recording_request:
+    subscribe:
+      description: Send messages to set recording
+      operationId: cameras_set_recording
+      message:
+        name: cameras_set_recording
+        title: Message to set recording on/off
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - uuid
+            - type
+            - camera_id
+            - data
+          properties:
+            uuid:
+              $ref: '../base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'cameras_set_recording_request'
+            camera_id:
+              $ref: '../base_types.yml#/components/schemas/camera_id'
+            data:
+              type: object
+              required:
+                - recording
+              properties:
+                recording:
+                  type:
+                    boolean
+                  description: status of recording
+                  enum:
+                    - True
+                    - False
+
+  cameras_set_recording_response:
+    publish:
+      description: Receive message with status of recording
+      operationId: cameras_set_recording
+      message:
+        oneOf:
+          - $ref: '#/components/messages/success'
+          - $ref: '#/components/messages/error'
+
+components:
+  messages:
+    success:
+      name: cameras_set_recording
+      title: Message with success status of request to set recording
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - camera_id
+          - data
+        properties:
+          uuid:
+            $ref: '../base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'cameras_set_recording'
+          camera_id:
+            $ref: '../base_types.yml#/components/schemas/camera_id'
+          data:
+            $ref: '../base_types.yml#/components/schemas/data_success'
+    error:
+      name: cameras_set_recording_response
+      title: Message with error status of request to set recording
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - uuid
+          - type
+          - camera_id
+          - data
+        properties:
+          uuid:
+            $ref: '../base_types.yml#/components/schemas/uuid'
+          type:
+            type: string
+            const: 'cameras_set_recording'
+          camera_id:
+            $ref: '../base_types.yml#/components/schemas/camera_id'
+          data:
+            $ref: '../base_types.yml#/components/schemas/data_error'

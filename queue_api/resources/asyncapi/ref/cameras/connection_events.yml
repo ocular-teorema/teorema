@@ -1,0 +1,101 @@
+channels:
+  cameras_connection_status:
+    publish:
+      description: Receive messages about camera connections
+      operationId: cameras_connection_status
+      message:
+        name: cameras_connection
+        title: Message that camera connection was lost or established
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - uuid
+            - type
+            - camera_id
+            - data
+          properties:
+            uuid:
+              $ref: '../base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'cameras_connection'
+            camera_id:
+              $ref: '../base_types.yml#/components/schemas/camera_id'
+            data:
+              type: object
+              properties:
+                connected:
+                  type: boolean
+                  enum:
+                    - True
+                    - False
+  cameras_events:
+    publish:
+      description: Receive messages about events from cameras
+      operationId: cameras_events
+      message:
+        name: cameras_event
+        title: Message with event details
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - uuid
+            - type
+            - camera_id
+            - data
+          properties:
+            uuid:
+              $ref: '../base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'cameras_events'
+            camera_id:
+              $ref: '../base_types.yml#/components/schemas/camera_id'
+            data:
+              type: object
+              properties:
+#                camera_id:
+#                  $ref: "../base_types.yml#/components/schemas/camera_id"
+                event_id:
+                  type: integer
+                  format: int64
+                  description: Event id
+                  examples:
+                    - 4
+                    - 16
+                event_start_timestamp:
+                  type: integer
+                  description: event start timestamp
+                  examples:
+                    - "1572273590"
+                event_end_timestamp:
+                  type: integer
+                  description: event end timestamp
+                  examples:
+                    - "1572273591"
+                event_type:
+                  type: integer
+                  description: type of event
+                  examples:
+                    - 1
+                    - 2
+                    - 4
+                    - 8
+                confidence:
+                  type: integer
+                  minimum: 0
+                  maximum: 100
+                  description: confidence of event
+                  examples:
+                    - 55
+                    - 89
+                    - 94
+                reaction:
+                  type: integer
+                  description: reaction of event
+                  enum:
+                    - -1
+                    - 1
+                    - 2

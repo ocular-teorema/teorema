@@ -7,8 +7,8 @@ import json
 
 class StorageQueueEndpoint(QueueEndpoint):
 
-    def __init__(self, exchange, server_name, topic_object=None):
-        super().__init__(exchange=exchange, server_name=server_name, topic_object=topic_object)
+    def __init__(self, exchange, server_name):
+        super().__init__(exchange=exchange, server_name=server_name)
 
 
 class StorageAddMessages(StorageQueueEndpoint):
@@ -22,7 +22,7 @@ class StorageAddMessages(StorageQueueEndpoint):
 
     def handle_request(self, params):
         print('message received', flush=True)
-        self.request_uid = params['request_uid']
+        self.uuid = params['uuid']
         checking_params = params['data']
 
         if self.check_request_params(checking_params):
@@ -56,17 +56,17 @@ class StorageDeleteMessage(StorageQueueEndpoint):
 
     def handle_request(self, params):
         print('message received', flush=True)
-        self.request_uid = params['request_uid']
+        self.uuid = params['uuid']
 
         #if self.check_request_params(params):
         #    return
 
-        storage = Storage.objects.filter(id=self.topic_object).first()
+        storage = Storage.objects.filter(id=params['storage_id']).first()
         if storage:
             storage.delete()
         else:
             # raise Exception('storage does not exist')
-            error = RequestParamValidationError('storage with id {id} not found'.format(id=self.topic_object))
+            error = RequestParamValidationError('storage with id {id} not found'.format(id=params['storage_id']))
             self.send_error_response(error)
             return
 
@@ -80,7 +80,7 @@ class StorageListMessage(StorageQueueEndpoint):
 
     def handle_request(self, params):
         print('message received', flush=True)
-        self.request_uid = params['request_uid']
+        self.uuid = params['uuid']
 
         storages = Storage.objects.all()
 
@@ -109,7 +109,7 @@ class StorageUpdateMessage(StorageQueueEndpoint):
 
     def handle_request(self, params):
         print('message received', flush=True)
-        self.request_uid = params['request_uid']
+        self.uuid = params['uuid']
         checking_params = params['data']
 
         if self.check_request_params(checking_params):
@@ -120,7 +120,7 @@ class StorageUpdateMessage(StorageQueueEndpoint):
             'path': checking_params['path']
         }
 
-        storage = Storage.objects.filter(id=self.topic_object).first()
+        storage = Storage.objects.filter(id=params['storage_id']).first()
         if storage:
             serializer = StorageSerializer(data=serializer_params)
             if serializer.is_valid():
@@ -133,7 +133,7 @@ class StorageUpdateMessage(StorageQueueEndpoint):
                 return
         else:
             # raise Exception('storage does not exist')
-            error = RequestParamValidationError('storage with id {id} not found'.format(id=self.topic_object))
+            error = RequestParamValidationError('storage with id {id} not found'.format(id=params['storage_id']))
             self.send_error_response(error)
             return
 
