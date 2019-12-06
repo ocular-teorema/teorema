@@ -7,8 +7,8 @@ from theorema.cameras.models import Camera
 
 class PtzControlQueueEndpoint(QueueEndpoint):
 
-    def __init__(self, exchange, server_name):
-        super().__init__(exchange=exchange, server_name=server_name)
+    def __init__(self):
+        super().__init__()
 
     def move(self, x_coord, y_coord, zoom, address):
         user = address.split('@')[0].split('/')[-1].split(':')[0]

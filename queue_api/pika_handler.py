@@ -5,7 +5,6 @@ import sys
 import traceback
 import threading
 import json
-import uuid
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'theorema.settings')
@@ -17,18 +16,11 @@ from theorema.cameras.models import Camera, Storage
 from queue_api.status import StatusMessages
 from queue_api.storages import StorageListMessage, StorageDeleteMessage, StorageAddMessages, StorageUpdateMessage
 from queue_api.cameras import CameraAddMessages, CameraListMessages, CameraSetRecordingMessages, CameraDeleteMessages, CameraUpdateMessages
-from queue_api.common import pika_setup_connection, exchange_from_server_name
+from queue_api.common import pika_setup_connection, get_server_name_exchange, exchange_from_server_name
 from queue_api.ptz_control import PanControlMessage, TiltControlMessage, ZoomControlMessage
 from queue_api.archive import VideosGetMessage
 from queue_api.events import EventsSendMessage
 
-
-class SelfPublished(Exception):
-    pass
-
-
-class InvalidTopic(Exception):
-    pass
 
 
 class PikaHandler(threading.Thread):
@@ -36,28 +28,10 @@ class PikaHandler(threading.Thread):
     def __init__(self):
         super().__init__()
 
-        self.server_name = uuid.getnode()
+        self.server_name, self.server_exchange = get_server_name_exchange()
         print('server name: {name}'.format(name=self.server_name), flush=True)
-
-        self.server_exchange = exchange_from_server_name(self.server_name)
         print('exchange:', self.server_exchange, flush=True)
 
-#        self.is_object_exchange = False
-#        self.object_exchange_id = None
-#        self.object_exchange_type = None
-
-#    def set_object_exchange(self, object_type, object_id):
-#
-#        if object_type == 'camera':
-#            self.server_exchange = exchange_with_camera_name(self.server_exchange, object_id)
-#        elif object_type == 'storage':
-#            self.server_exchange = exchange_with_storage_name(self.server_exchange, object_id)
-#
-#        self.is_object_exchange = True
-#        self.object_exchange_id = object_id
-#        self.object_exchange_type = object_type
-#
-#        print('set object topic:', self.server_exchange, flush=True)
 
     def run(self):
         print('starting receiver', flush=True)
@@ -82,20 +56,11 @@ class PikaHandler(threading.Thread):
     def callback(self, ch, method, properties, body):
         print('received', body, properties, method, flush=True)
         try:
-            # if not properties.app_id or int(properties.app_id) != self.server_name:
-            #if properties.app_id and properties.app_id == str(self.server_name):
-            #    print('message published by self, skipping', flush=True)
-            #    raise SelfPublished
-
-            #else:
             message = json.loads(body.decode())
             message_type = message['type']
 
             getattr(self, message_type, self.unknown_handler)(message)
 
-
-        except SelfPublished:
-            pass
         except Exception as e:
             print('\n'.join(traceback.format_exception(*sys.exc_info())),
                   flush=True)

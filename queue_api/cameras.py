@@ -14,8 +14,8 @@ from queue_api.messages import RequestParamValidationError
 
 class CameraQueueEndpoint(QueueEndpoint):
 
-    def __init__(self, exchange, server_name, topic_object=None):
-        super().__init__(exchange=exchange, server_name=server_name, topic_object=topic_object)
+    def __init__(self):
+        super().__init__()
 
         self.default_org = Organization.objects.all().first()
         self.default_serv = Server.objects.all().first()

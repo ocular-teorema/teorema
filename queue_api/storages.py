@@ -7,8 +7,8 @@ import json
 
 class StorageQueueEndpoint(QueueEndpoint):
 
-    def __init__(self, exchange, server_name):
-        super().__init__(exchange=exchange, server_name=server_name)
+    def __init__(self):
+        super().__init__()
 
 
 class StorageAddMessages(StorageQueueEndpoint):

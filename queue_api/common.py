@@ -1,4 +1,5 @@
 import json
+import uuid
 import pika
 from supervisor.xmlrpc import SupervisorTransport
 from xmlrpc import client as xmlrpc_client
@@ -17,11 +18,8 @@ class QueueEndpoint:
     response_exchange = '/ocular_driver'
     response_message_type = None
 
-    def __init__(self, exchange, server_name):
-        self.exchange = exchange
-        self.server_name = server_name
-
-        # self.response_topic = self.response_topic.format(server_name=self.server_name)
+    def __init__(self):
+        self.server_name, self.exchange = get_server_name_exchange()
 
     def check_request_params(self, actual):
         actual_keys = actual.keys()
@@ -46,10 +44,10 @@ class QueueEndpoint:
     def send_in_queue(self, message):
         message.uuid = self.uuid
         message.response_type = self.response_message_type
-        return base_send_in_queue(self.response_exchange, str(message), self.server_name)
+        return base_send_in_queue(self.response_exchange, str(message))
 
 
-def base_send_in_queue(exchange, message, app_id=None):
+def base_send_in_queue(exchange, message):
     connection = pika_setup_connection()
 
     channel = connection.channel()
@@ -59,7 +57,7 @@ def base_send_in_queue(exchange, message, app_id=None):
         exchange=exchange,
         routing_key='',
         body=message,
-        properties=pika.BasicProperties(app_id=str(app_id))
+        properties=pika.BasicProperties()
     )
     print("sent message %r : %r" % (exchange, message), flush=True)
     connection.close()
@@ -104,9 +102,18 @@ def get_supervisor_processes():
     }
 
 
+def get_server_name():
+    return uuid.getnode()
+
+
 def exchange_from_server_name(name):
     return '/ocular/{server}'.format(server=name)
 
+
+def get_server_name_exchange():
+    server_name = get_server_name()
+    exchange = exchange_from_server_name(server_name)
+    return server_name, exchange
 #
 # def exchange_with_camera_name(base_exchange, camera_id):
 #     camera_postfix = '/cameras/{camera_id}'.format(camera_id=camera_id)
