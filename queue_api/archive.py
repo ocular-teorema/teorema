@@ -15,8 +15,8 @@ class VideosGetMessage(ArchiveQueueEndpoint):
         'cameras'
     ]
 
-    response_topic = '/archive/video/response'
-    response_message_type = 'archive_video_response'
+    response_topic = '/archive/video'
+    response_message_type = 'archive_video'
 
     def handle_request(self, params):
         print('message received', flush=True)

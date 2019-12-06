@@ -1,7 +1,6 @@
 from queue_api.common import QueueEndpoint
 import json
 from queue_api.common import base_send_in_queue
-from theorema.cameras.models import Server
 
 
 class EventQueueEndpoint(QueueEndpoint):
@@ -14,8 +13,7 @@ class EventsSendMessage(EventQueueEndpoint):
 
     def handle_request(self, params):
         print('message received', flush=True)
-        self.request_uid = params['request_uid']
-        print('request uid', self.request_uid, flush=True)
+
         print('params', params['data'], flush=True)
 
         end_of_dict = params['data'].index('}')
@@ -34,6 +32,6 @@ class EventsSendMessage(EventQueueEndpoint):
             }
         }
 
-        base_send_in_queue(self.exchange, message, self.default_serv.address)
+        base_send_in_queue(self.exchange, json.dumps(message))
 
 

@@ -5,7 +5,7 @@ from supervisor.xmlrpc import SupervisorTransport
 from xmlrpc import client as xmlrpc_client
 
 from theorema.orgs.models import Organization
-from theorema.cameras.models import CameraGroup, Server
+from theorema.cameras.models import CameraGroup, Server, Storage
 
 from queue_api.messages import QueueMessage, QueueSuccessMessage, QueueErrorMessage, RequiredParamError
 
