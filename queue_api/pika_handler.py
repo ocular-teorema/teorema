@@ -18,7 +18,7 @@ from queue_api.common import pika_setup_connection, get_server_name_exchange, ba
 from queue_api.ptz_control import PanControlMessage, TiltControlMessage, ZoomControlMessage
 from queue_api.archive import VideosGetMessage
 from queue_api.events import EventsSendMessage
-from queue_api.configuration import ConfigExportMessage
+from queue_api.configuration import ConfigExportMessage, ConfigImportMessage
 from queue_api.messages import InvalidMessageStructureError, InvalidMessageTypeError
 
 
@@ -216,6 +216,13 @@ class PikaHandler(threading.Thread):
         print('config export request, flush=True')
 
         config_export_msg = ConfigExportMessage()
+        config_export_msg.handle_request(message)
+        print('message ok', flush=True)
+
+    def config_import(self, message):
+        print('config export request, flush=True')
+
+        config_export_msg = ConfigImportMessage()
         config_export_msg.handle_request(message)
         print('message ok', flush=True)
 

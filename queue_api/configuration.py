@@ -1,11 +1,14 @@
 from theorema.orgs.models import Organization
-from theorema.cameras.models import Storage
+from theorema.cameras.models import Camera, Server, Storage
 
 from queue_api.common import QueueEndpoint, get_supervisor_processes
+from queue_api.messages import RequestParamValidationError
+from theorema.cameras.serializers import CameraSerializer
 
 
 class ConfigurationQueueEndpoint(QueueEndpoint):
     pass
+
 
 class ConfigExportMessage(ConfigurationQueueEndpoint):
     def handle_request(self, message):
@@ -94,24 +97,86 @@ class ConfigExportMessage(ConfigurationQueueEndpoint):
         self.send_data_response(response_data)
 
 
-
-
-
-
-
-
-
-class ConfigurationImportQueueEndpoint(QueueEndpoint):
+class ConfigImportMessage(QueueEndpoint):
     request_required_params = [
         'organizations'
     ]
 
     def handle_request(self, message):
+
         data = message['data']
         print('params', data, flush=True)
 
         if self.check_request_params(data):
             return
+
+        organization = data['organizations']
+
+        for org_dict in organization:
+
+            org = Organization(name=org_dict['name'])
+            org.save()
+
+            servers = org_dict['servers']
+            for server_dict in servers:
+                server_id = server_dict['server_id']
+                server_name = server_dict['server_name']
+
+                server = Server(name=server_name, organization=org)
+                server.save()
+
+                cameras = server_dict['cameras']
+                for camera in cameras:
+
+                    storage_indefinitely = True if camera['storage_days'] == 1000 else False
+                    compress_level = 1
+
+                    serializer_params = {
+                        'name': camera['name'],
+                        'organization': org,
+                        'server': server,
+                        'camera_group': 'default',
+                        'address': camera['address_primary'],
+                        'analysis': camera['analysis'],
+                        'storage_life': camera['storage_days'],
+                        'indefinitely': storage_indefinitely,
+                        'compress_level': compress_level,
+                        'archive_path': storage.path,
+                        'from_queue_api': True
+                        # 'storage'
+                    }
+
+                    if 'storage_id' in camera:
+                        storage_id = camera['storage_id']
+                        storage = Storage.objects.filter(id=storage_id)
+                        if not storage:
+                            error = RequestParamValidationError('storage with id {id} not found'.format(id=storage_id))
+                            print(error, flush=True)
+                            self.send_error_response(error)
+                            return
+                    else:
+                        storage = self.default_storage
+
+                    camera_serializer = CameraSerializer(data=serializer_params)
+
+                    if camera_serializer.is_valid():
+                        imported_camera = camera_serializer.save()
+                        imported_camera.storage = storage
+                        imported_camera.save()
+                    else:
+                        errors = camera_serializer.errors
+                        error_str = 'Validation error: "err"'.format(err=errors)
+                        msg = RequestParamValidationError(error_str, self.uuid, self.response_message_type)
+                        print(msg, flush=True)
+                        self.send_error_response(msg)
+                        return
+
+                storages = server_dict['storages']
+                for storage in storages:
+                    imported_storage = Storage(name=storage['name'], path=storage['path'])
+                    imported_storage.save()
+
+        self.send_success_response()
 
 
 
