@@ -55,7 +55,8 @@ class VideosGetMessage(ArchiveQueueEndpoint):
                 'camera': video['cam'],
                 'start_timestamp': video['start_posix_time'],
                 'stop_timestamp': video['end_posix_time'],
-                'file_size': video['fileSize']
+                'file_size': video['fileSize'],
+                'path': video['archivePostfix'],
             }
             data['videos'].append(video_data)
 

@@ -22,8 +22,6 @@ class CameraAddMessages(CameraQueueEndpoint):
         'name', 'address_primary',
         'analysis_type', 'storage_days'
     ]
-    response_topic = '/cameras/add/response'
-    response_message_type = 'cameras_add_response'
 
     def handle_request(self, message):
         print('message received', flush=True)
