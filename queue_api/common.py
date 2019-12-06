@@ -1,9 +1,12 @@
 import json
+import sys
+import os
 import uuid
 import pika
+
+
 from supervisor.xmlrpc import SupervisorTransport
 from xmlrpc import client as xmlrpc_client
-
 from theorema.orgs.models import Organization
 from theorema.cameras.models import CameraGroup, Server, Storage
 
@@ -80,7 +83,7 @@ def pika_setup_connection():
     connection = pika.BlockingConnection(pika.ConnectionParameters(
         # 'localhost',
         host='10.10.110.1',
-        port=5672,
+        port=15672,
         virtual_host='ocular',
         credentials=pika.PlainCredentials('ocular', 'mC2QX0J7sx7i'),
         # heartbeat_interval=heartbeat

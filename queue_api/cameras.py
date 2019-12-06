@@ -207,40 +207,62 @@ class CameraListMessages(QueueEndpoint):
 
 class CameraSetRecordingMessages(CameraQueueEndpoint):
 
-    response_topic = '/cameras/{cam_id}/set_recording/request'
-    response_message_type = 'set_recording_request'
+    request_required_params = [
+        'recording'
+    ]
 
     def handle_request(self, params):
         print('preparing response', flush=True)
         self.uuid = params['uuid']
+        camera_id = params['camera_id']
+        data = params['data']
 
-        self.response_topic = self.response_topic.format(cam_id=params['camera_id'])
+        if self.check_request_params(data):
+            return
 
-        camera = Camera.objects.filter(uid=params['camera_id']).first()
-        if camera:
-
-            data = dict(CameraSerializer().basic_to_representation(camera))
-            data['unique_id'] = str(camera.id) + camera.add_time
-            data['ws_video_url'] = 'ws://%s/video_ws/?port=%s' % (camera.server.address, camera.port+50)
-            data['thumb_url'] = 'http://%s:5005/thumb/%s/' % (camera.server.address, camera.id)
-            data['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (camera.server.address, str(camera.id) + camera.add_time)
-            data['m3u8_video_url'] = 'http://%s:8080/vasrc/cam%s/index.m3u8' % (camera.server.address, str(camera.id))
-            data['camera_group'] = camera.camera_group.id
-            if camera.is_active:
-                data['is_active'] = False
-            else:
-                data['is_active'] = True
-            data['server'] = camera.server
-            data['organization'] = camera.organization
-
-            CameraSerializer().update(camera, data)
-
-        else:
-            print('errrrrrrrrrrrrrrr', flush=True)
-            error = RequestParamValidationError(info='camera with id {id} not found'.format(id=params['camera_id']))
+        try:
+            camera = Camera.objects.get(uid=camera_id)
+            camera_repr = CameraSerializer().to_representation(camera)
+        except ObjectDoesNotExist:
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=camera_id))
             print(error, flush=True)
             self.send_error_response(error)
             return
+
+        recording = data['recording']
+        if not isinstance(recording, bool):
+            error = RequestParamValidationError('parameter must be Boolean')
+            print(error, flush=True)
+            self.send_error_response(error)
+            return
+
+        camera_repr['is_active'] = recording
+        CameraSerializer().update(camera, camera_repr)
+
+        # camera = Camera.objects.filter(uid=params['camera_id']).first()
+        # if camera:
+        #
+        #     data = dict(CameraSerializer().basic_to_representation(camera))
+        #     data['unique_id'] = str(camera.id) + camera.add_time
+        #     data['ws_video_url'] = 'ws://%s/video_ws/?port=%s' % (camera.server.address, camera.port+50)
+        #     data['thumb_url'] = 'http://%s:5005/thumb/%s/' % (camera.server.address, camera.id)
+        #     data['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (camera.server.address, str(camera.id) + camera.add_time)
+        #     data['m3u8_video_url'] = 'http://%s:8080/vasrc/cam%s/index.m3u8' % (camera.server.address, str(camera.id))
+        #     data['camera_group'] = camera.camera_group.id
+        #     if camera.is_active:
+        #         data['is_active'] = False
+        #     else:
+        #         data['is_active'] = True
+        #     data['server'] = camera.server
+        #     data['organization'] = camera.organization
+        #
+        #     CameraSerializer().update(camera, data)
+        #
+        # else:
+        #     error = RequestParamValidationError(info='camera with id {id} not found'.format(id=params['camera_id']))
+        #     print(error, flush=True)
+        #     self.send_error_response(error)
+        #     return
 
         self.send_success_response()
 
