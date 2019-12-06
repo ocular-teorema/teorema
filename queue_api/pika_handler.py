@@ -11,12 +11,10 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'theorema.settings')
 import django
 django.setup()
 
-from theorema.cameras.models import Camera, Storage
-
 from queue_api.status import StatusMessages
 from queue_api.storages import StorageListMessage, StorageDeleteMessage, StorageAddMessages, StorageUpdateMessage
 from queue_api.cameras import CameraAddMessages, CameraListMessages, CameraSetRecordingMessages, CameraDeleteMessages, CameraUpdateMessages
-from queue_api.common import pika_setup_connection, get_server_name_exchange, exchange_from_server_name
+from queue_api.common import pika_setup_connection, get_server_name_exchange
 from queue_api.ptz_control import PanControlMessage, TiltControlMessage, ZoomControlMessage
 from queue_api.archive import VideosGetMessage
 from queue_api.events import EventsSendMessage
@@ -73,28 +71,28 @@ class PikaHandler(threading.Thread):
     def cameras_add(self, message):
         print('camera add request message received', flush=True)
 
-        camera_message = CameraAddMessages(self.server_exchange, self.server_name)
+        camera_message = CameraAddMessages()
         camera_message.handle_request(message)
         print('message ok', flush=True)
 
     def cameras_list(self, message):
         print('camera list request message received', flush=True)
 
-        camera_message = CameraListMessages(self.server_exchange, self.server_name)
+        camera_message = CameraListMessages()
         camera_message.handle_request(message)
         print('message ok', flush=True)
 
     def cameras_update(self, message):
         print('camera update request message received', flush=True)
 
-        camera_message = CameraUpdateMessages(self.server_exchange, self.server_name)
+        camera_message = CameraUpdateMessages()
         camera_message.handle_request(message)
         print('message ok')
 
     def status(self, message):
         print('status request message received', flush=True)
 
-        status_request = StatusMessages(self.server_exchange, self.server_name)
+        status_request = StatusMessages()
         status_request.handle_request(message)
         print('message ok', flush=True)
 
@@ -104,7 +102,7 @@ class PikaHandler(threading.Thread):
         uuid = message['uuid']
         print(uuid, flush=True)
 
-        storages_request = StorageAddMessages(self.server_exchange, self.server_name)
+        storages_request = StorageAddMessages()
         storages_request.handle_request(message)
         print('message ok', flush=True)
 
@@ -114,7 +112,7 @@ class PikaHandler(threading.Thread):
         uuid = message['uuid']
         print(uuid, flush=True)
 
-        storages_request = StorageDeleteMessage(self.server_exchange, self.server_name)
+        storages_request = StorageDeleteMessage()
         storages_request.handle_request(message)
         print('message ok', flush=True)
 
@@ -124,7 +122,7 @@ class PikaHandler(threading.Thread):
         uuid = message['uuid']
         print(uuid, flush=True)
 
-        storages_request = StorageListMessage(self.server_exchange, self.server_name)
+        storages_request = StorageListMessage()
         storages_request.handle_request(message)
         print('message ok', flush=True)
 
@@ -134,7 +132,7 @@ class PikaHandler(threading.Thread):
         uuid = message['uuid']
         print(uuid, flush=True)
 
-        storages_request = StorageUpdateMessage(self.server_exchange, self.server_name)
+        storages_request = StorageUpdateMessage()
         storages_request.handle_request(message)
         print('message ok', flush=True)
 
@@ -144,69 +142,54 @@ class PikaHandler(threading.Thread):
         uuid = message['uuid']
         print(uuid, flush=True)
 
-        cameras_request = CameraSetRecordingMessages(self.server_exchange, self.server_name)
+        cameras_request = CameraSetRecordingMessages()
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
     def cameras_delete(self, message):
         print('cameras delete request', flush=True)
 
-        cameras_request = CameraDeleteMessages(self.server_exchange, self.server_name)
+        cameras_request = CameraDeleteMessages()
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
     def cameras_ptz_move_horizontal(self, message):
         print('horizontal control request', flush=True)
 
-        cameras_request = PanControlMessage(self.server_exchange, self.server_name)
+        cameras_request = PanControlMessage()
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
     def cameras_ptz_move_vertical(self, message):
         print('vertical control request', flush=True)
 
-        cameras_request = TiltControlMessage(self.server_exchange, self.server_name)
+        cameras_request = TiltControlMessage()
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
     def camera_ptz_zoom(self, message):
         print('zoom control request', flush=True)
 
-        cameras_request = ZoomControlMessage(self.server_exchange, self.server_name)
+        cameras_request = ZoomControlMessage()
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
     def archive_video(self, message):
         print('archive video request', flush=True)
 
-        cameras_request = VideosGetMessage(self.server_exchange, self.server_name)
+        cameras_request = VideosGetMessage()
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
     def cameras_event(self, message):
         print('cameras event request', flush=True)
 
-        cameras_request = EventsSendMessage(self.server_exchange, self.server_name)
+        cameras_request = EventsSendMessage()
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
 
 if __name__ == '__main__':
 
-    # cameras_ids = list(Camera.objects.all().values_list('uid', flat=True))
-    # storages_ids = list(Storage.objects.all().values_list('id', flat=True))
-    # print('cameras', cameras_ids, flush=True)
-    # print('storages', storages_ids, flush=True)
-    #
-    # for cam_id in cameras_ids:
-    #     camera_receiver = PikaHandler()
-    #     camera_receiver.set_object_exchange(object_type='camera', object_id=cam_id)
-    #     camera_receiver.start()
-    #
-    # for storage_id in storages_ids:
-    #     storage_receiver = PikaHandler()
-    #     storage_receiver.set_object_exchange(object_type='storage', object_id=storage_id)
-    #     storage_receiver.start()
-    # else:
     receiver = PikaHandler()
     receiver.start()
