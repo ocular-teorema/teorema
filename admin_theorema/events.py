@@ -10,7 +10,10 @@ from twisted.internet.endpoints import TCP4ServerEndpoint
 
 from settings import *
 
-# from queue_api.events import EventsSendMessage
+import sys
+sys.path.append(os.path.abspath(".."))
+
+from queue_api.pika_handler import PikaHandler
 
 config = configparser.ConfigParser()
 config.read(SUPERVISOR_CAMERAS_CONF)
@@ -37,9 +40,13 @@ class CamListener(Protocol):
 
     def dataReceived(self, data):
         print(self.camera_id, data, flush=True)
-        # if 'Hello from DataDirectory' not in data.decode():
-        #     event_message = EventsSendMessage()
-        #     event_message.handle_request({'data': data})
+        if 'Hello from DataDirectory' not in data.decode():
+            try:
+                event_message = PikaHandler()
+                event_message.cameras_event({'data': data})
+                print('message sent to queue', flush=True)
+            except:
+               print('fail in sending to api', flush=True)
         [x for x in cams if str(x['id']) == str(self.camera_id)][0]['connection'] = self # kill me
         try:
             j = json.loads(data.strip(b'\0').decode())

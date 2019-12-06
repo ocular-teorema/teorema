@@ -7,7 +7,7 @@ class EventQueueEndpoint(QueueEndpoint):
     pass
 
 
-class EventsSendMessage(EventQueueEndpoint):
+class EventsSendMessage(QueueEndpoint):
     response_topic = '/cameras/events'
     response_message_type = 'cameras_event'
 
@@ -16,7 +16,7 @@ class EventsSendMessage(EventQueueEndpoint):
 
         print('params', params['data'], flush=True)
 
-        end_of_dict = params['data'].index('}')
+        end_of_dict = params['data'].decode().index('}')
         data = json.loads(params['data'].decode()[:end_of_dict + 1])
 
         message = {
@@ -32,6 +32,6 @@ class EventsSendMessage(EventQueueEndpoint):
             }
         }
 
-        base_send_in_queue(self.exchange, json.dumps(message))
+        base_send_in_queue(self.response_exchange, json.dumps(message))
 
 
