@@ -5,9 +5,7 @@ from theorema.cameras.models import Server
 
 
 class EventQueueEndpoint(QueueEndpoint):
-    def __init__(self):
-        super().__init__()
-        self.default_serv = Server.objects.all().first()
+    pass
 
 
 class EventsSendMessage(EventQueueEndpoint):

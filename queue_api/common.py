@@ -4,6 +4,9 @@ import pika
 from supervisor.xmlrpc import SupervisorTransport
 from xmlrpc import client as xmlrpc_client
 
+from theorema.orgs.models import Organization
+from theorema.cameras.models import CameraGroup, Server
+
 from queue_api.messages import QueueMessage, QueueSuccessMessage, QueueErrorMessage, RequiredParamError
 
 
@@ -20,6 +23,16 @@ class QueueEndpoint:
 
     def __init__(self):
         self.server_name, self.exchange = get_server_name_exchange()
+
+        self.default_org = Organization.objects.all().first()
+        self.default_serv = Server.objects.all().first()
+        cgroup = CameraGroup.objects.all().first()
+        if cgroup is None:
+            cgroup = 'default'
+        else:
+            cgroup = cgroup.id
+        self.default_camera_group = cgroup
+        self.default_storage = Storage.objects.all().first()
 
     def check_request_params(self, actual):
         actual_keys = actual.keys()

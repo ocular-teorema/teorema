@@ -5,9 +5,7 @@ import json
 
 
 class ArchiveQueueEndpoint(QueueEndpoint):
-    def __init__(self):
-        super().__init__()
-        self.default_serv = Server.objects.all().first()
+    pass
 
 
 class VideosGetMessage(ArchiveQueueEndpoint):

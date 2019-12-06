@@ -4,8 +4,8 @@ import json
 from django.core.exceptions import ObjectDoesNotExist
 
 from theorema.users.models import CamSet
-from theorema.orgs.models import Organization
-from theorema.cameras.models import CameraGroup, Server, Camera, Storage
+
+from theorema.cameras.models import Camera, Storage
 from theorema.cameras.serializers import CameraSerializer
 
 from queue_api.common import QueueEndpoint, get_supervisor_processes
@@ -13,19 +13,7 @@ from queue_api.messages import RequestParamValidationError
 
 
 class CameraQueueEndpoint(QueueEndpoint):
-
-    def __init__(self):
-        super().__init__()
-
-        self.default_org = Organization.objects.all().first()
-        self.default_serv = Server.objects.all().first()
-        cgroup = CameraGroup.objects.all().first()
-        if cgroup is None:
-            cgroup = 'default'
-        else:
-            cgroup = cgroup.id
-        self.default_camera_group = cgroup
-        self.default_storage = Storage.objects.all().first()
+    pass
 
 
 class CameraAddMessages(CameraQueueEndpoint):
