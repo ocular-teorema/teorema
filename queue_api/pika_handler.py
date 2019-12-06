@@ -14,11 +14,11 @@ django.setup()
 from queue_api.status import StatusMessages
 from queue_api.storages import StorageListMessage, StorageDeleteMessage, StorageAddMessages, StorageUpdateMessage
 from queue_api.cameras import CameraAddMessages, CameraListMessages, CameraSetRecordingMessages, CameraDeleteMessages, CameraUpdateMessages
-from queue_api.common import pika_setup_connection, get_server_name_exchange
+from queue_api.common import pika_setup_connection, get_server_name_exchange, base_send_in_queue
 from queue_api.ptz_control import PanControlMessage, TiltControlMessage, ZoomControlMessage
 from queue_api.archive import VideosGetMessage
 from queue_api.events import EventsSendMessage
-
+from queue_api.messages import InvalidMessageStructureError, InvalidMessageTypeError
 
 
 class PikaHandler(threading.Thread):
@@ -27,9 +27,9 @@ class PikaHandler(threading.Thread):
         super().__init__()
 
         self.server_name, self.server_exchange = get_server_name_exchange()
+        self.response_exchange = '/ocular_driver'
         print('server name: {name}'.format(name=self.server_name), flush=True)
         print('exchange:', self.server_exchange, flush=True)
-
 
     def run(self):
         print('starting receiver', flush=True)
@@ -51,10 +51,31 @@ class PikaHandler(threading.Thread):
         print('receiver started', flush=True)
         channel.start_consuming()
 
+    def verify_message(self, message):
+        if 'uuid' and 'type' and 'data' not in message:
+            valid = False
+        elif not isinstance(message['uuid'], str):
+            valid = False
+        elif not isinstance(message['type'], str):
+            valid = False
+        elif not isinstance(message['data'], dict):
+            valid = False
+        else:
+            valid = True
+
+        if not valid:
+            error = InvalidMessageStructureError()
+            base_send_in_queue(self.response_exchange, str(error))
+            return False
+        else:
+            return True
+
     def callback(self, ch, method, properties, body):
         print('received', body, properties, method, flush=True)
         try:
             message = json.loads(body.decode())
+            if not self.verify_message(message):
+                return
             message_type = message['type']
 
             getattr(self, message_type, self.unknown_handler)(message)
@@ -67,6 +88,8 @@ class PikaHandler(threading.Thread):
 
     def unknown_handler(self, message):
         print('unknown message', message, flush=True)
+        error = InvalidMessageTypeError(message['type'], message['uuid'])
+        base_send_in_queue(self.response_exchange, str(error))
 
     def cameras_add(self, message):
         print('camera add request message received', flush=True)

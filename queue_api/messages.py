@@ -53,8 +53,32 @@ class QueueErrorMessage(QueueMessage):
         super().__init__(uuid, response_type, self.data)
 
 
-class RequiredParamError(QueueErrorMessage):
+class InvalidMessageStructureError(QueueErrorMessage):
     code = 1
+    message = "Message structure is not valid"
+
+    def __init__(self, uuid=None):
+        super().__init__(
+            uuid=uuid,
+            response_type='error',
+            error=self.message
+        )
+
+
+class InvalidMessageTypeError(QueueErrorMessage):
+    code = 2
+    message = "Declared type is not supported: {type}"
+
+    def __init__(self, request_type, uuid=None):
+        super().__init__(
+            uuid=uuid,
+            response_type='error',
+            error=self.message.format(type=request_type)
+        )
+
+
+class RequiredParamError(QueueErrorMessage):
+    code = 3
     message = "Required parameter not found: {param}"
 
     def __init__(self, param, uuid=None, response_type=None):
@@ -66,7 +90,7 @@ class RequiredParamError(QueueErrorMessage):
 
 
 class RequestParamValidationError(QueueErrorMessage):
-    code = 2
+    code = 4
     message = "Validation error: {info}"
 
     def __init__(self, info, uuid=None, response_type=None):
