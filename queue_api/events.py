@@ -7,7 +7,7 @@ class EventQueueEndpoint(QueueEndpoint):
     pass
 
 
-class EventsSendMessage(QueueEndpoint):
+class EventsSendMessage(EventQueueEndpoint):
     response_topic = '/cameras/events'
     response_message_type = 'cameras_event'
 
