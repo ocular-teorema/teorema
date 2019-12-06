@@ -178,13 +178,13 @@
       <li>
         
         <a class="js-menu-item flex break-words no-underline text-grey-darkest mt-8 sm:mt-8 md:mt-3"
-          href="#operation-publish-/ocular_driver/cameras/lis">
+          href="#operation-publish-/ocular_driver/cameras/list">
           <span class="bg-blue-dark font-bold h-6 no-underline text-white uppercase p-1 mr-2 rounded"
             style="height: 21px;font-size: 11px;" title="Publish">Pub</span>
           
           <div style="display:inline-block;">
             
-<span class="string-chunk" style="padding-top: 2px;">/ocular_driver</span><span class="string-chunk" style="padding-top: 2px;">/cameras</span><span class="string-chunk" style="padding-top: 2px;">/lis</span>
+<span class="string-chunk" style="padding-top: 2px;">/ocular_driver</span><span class="string-chunk" style="padding-top: 2px;">/cameras</span><span class="string-chunk" style="padding-top: 2px;">/list</span>
 
           </div>
           
@@ -806,7 +806,7 @@
 <h1>Notes:</h1>
 <ul>
 <li>All messages from subsribe channels must be sended with exchange &quot;/ocular/{server_name}&quot; and empty routing_key.</li>
-<li>All messages from publish channels will be sended to exchange &quot;/ocular_driver/&quot; and empty routing_key.</li>
+<li>All messages from publish channels will be sended to exchange &quot;/ocular_driver&quot; and empty routing_key.</li>
 </ul>
 
   </div>
@@ -2227,9 +2227,9 @@ string
           <div class="text-xs">
             Examples:
             
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;Process exited because of error on launch&quot;</span>
-            
               <span class="border text-orange rounded ml-1 py-0 px-2">null</span>
+            
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;Process exited because of error on launch&quot;</span>
             
           </div>
         
@@ -2470,9 +2470,9 @@ string
           <div class="text-xs">
             Examples:
             
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;Process exited because of error on launch&quot;</span>
-            
               <span class="border text-orange rounded ml-1 py-0 px-2">null</span>
+            
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;Process exited because of error on launch&quot;</span>
             
           </div>
         
@@ -2713,9 +2713,9 @@ string
           <div class="text-xs">
             Examples:
             
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;Process exited because of error on launch&quot;</span>
-            
               <span class="border text-orange rounded ml-1 py-0 px-2">null</span>
+            
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;Process exited because of error on launch&quot;</span>
             
           </div>
         
@@ -2956,9 +2956,9 @@ string
           <div class="text-xs">
             Examples:
             
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;Process exited because of error on launch&quot;</span>
-            
               <span class="border text-orange rounded ml-1 py-0 px-2">null</span>
+            
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;Process exited because of error on launch&quot;</span>
             
           </div>
         
@@ -3199,9 +3199,9 @@ string
           <div class="text-xs">
             Examples:
             
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;Process exited because of error on launch&quot;</span>
-            
               <span class="border text-orange rounded ml-1 py-0 px-2">null</span>
+            
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;Process exited because of error on launch&quot;</span>
             
           </div>
         
@@ -3442,9 +3442,9 @@ string
           <div class="text-xs">
             Examples:
             
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;Process exited because of error on launch&quot;</span>
-            
               <span class="border text-orange rounded ml-1 py-0 px-2">null</span>
+            
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;Process exited because of error on launch&quot;</span>
             
           </div>
         
@@ -3814,9 +3814,9 @@ string
           <div class="text-xs">
             Examples:
             
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;Connection refused&quot;</span>
-            
               <span class="border text-orange rounded ml-1 py-0 px-2">null</span>
+            
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;Connection refused&quot;</span>
             
           </div>
         
@@ -3991,32 +3991,32 @@ string
       "wsdaemon_worker": {
         "status": "RUNNING",
         "error_code": 0,
-        "error_message": "Process exited because of error on launch"
+        "error_message": null
       },
       "wsdaemon_admin": {
         "status": "RUNNING",
         "error_code": 0,
-        "error_message": "Process exited because of error on launch"
+        "error_message": null
       },
       "theorem_worker": {
         "status": "RUNNING",
         "error_code": 0,
-        "error_message": "Process exited because of error on launch"
+        "error_message": null
       },
       "theorem_admin": {
         "status": "RUNNING",
         "error_code": 0,
-        "error_message": "Process exited because of error on launch"
+        "error_message": null
       },
       "nginx": {
         "status": "RUNNING",
         "error_code": 0,
-        "error_message": "Process exited because of error on launch"
+        "error_message": null
       },
       "rabbitmq_receiver": {
         "status": "RUNNING",
         "error_code": 0,
-        "error_message": "Process exited because of error on launch"
+        "error_message": null
       }
     },
     "cameras": [
@@ -4024,7 +4024,7 @@ string
         "camera_id": {
           "status": "RUNNING",
           "error_code": 0,
-          "error_message": "Connection refused"
+          "error_message": null
         }
       }
     ]
@@ -7458,7 +7458,7 @@ object
     
       
 
-<a name="operation-publish-/ocular_driver/cameras/lis"></a>
+<a name="operation-publish-/ocular_driver/cameras/list"></a>
 <div class="center-block p-8">
   <div class="operation pt-8 pb-8">
     <h3 class="font-mono text-base">
@@ -7467,7 +7467,7 @@ object
       
       
       
-<span class="string-chunk" >/ocular_driver</span><span class="string-chunk" >/cameras</span><span class="string-chunk" >/lis</span>
+<span class="string-chunk" >/ocular_driver</span><span class="string-chunk" >/cameras</span><span class="string-chunk" >/list</span>
 
     </h3>
 
@@ -7723,60 +7723,6 @@ object
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-array&lt;object&gt;
-          
-          
-          
-          <div class="inline-block">
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-          </div>
-        </div>
-
-        
-        
-        
-        
-        
-      </div>
-    </div>
-
-    
-      <div class="children bg-grey-lightest py-4 rounded">
-        
-
-        
-          
-            <p class="pl-6 mb-2 text-xs font-bold uppercase text-grey-darker">Items:</p>
-            
-              
-
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
-  <div class="">
-    <div class="js-prop cursor-pointer py-2 flex property">
-      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">0</span>
-        
-        <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
-          xmlns="http://www.w3.org/2000/svg" y="0">
-          <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 "></polygon>
-        </svg>
-        
-        
-      </div>
-
-      <div>
-        <div class="capitalize text-sm text-teal font-bold">
-          
 object
           
           
@@ -7808,12 +7754,12 @@ object
     </div>
 
     
-      <div class="children bg-grey-lighter py-4 rounded">
+      <div class="children bg-grey-lightest py-4 rounded">
         
           
             
 
-<div class="bg-grey-lighter pl-8 pr-8 rounded">
+<div class="bg-grey-lightest pl-8 pr-8 rounded">
   <div class="">
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -7858,12 +7804,12 @@ object
     </div>
 
     
-      <div class="children bg-grey-lightest py-4 rounded">
+      <div class="children bg-grey-lighter py-4 rounded">
         
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -7917,7 +7863,7 @@ string
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -7974,7 +7920,7 @@ string
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -8031,7 +7977,7 @@ string
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -8092,7 +8038,7 @@ integer
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -8153,7 +8099,7 @@ integer
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -8211,7 +8157,7 @@ integer
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -8274,7 +8220,7 @@ integer
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -8328,7 +8274,7 @@ string
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -8387,7 +8333,7 @@ string
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -8485,27 +8431,6 @@ boolean
 </div>
 
 
-            
-          
-
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional items are allowed.</p>
-          
-        
-
-        
-
-        
-
-        
-
-        
-      </div>
-    
-  </div>
-</div>
-
-
           
         
 
@@ -8587,22 +8512,20 @@ boolean
   "uuid": "31b9448f-9ea3-429f-a04d-23c7c7ac77d3",
   "type": "cameras_list",
   "data": {
-    "cameras": [
-      {
-        "camera_id": {
-          "name": "Reception camera #1",
-          "address_primary": "rtsp://root:AaBbCc@91.154.24.22:554/FullHD_live.sdp",
-          "address_secondary": "rtsp://root:AaBbCc@91.154.24.22:554/SD_live.sdp",
-          "storage_id": 4,
-          "schedule_id": 4,
-          "storage_days": 7,
-          "analysis_type": 1,
-          "stream_address": "rtmp://80.254.48.93:1935/vasrc/cam20_2019-10-29_15-29-00.586164",
-          "status": "RUNNING",
-          "enabled": true
-        }
+    "cameras": {
+      "camera_id": {
+        "name": "Reception camera #1",
+        "address_primary": "rtsp://root:AaBbCc@91.154.24.22:554/FullHD_live.sdp",
+        "address_secondary": "rtsp://root:AaBbCc@91.154.24.22:554/SD_live.sdp",
+        "storage_id": 4,
+        "schedule_id": 4,
+        "storage_days": 7,
+        "analysis_type": 1,
+        "stream_address": "rtmp://80.254.48.93:1935/vasrc/cam20_2019-10-29_15-29-00.586164",
+        "status": "RUNNING",
+        "enabled": true
       }
-    ]
+    }
   }
 }</code></pre>
     <h6 class="text-xs font-bold text-grey-darker italic">This example has been generated automatically.</h6>
@@ -18785,61 +18708,7 @@ object
   <div class="">
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">cameras</span>
-        
-        <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
-          xmlns="http://www.w3.org/2000/svg" y="0">
-          <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 "></polygon>
-        </svg>
-        
-        
-      </div>
-
-      <div>
-        <div class="capitalize text-sm text-teal font-bold">
-          
-array&lt;object&gt;
-          
-          
-          
-          <div class="inline-block">
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-          </div>
-        </div>
-
-        
-        
-        
-        
-        
-      </div>
-    </div>
-
-    
-      <div class="children bg-grey-lightest py-4 rounded">
-        
-
-        
-          
-            <p class="pl-6 mb-2 text-xs font-bold uppercase text-grey-darker">Items:</p>
-            
-              
-
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
-  <div class="">
-    <div class="js-prop cursor-pointer py-2 flex property">
-      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">0</span>
+        <span class="text-sm " style="word-break: break-word;">storages</span>
         
         <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
           xmlns="http://www.w3.org/2000/svg" y="0">
@@ -18883,12 +18752,12 @@ object
     </div>
 
     
-      <div class="children bg-grey-lighter py-4 rounded">
+      <div class="children bg-grey-lightest py-4 rounded">
         
           
             
 
-<div class="bg-grey-lighter pl-8 pr-8 rounded">
+<div class="bg-grey-lightest pl-8 pr-8 rounded">
   <div class="">
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -18933,12 +18802,12 @@ object
     </div>
 
     
-      <div class="children bg-grey-lightest py-4 rounded">
+      <div class="children bg-grey-lighter py-4 rounded">
         
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -18992,7 +18861,7 @@ string
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -19087,27 +18956,6 @@ string
 </div>
 
 
-            
-          
-
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional items are allowed.</p>
-          
-        
-
-        
-
-        
-
-        
-
-        
-      </div>
-    
-  </div>
-</div>
-
-
           
         
 
@@ -19189,14 +19037,12 @@ string
   "uuid": "31b9448f-9ea3-429f-a04d-23c7c7ac77d3",
   "type": "storages_list",
   "data": {
-    "cameras": [
-      {
-        "storage_id": {
-          "name": "main_storage_1",
-          "path": "/home/_VideoArchive"
-        }
+    "storages": {
+      "storage_id": {
+        "name": "main_storage_1",
+        "path": "/home/_VideoArchive"
       }
-    ]
+    }
   }
 }</code></pre>
     <h6 class="text-xs font-bold text-grey-darker italic">This example has been generated automatically.</h6>
@@ -22965,7 +22811,7 @@ string
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-integer
+string
           
           
           
@@ -23024,7 +22870,7 @@ integer
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-integer
+string
           
           
           
@@ -23356,63 +23202,6 @@ object
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">uuid</span>
-        
-        
-      </div>
-
-      <div>
-        <div class="capitalize text-sm text-teal font-bold">
-          
-string
-          
-          
-          
-          <div class="inline-block">
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-          </div>
-        </div>
-
-        
-          <div class="text-sm markdown"><p>Unique identifier for send-receive actions</p>
-</div>
-        
-        
-        
-        
-        
-          <div class="text-xs">
-            Examples:
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;31b9448f-9ea3-429f-a04d-23c7c7ac77d3&quot;</span>
-            
-          </div>
-        
-      </div>
-    </div>
-
-    
-  </div>
-</div>
-
-
-          
-            
-
-<div class="bg-grey-lighter pl-8 pr-8 rounded">
-  <div class="">
-    <div class=" flex property">
-      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
         <span class="text-sm " style="word-break: break-word;">schedule_type</span>
         
         
@@ -23737,7 +23526,6 @@ string
   "uuid": "31b9448f-9ea3-429f-a04d-23c7c7ac77d3",
   "type": "schedules_add",
   "data": {
-    "uuid": "31b9448f-9ea3-429f-a04d-23c7c7ac77d3",
     "schedule_type": "weekdays",
     "start_time": "07-49-00",
     "stop_time": "22-31-30"
@@ -25321,7 +25109,7 @@ object
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-array&lt;object&gt;
+
           
           
           
@@ -25351,18 +25139,14 @@ array&lt;object&gt;
     
       <div class="children bg-grey-lighter py-4 rounded">
         
-
-        
           
-            <p class="pl-6 mb-2 text-xs font-bold uppercase text-grey-darker">Items:</p>
             
-              
 
 <div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">0</span>
+        <span class="text-sm " style="word-break: break-word;">schedule_id</span>
         
         <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
           xmlns="http://www.w3.org/2000/svg" y="0">
@@ -25375,7 +25159,7 @@ array&lt;object&gt;
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-object
+
           
           
           
@@ -25405,69 +25189,6 @@ object
     
       <div class="children bg-grey-lightest py-4 rounded">
         
-          
-            
-
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
-  <div class="">
-    <div class=" flex property">
-      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">type</span>
-        
-        
-          <div class="text-red-dark text-xs">required</div>
-        
-      </div>
-
-      <div>
-        <div class="capitalize text-sm text-teal font-bold">
-          
-string
-          
-          
-          
-          <div class="inline-block">
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-          </div>
-        </div>
-
-        
-          <div class="text-sm markdown"><p>type of scheduling</p>
-</div>
-        
-        
-        
-        
-          <div class="text-xs">
-            Enum:
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;weekdays&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;timestamp&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;time_period&quot;</span>
-            
-          </div>
-        
-        
-      </div>
-    </div>
-
-    
-  </div>
-</div>
-
-
           
             
 
@@ -25518,11 +25239,7 @@ array
           <div class="text-xs">
             Examples:
             
-              <span class="border text-orange rounded ml-1 py-0 px-2">1</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">3</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">7</span>
+              <span class="border text-orange rounded ml-1 py-0 px-2">[1,3,7]</span>
             
           </div>
         
@@ -25560,10 +25277,6 @@ array
         
 
         
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional properties are allowed.</p>
-          
-        
 
         
 
@@ -25576,12 +25289,9 @@ array
 </div>
 
 
-            
           
+        
 
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional items are allowed.</p>
-          
         
 
         
@@ -25617,7 +25327,7 @@ array
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-array&lt;object&gt;
+
           
           
           
@@ -25647,18 +25357,14 @@ array&lt;object&gt;
     
       <div class="children bg-grey-lighter py-4 rounded">
         
-
-        
           
-            <p class="pl-6 mb-2 text-xs font-bold uppercase text-grey-darker">Items:</p>
             
-              
 
 <div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">0</span>
+        <span class="text-sm " style="word-break: break-word;">schedule_id</span>
         
         <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
           xmlns="http://www.w3.org/2000/svg" y="0">
@@ -25671,7 +25377,7 @@ array&lt;object&gt;
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-object
+
           
           
           
@@ -25708,7 +25414,7 @@ object
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">type</span>
+        <span class="text-sm " style="word-break: break-word;">start_timestamp</span>
         
         
       </div>
@@ -25736,23 +25442,76 @@ string
         </div>
 
         
-          <div class="text-sm markdown"><p>type of scheduling</p>
+          <div class="text-sm markdown"><p>start timestamp for scheduling (in unix timestamp)</p>
 </div>
         
         
         
         
+        
           <div class="text-xs">
-            Enum:
+            Examples:
             
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;weekdays&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;timestamp&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;time_period&quot;</span>
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;1572273590&quot;</span>
             
           </div>
         
+      </div>
+    </div>
+
+    
+  </div>
+</div>
+
+
+          
+            
+
+<div class="bg-grey-lightest pl-8 pr-8 rounded">
+  <div class="">
+    <div class=" flex property">
+      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
+        <span class="text-sm " style="word-break: break-word;">stop_timestamp</span>
+        
+        
+      </div>
+
+      <div>
+        <div class="capitalize text-sm text-teal font-bold">
+          
+string
+          
+          
+          
+          <div class="inline-block">
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+          </div>
+        </div>
+
+        
+          <div class="text-sm markdown"><p>stop timestamp for scheduling</p>
+</div>
+        
+        
+        
+        
+        
+          <div class="text-xs">
+            Examples:
+            
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;1572273591&quot;</span>
+            
+          </div>
         
       </div>
     </div>
@@ -25768,10 +25527,6 @@ string
         
 
         
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional properties are allowed.</p>
-          
-        
 
         
 
@@ -25784,12 +25539,9 @@ string
 </div>
 
 
-            
           
+        
 
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional items are allowed.</p>
-          
         
 
         
@@ -25825,7 +25577,7 @@ string
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-array&lt;object&gt;
+
           
           
           
@@ -25855,18 +25607,14 @@ array&lt;object&gt;
     
       <div class="children bg-grey-lighter py-4 rounded">
         
-
-        
           
-            <p class="pl-6 mb-2 text-xs font-bold uppercase text-grey-darker">Items:</p>
             
-              
 
 <div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">0</span>
+        <span class="text-sm " style="word-break: break-word;">schedule_id</span>
         
         <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
           xmlns="http://www.w3.org/2000/svg" y="0">
@@ -25879,7 +25627,7 @@ array&lt;object&gt;
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-object
+
           
           
           
@@ -25916,7 +25664,7 @@ object
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">type</span>
+        <span class="text-sm " style="word-break: break-word;">start_time</span>
         
         
       </div>
@@ -25944,23 +25692,76 @@ string
         </div>
 
         
-          <div class="text-sm markdown"><p>type of scheduling</p>
+          <div class="text-sm markdown"><p>start time for scheduling (hour, minute and second HH-MM-SS)</p>
 </div>
         
         
         
         
+        
           <div class="text-xs">
-            Enum:
+            Examples:
             
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;weekdays&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;timestamp&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;time_period&quot;</span>
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;07-49-00&quot;</span>
             
           </div>
         
+      </div>
+    </div>
+
+    
+  </div>
+</div>
+
+
+          
+            
+
+<div class="bg-grey-lightest pl-8 pr-8 rounded">
+  <div class="">
+    <div class=" flex property">
+      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
+        <span class="text-sm " style="word-break: break-word;">stop_time</span>
+        
+        
+      </div>
+
+      <div>
+        <div class="capitalize text-sm text-teal font-bold">
+          
+string
+          
+          
+          
+          <div class="inline-block">
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+          </div>
+        </div>
+
+        
+          <div class="text-sm markdown"><p>stop time for scheduling (hour, minute and second HH-MM-SS)</p>
+</div>
+        
+        
+        
+        
+        
+          <div class="text-xs">
+            Examples:
+            
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;22-31-30&quot;</span>
+            
+          </div>
         
       </div>
     </div>
@@ -25976,10 +25777,6 @@ string
         
 
         
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional properties are allowed.</p>
-          
-        
 
         
 
@@ -25992,12 +25789,9 @@ string
 </div>
 
 
-            
           
+        
 
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional items are allowed.</p>
-          
         
 
         
@@ -26117,22 +25911,27 @@ string
   "type": "schedules_list",
   "data": {
     "schedules": {
-      "weekdays": [
-        {
-          "type": "weekdays",
-          "days": 1
+      "weekdays": {
+        "schedule_id": {
+          "days": [
+            1,
+            3,
+            7
+          ]
         }
-      ],
-      "timestamp": [
-        {
-          "type": "weekdays"
+      },
+      "timestamp": {
+        "schedule_id": {
+          "start_timestamp": "1572273590",
+          "stop_timestamp": "1572273591"
         }
-      ],
-      "time_period": [
-        {
-          "type": "weekdays"
+      },
+      "time_period": {
+        "schedule_id": {
+          "start_time": "07-49-00",
+          "stop_time": "22-31-30"
         }
-      ]
+      }
     }
   }
 }</code></pre>
@@ -26519,17 +26318,8 @@ string
         
         
         
+          <div class="text-xs">Const: &quot;weekdays&quot;</div>
         
-          <div class="text-xs">
-            Enum:
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;weekdays&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;timestamp&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;time_period&quot;</span>
-            
-          </div>
         
         
       </div>
@@ -27012,17 +26802,8 @@ string
         
         
         
+          <div class="text-xs">Const: &quot;timestamp&quot;</div>
         
-          <div class="text-xs">
-            Enum:
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;weekdays&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;timestamp&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;time_period&quot;</span>
-            
-          </div>
         
         
       </div>
@@ -27050,7 +26831,7 @@ string
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-integer
+string
           
           
           
@@ -27109,7 +26890,7 @@ integer
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-integer
+string
           
           
           
@@ -27504,63 +27285,6 @@ object
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">uuid</span>
-        
-        
-      </div>
-
-      <div>
-        <div class="capitalize text-sm text-teal font-bold">
-          
-string
-          
-          
-          
-          <div class="inline-block">
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-          </div>
-        </div>
-
-        
-          <div class="text-sm markdown"><p>Unique identifier for send-receive actions</p>
-</div>
-        
-        
-        
-        
-        
-          <div class="text-xs">
-            Examples:
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;31b9448f-9ea3-429f-a04d-23c7c7ac77d3&quot;</span>
-            
-          </div>
-        
-      </div>
-    </div>
-
-    
-  </div>
-</div>
-
-
-          
-            
-
-<div class="bg-grey-lighter pl-8 pr-8 rounded">
-  <div class="">
-    <div class=" flex property">
-      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
         <span class="text-sm " style="word-break: break-word;">schedule_type</span>
         
         
@@ -27596,17 +27320,8 @@ string
         
         
         
+          <div class="text-xs">Const: &quot;time_period&quot;</div>
         
-          <div class="text-xs">
-            Enum:
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;weekdays&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;timestamp&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;time_period&quot;</span>
-            
-          </div>
         
         
       </div>
@@ -27855,7 +27570,7 @@ string
   "type": "schedules_update",
   "schedule_id": 4,
   "data": {
-    "schedule_type": "weekdays",
+    "schedule_type": "timestamp",
     "start_timestamp": "1572273590",
     "stop_timestamp": "1572273591"
   }
@@ -27888,8 +27603,7 @@ string
   "type": "schedules_update",
   "schedule_id": 4,
   "data": {
-    "uuid": "31b9448f-9ea3-429f-a04d-23c7c7ac77d3",
-    "schedule_type": "weekdays",
+    "schedule_type": "time_period",
     "start_time": "07-49-00",
     "stop_time": "22-31-30"
   }
@@ -30903,65 +30617,6 @@ object
 
 <div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
-    <div class=" flex property">
-      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">uuid</span>
-        
-        
-          <div class="text-red-dark text-xs">required</div>
-        
-      </div>
-
-      <div>
-        <div class="capitalize text-sm text-teal font-bold">
-          
-string
-          
-          
-          
-          <div class="inline-block">
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-          </div>
-        </div>
-
-        
-          <div class="text-sm markdown"><p>Unique identifier for send-receive actions</p>
-</div>
-        
-        
-        
-        
-        
-          <div class="text-xs">
-            Examples:
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;31b9448f-9ea3-429f-a04d-23c7c7ac77d3&quot;</span>
-            
-          </div>
-        
-      </div>
-    </div>
-
-    
-  </div>
-</div>
-
-
-          
-            
-
-<div class="bg-grey-lighter pl-8 pr-8 rounded">
-  <div class="">
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
         <span class="text-sm " style="word-break: break-word;">organizations</span>
@@ -31352,60 +31007,6 @@ string
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-array&lt;object&gt;
-          
-          
-          
-          <div class="inline-block">
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-          </div>
-        </div>
-
-        
-        
-        
-        
-        
-      </div>
-    </div>
-
-    
-      <div class="children bg-grey-lightest py-4 rounded">
-        
-
-        
-          
-            <p class="pl-6 mb-2 text-xs font-bold uppercase text-grey-darker">Items:</p>
-            
-              
-
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
-  <div class="">
-    <div class="js-prop cursor-pointer py-2 flex property">
-      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">0</span>
-        
-        <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
-          xmlns="http://www.w3.org/2000/svg" y="0">
-          <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 "></polygon>
-        </svg>
-        
-        
-      </div>
-
-      <div>
-        <div class="capitalize text-sm text-teal font-bold">
-          
 object
           
           
@@ -31437,12 +31038,12 @@ object
     </div>
 
     
-      <div class="children bg-grey-lighter py-4 rounded">
+      <div class="children bg-grey-lightest py-4 rounded">
         
           
             
 
-<div class="bg-grey-lighter pl-8 pr-8 rounded">
+<div class="bg-grey-lightest pl-8 pr-8 rounded">
   <div class="">
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -31487,12 +31088,12 @@ object
     </div>
 
     
-      <div class="children bg-grey-lightest py-4 rounded">
+      <div class="children bg-grey-lighter py-4 rounded">
         
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -31546,7 +31147,7 @@ string
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -31603,7 +31204,7 @@ string
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -31660,7 +31261,7 @@ string
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -31721,7 +31322,7 @@ integer
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -31782,7 +31383,7 @@ integer
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -31840,7 +31441,7 @@ integer
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -31903,7 +31504,7 @@ integer
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -31957,7 +31558,7 @@ string
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -32016,7 +31617,7 @@ string
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -32114,27 +31715,6 @@ boolean
 </div>
 
 
-            
-          
-
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional items are allowed.</p>
-          
-        
-
-        
-
-        
-
-        
-
-        
-      </div>
-    
-  </div>
-</div>
-
-
           
             
 
@@ -32143,60 +31723,6 @@ boolean
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
         <span class="text-sm " style="word-break: break-word;">storages</span>
-        
-        <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
-          xmlns="http://www.w3.org/2000/svg" y="0">
-          <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 "></polygon>
-        </svg>
-        
-        
-      </div>
-
-      <div>
-        <div class="capitalize text-sm text-teal font-bold">
-          
-array&lt;object&gt;
-          
-          
-          
-          <div class="inline-block">
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-          </div>
-        </div>
-
-        
-        
-        
-        
-        
-      </div>
-    </div>
-
-    
-      <div class="children bg-grey-lightest py-4 rounded">
-        
-
-        
-          
-            <p class="pl-6 mb-2 text-xs font-bold uppercase text-grey-darker">Items:</p>
-            
-              
-
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
-  <div class="">
-    <div class="js-prop cursor-pointer py-2 flex property">
-      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">0</span>
         
         <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
           xmlns="http://www.w3.org/2000/svg" y="0">
@@ -32240,12 +31766,12 @@ object
     </div>
 
     
-      <div class="children bg-grey-lighter py-4 rounded">
+      <div class="children bg-grey-lightest py-4 rounded">
         
           
             
 
-<div class="bg-grey-lighter pl-8 pr-8 rounded">
+<div class="bg-grey-lightest pl-8 pr-8 rounded">
   <div class="">
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -32290,12 +31816,12 @@ object
     </div>
 
     
-      <div class="children bg-grey-lightest py-4 rounded">
+      <div class="children bg-grey-lighter py-4 rounded">
         
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -32349,7 +31875,7 @@ string
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -32444,131 +31970,6 @@ string
 </div>
 
 
-            
-          
-
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional items are allowed.</p>
-          
-        
-
-        
-
-        
-
-        
-
-        
-      </div>
-    
-  </div>
-</div>
-
-
-          
-            
-
-<div class="bg-grey-lighter pl-8 pr-8 rounded">
-  <div class="">
-    <div class="js-prop cursor-pointer py-2 flex property">
-      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">schedules</span>
-        
-        <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
-          xmlns="http://www.w3.org/2000/svg" y="0">
-          <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 "></polygon>
-        </svg>
-        
-        
-      </div>
-
-      <div>
-        <div class="capitalize text-sm text-teal font-bold">
-          
-array&lt;object&gt;
-          
-          
-          
-          <div class="inline-block">
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-          </div>
-        </div>
-
-        
-        
-        
-        
-        
-      </div>
-    </div>
-
-    
-      <div class="children bg-grey-lightest py-4 rounded">
-        
-
-        
-          
-            <p class="pl-6 mb-2 text-xs font-bold uppercase text-grey-darker">Items:</p>
-            
-              
-
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
-  <div class="">
-    <div class="js-prop cursor-pointer py-2 flex property">
-      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">0</span>
-        
-        <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
-          xmlns="http://www.w3.org/2000/svg" y="0">
-          <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 "></polygon>
-        </svg>
-        
-        
-      </div>
-
-      <div>
-        <div class="capitalize text-sm text-teal font-bold">
-          
-object
-          
-          
-          
-          <div class="inline-block">
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-          </div>
-        </div>
-
-        
-        
-        
-        
-        
-      </div>
-    </div>
-
-    
-      <div class="children bg-grey-lighter py-4 rounded">
-        
           
             
 
@@ -32639,7 +32040,7 @@ object
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-array&lt;object&gt;
+
           
           
           
@@ -32669,18 +32070,14 @@ array&lt;object&gt;
     
       <div class="children bg-grey-lighter py-4 rounded">
         
-
-        
           
-            <p class="pl-6 mb-2 text-xs font-bold uppercase text-grey-darker">Items:</p>
             
-              
 
 <div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">0</span>
+        <span class="text-sm " style="word-break: break-word;">schedule_id</span>
         
         <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
           xmlns="http://www.w3.org/2000/svg" y="0">
@@ -32693,7 +32090,7 @@ array&lt;object&gt;
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-object
+
           
           
           
@@ -32723,69 +32120,6 @@ object
     
       <div class="children bg-grey-lightest py-4 rounded">
         
-          
-            
-
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
-  <div class="">
-    <div class=" flex property">
-      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">type</span>
-        
-        
-          <div class="text-red-dark text-xs">required</div>
-        
-      </div>
-
-      <div>
-        <div class="capitalize text-sm text-teal font-bold">
-          
-string
-          
-          
-          
-          <div class="inline-block">
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-          </div>
-        </div>
-
-        
-          <div class="text-sm markdown"><p>type of scheduling</p>
-</div>
-        
-        
-        
-        
-          <div class="text-xs">
-            Enum:
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;weekdays&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;timestamp&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;time_period&quot;</span>
-            
-          </div>
-        
-        
-      </div>
-    </div>
-
-    
-  </div>
-</div>
-
-
           
             
 
@@ -32836,11 +32170,7 @@ array
           <div class="text-xs">
             Examples:
             
-              <span class="border text-orange rounded ml-1 py-0 px-2">1</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">3</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">7</span>
+              <span class="border text-orange rounded ml-1 py-0 px-2">[1,3,7]</span>
             
           </div>
         
@@ -32878,10 +32208,6 @@ array
         
 
         
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional properties are allowed.</p>
-          
-        
 
         
 
@@ -32894,12 +32220,9 @@ array
 </div>
 
 
-            
           
+        
 
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional items are allowed.</p>
-          
         
 
         
@@ -32935,7 +32258,7 @@ array
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-array&lt;object&gt;
+
           
           
           
@@ -32965,18 +32288,14 @@ array&lt;object&gt;
     
       <div class="children bg-grey-lighter py-4 rounded">
         
-
-        
           
-            <p class="pl-6 mb-2 text-xs font-bold uppercase text-grey-darker">Items:</p>
             
-              
 
 <div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">0</span>
+        <span class="text-sm " style="word-break: break-word;">schedule_id</span>
         
         <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
           xmlns="http://www.w3.org/2000/svg" y="0">
@@ -32989,7 +32308,7 @@ array&lt;object&gt;
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-object
+
           
           
           
@@ -33026,7 +32345,7 @@ object
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">type</span>
+        <span class="text-sm " style="word-break: break-word;">start_timestamp</span>
         
         
       </div>
@@ -33054,23 +32373,76 @@ string
         </div>
 
         
-          <div class="text-sm markdown"><p>type of scheduling</p>
+          <div class="text-sm markdown"><p>start timestamp for scheduling (in unix timestamp)</p>
 </div>
         
         
         
         
+        
           <div class="text-xs">
-            Enum:
+            Examples:
             
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;weekdays&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;timestamp&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;time_period&quot;</span>
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;1572273590&quot;</span>
             
           </div>
         
+      </div>
+    </div>
+
+    
+  </div>
+</div>
+
+
+          
+            
+
+<div class="bg-grey-lightest pl-8 pr-8 rounded">
+  <div class="">
+    <div class=" flex property">
+      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
+        <span class="text-sm " style="word-break: break-word;">stop_timestamp</span>
+        
+        
+      </div>
+
+      <div>
+        <div class="capitalize text-sm text-teal font-bold">
+          
+string
+          
+          
+          
+          <div class="inline-block">
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+          </div>
+        </div>
+
+        
+          <div class="text-sm markdown"><p>stop timestamp for scheduling</p>
+</div>
+        
+        
+        
+        
+        
+          <div class="text-xs">
+            Examples:
+            
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;1572273591&quot;</span>
+            
+          </div>
         
       </div>
     </div>
@@ -33086,10 +32458,6 @@ string
         
 
         
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional properties are allowed.</p>
-          
-        
 
         
 
@@ -33102,12 +32470,9 @@ string
 </div>
 
 
-            
           
+        
 
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional items are allowed.</p>
-          
         
 
         
@@ -33143,7 +32508,7 @@ string
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-array&lt;object&gt;
+
           
           
           
@@ -33173,18 +32538,14 @@ array&lt;object&gt;
     
       <div class="children bg-grey-lighter py-4 rounded">
         
-
-        
           
-            <p class="pl-6 mb-2 text-xs font-bold uppercase text-grey-darker">Items:</p>
             
-              
 
 <div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">0</span>
+        <span class="text-sm " style="word-break: break-word;">schedule_id</span>
         
         <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
           xmlns="http://www.w3.org/2000/svg" y="0">
@@ -33197,7 +32558,7 @@ array&lt;object&gt;
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-object
+
           
           
           
@@ -33234,7 +32595,7 @@ object
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">type</span>
+        <span class="text-sm " style="word-break: break-word;">start_time</span>
         
         
       </div>
@@ -33262,23 +32623,76 @@ string
         </div>
 
         
-          <div class="text-sm markdown"><p>type of scheduling</p>
+          <div class="text-sm markdown"><p>start time for scheduling (hour, minute and second HH-MM-SS)</p>
 </div>
         
         
         
         
+        
           <div class="text-xs">
-            Enum:
+            Examples:
             
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;weekdays&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;timestamp&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;time_period&quot;</span>
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;07-49-00&quot;</span>
             
           </div>
         
+      </div>
+    </div>
+
+    
+  </div>
+</div>
+
+
+          
+            
+
+<div class="bg-grey-lightest pl-8 pr-8 rounded">
+  <div class="">
+    <div class=" flex property">
+      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
+        <span class="text-sm " style="word-break: break-word;">stop_time</span>
+        
+        
+      </div>
+
+      <div>
+        <div class="capitalize text-sm text-teal font-bold">
+          
+string
+          
+          
+          
+          <div class="inline-block">
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+          </div>
+        </div>
+
+        
+          <div class="text-sm markdown"><p>stop time for scheduling (hour, minute and second HH-MM-SS)</p>
+</div>
+        
+        
+        
+        
+        
+          <div class="text-xs">
+            Examples:
+            
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;22-31-30&quot;</span>
+            
+          </div>
         
       </div>
     </div>
@@ -33294,10 +32708,6 @@ string
         
 
         
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional properties are allowed.</p>
-          
-        
 
         
 
@@ -33310,12 +32720,9 @@ string
 </div>
 
 
-            
           
+        
 
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional items are allowed.</p>
-          
         
 
         
@@ -33340,49 +32747,6 @@ string
           
             <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional properties are allowed.</p>
           
-        
-
-        
-
-        
-
-        
-      </div>
-    
-  </div>
-</div>
-
-
-          
-        
-
-        
-
-        
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional properties are allowed.</p>
-          
-        
-
-        
-
-        
-
-        
-      </div>
-    
-  </div>
-</div>
-
-
-            
-          
-
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional items are allowed.</p>
-          
-        
-
         
 
         
@@ -33563,7 +32927,6 @@ string
   "uuid": "31b9448f-9ea3-429f-a04d-23c7c7ac77d3",
   "type": "config_export",
   "data": {
-    "uuid": "31b9448f-9ea3-429f-a04d-23c7c7ac77d3",
     "organizations": [
       {
         "name": "Ocular",
@@ -33571,52 +32934,49 @@ string
           {
             "server_id": "525400DC395E",
             "server_name": "string",
-            "cameras": [
-              {
-                "camera_id": {
-                  "name": "Reception camera #1",
-                  "address_primary": "rtsp://root:AaBbCc@91.154.24.22:554/FullHD_live.sdp",
-                  "address_secondary": "rtsp://root:AaBbCc@91.154.24.22:554/SD_live.sdp",
-                  "storage_id": 4,
-                  "schedule_id": 4,
-                  "storage_days": 7,
-                  "analysis_type": 1,
-                  "stream_address": "rtmp://80.254.48.93:1935/vasrc/cam20_2019-10-29_15-29-00.586164",
-                  "status": "RUNNING",
-                  "enabled": true
-                }
+            "cameras": {
+              "camera_id": {
+                "name": "Reception camera #1",
+                "address_primary": "rtsp://root:AaBbCc@91.154.24.22:554/FullHD_live.sdp",
+                "address_secondary": "rtsp://root:AaBbCc@91.154.24.22:554/SD_live.sdp",
+                "storage_id": 4,
+                "schedule_id": 4,
+                "storage_days": 7,
+                "analysis_type": 1,
+                "stream_address": "rtmp://80.254.48.93:1935/vasrc/cam20_2019-10-29_15-29-00.586164",
+                "status": "RUNNING",
+                "enabled": true
               }
-            ],
-            "storages": [
-              {
-                "storage_id": {
-                  "name": "main_storage_1",
-                  "path": "/home/_VideoArchive"
-                }
+            },
+            "storages": {
+              "storage_id": {
+                "name": "main_storage_1",
+                "path": "/home/_VideoArchive"
               }
-            ],
-            "schedules": [
-              {
-                "schedules": {
-                  "weekdays": [
-                    {
-                      "type": "weekdays",
-                      "days": 1
-                    }
-                  ],
-                  "timestamp": [
-                    {
-                      "type": "weekdays"
-                    }
-                  ],
-                  "time_period": [
-                    {
-                      "type": "weekdays"
-                    }
+            },
+            "schedules": {
+              "weekdays": {
+                "schedule_id": {
+                  "days": [
+                    1,
+                    3,
+                    7
                   ]
                 }
+              },
+              "timestamp": {
+                "schedule_id": {
+                  "start_timestamp": "1572273590",
+                  "stop_timestamp": "1572273591"
+                }
+              },
+              "time_period": {
+                "schedule_id": {
+                  "start_time": "07-49-00",
+                  "stop_time": "22-31-30"
+                }
               }
-            ]
+            }
           }
         ]
       }
@@ -33903,65 +33263,6 @@ object
 
 <div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
-    <div class=" flex property">
-      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">uuid</span>
-        
-        
-          <div class="text-red-dark text-xs">required</div>
-        
-      </div>
-
-      <div>
-        <div class="capitalize text-sm text-teal font-bold">
-          
-string
-          
-          
-          
-          <div class="inline-block">
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-          </div>
-        </div>
-
-        
-          <div class="text-sm markdown"><p>Unique identifier for send-receive actions</p>
-</div>
-        
-        
-        
-        
-        
-          <div class="text-xs">
-            Examples:
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;31b9448f-9ea3-429f-a04d-23c7c7ac77d3&quot;</span>
-            
-          </div>
-        
-      </div>
-    </div>
-
-    
-  </div>
-</div>
-
-
-          
-            
-
-<div class="bg-grey-lighter pl-8 pr-8 rounded">
-  <div class="">
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
         <span class="text-sm " style="word-break: break-word;">organizations</span>
@@ -34352,60 +33653,6 @@ string
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-array&lt;object&gt;
-          
-          
-          
-          <div class="inline-block">
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-          </div>
-        </div>
-
-        
-        
-        
-        
-        
-      </div>
-    </div>
-
-    
-      <div class="children bg-grey-lightest py-4 rounded">
-        
-
-        
-          
-            <p class="pl-6 mb-2 text-xs font-bold uppercase text-grey-darker">Items:</p>
-            
-              
-
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
-  <div class="">
-    <div class="js-prop cursor-pointer py-2 flex property">
-      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">0</span>
-        
-        <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
-          xmlns="http://www.w3.org/2000/svg" y="0">
-          <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 "></polygon>
-        </svg>
-        
-        
-      </div>
-
-      <div>
-        <div class="capitalize text-sm text-teal font-bold">
-          
 object
           
           
@@ -34437,12 +33684,12 @@ object
     </div>
 
     
-      <div class="children bg-grey-lighter py-4 rounded">
+      <div class="children bg-grey-lightest py-4 rounded">
         
           
             
 
-<div class="bg-grey-lighter pl-8 pr-8 rounded">
+<div class="bg-grey-lightest pl-8 pr-8 rounded">
   <div class="">
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -34487,12 +33734,12 @@ object
     </div>
 
     
-      <div class="children bg-grey-lightest py-4 rounded">
+      <div class="children bg-grey-lighter py-4 rounded">
         
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -34546,7 +33793,7 @@ string
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -34603,7 +33850,7 @@ string
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -34660,7 +33907,7 @@ string
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -34721,7 +33968,7 @@ integer
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -34782,7 +34029,7 @@ integer
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -34840,7 +34087,7 @@ integer
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -34903,7 +34150,7 @@ integer
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -34957,7 +34204,7 @@ string
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -35016,7 +34263,7 @@ string
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -35114,27 +34361,6 @@ boolean
 </div>
 
 
-            
-          
-
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional items are allowed.</p>
-          
-        
-
-        
-
-        
-
-        
-
-        
-      </div>
-    
-  </div>
-</div>
-
-
           
             
 
@@ -35143,60 +34369,6 @@ boolean
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
         <span class="text-sm " style="word-break: break-word;">storages</span>
-        
-        <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
-          xmlns="http://www.w3.org/2000/svg" y="0">
-          <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 "></polygon>
-        </svg>
-        
-        
-      </div>
-
-      <div>
-        <div class="capitalize text-sm text-teal font-bold">
-          
-array&lt;object&gt;
-          
-          
-          
-          <div class="inline-block">
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-          </div>
-        </div>
-
-        
-        
-        
-        
-        
-      </div>
-    </div>
-
-    
-      <div class="children bg-grey-lightest py-4 rounded">
-        
-
-        
-          
-            <p class="pl-6 mb-2 text-xs font-bold uppercase text-grey-darker">Items:</p>
-            
-              
-
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
-  <div class="">
-    <div class="js-prop cursor-pointer py-2 flex property">
-      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">0</span>
         
         <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
           xmlns="http://www.w3.org/2000/svg" y="0">
@@ -35240,12 +34412,12 @@ object
     </div>
 
     
-      <div class="children bg-grey-lighter py-4 rounded">
+      <div class="children bg-grey-lightest py-4 rounded">
         
           
             
 
-<div class="bg-grey-lighter pl-8 pr-8 rounded">
+<div class="bg-grey-lightest pl-8 pr-8 rounded">
   <div class="">
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -35290,12 +34462,12 @@ object
     </div>
 
     
-      <div class="children bg-grey-lightest py-4 rounded">
+      <div class="children bg-grey-lighter py-4 rounded">
         
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -35349,7 +34521,7 @@ string
           
             
 
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
+<div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
@@ -35444,131 +34616,6 @@ string
 </div>
 
 
-            
-          
-
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional items are allowed.</p>
-          
-        
-
-        
-
-        
-
-        
-
-        
-      </div>
-    
-  </div>
-</div>
-
-
-          
-            
-
-<div class="bg-grey-lighter pl-8 pr-8 rounded">
-  <div class="">
-    <div class="js-prop cursor-pointer py-2 flex property">
-      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">schedules</span>
-        
-        <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
-          xmlns="http://www.w3.org/2000/svg" y="0">
-          <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 "></polygon>
-        </svg>
-        
-        
-      </div>
-
-      <div>
-        <div class="capitalize text-sm text-teal font-bold">
-          
-array&lt;object&gt;
-          
-          
-          
-          <div class="inline-block">
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-          </div>
-        </div>
-
-        
-        
-        
-        
-        
-      </div>
-    </div>
-
-    
-      <div class="children bg-grey-lightest py-4 rounded">
-        
-
-        
-          
-            <p class="pl-6 mb-2 text-xs font-bold uppercase text-grey-darker">Items:</p>
-            
-              
-
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
-  <div class="">
-    <div class="js-prop cursor-pointer py-2 flex property">
-      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">0</span>
-        
-        <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
-          xmlns="http://www.w3.org/2000/svg" y="0">
-          <polygon points="17.3 8.3 12 13.6 6.7 8.3 5.3 9.7 12 16.4 18.7 9.7 "></polygon>
-        </svg>
-        
-        
-      </div>
-
-      <div>
-        <div class="capitalize text-sm text-teal font-bold">
-          
-object
-          
-          
-          
-          <div class="inline-block">
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-          </div>
-        </div>
-
-        
-        
-        
-        
-        
-      </div>
-    </div>
-
-    
-      <div class="children bg-grey-lighter py-4 rounded">
-        
           
             
 
@@ -35639,7 +34686,7 @@ object
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-array&lt;object&gt;
+
           
           
           
@@ -35669,18 +34716,14 @@ array&lt;object&gt;
     
       <div class="children bg-grey-lighter py-4 rounded">
         
-
-        
           
-            <p class="pl-6 mb-2 text-xs font-bold uppercase text-grey-darker">Items:</p>
             
-              
 
 <div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">0</span>
+        <span class="text-sm " style="word-break: break-word;">schedule_id</span>
         
         <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
           xmlns="http://www.w3.org/2000/svg" y="0">
@@ -35693,7 +34736,7 @@ array&lt;object&gt;
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-object
+
           
           
           
@@ -35723,69 +34766,6 @@ object
     
       <div class="children bg-grey-lightest py-4 rounded">
         
-          
-            
-
-<div class="bg-grey-lightest pl-8 pr-8 rounded">
-  <div class="">
-    <div class=" flex property">
-      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">type</span>
-        
-        
-          <div class="text-red-dark text-xs">required</div>
-        
-      </div>
-
-      <div>
-        <div class="capitalize text-sm text-teal font-bold">
-          
-string
-          
-          
-          
-          <div class="inline-block">
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-          </div>
-        </div>
-
-        
-          <div class="text-sm markdown"><p>type of scheduling</p>
-</div>
-        
-        
-        
-        
-          <div class="text-xs">
-            Enum:
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;weekdays&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;timestamp&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;time_period&quot;</span>
-            
-          </div>
-        
-        
-      </div>
-    </div>
-
-    
-  </div>
-</div>
-
-
           
             
 
@@ -35836,11 +34816,7 @@ array
           <div class="text-xs">
             Examples:
             
-              <span class="border text-orange rounded ml-1 py-0 px-2">1</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">3</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">7</span>
+              <span class="border text-orange rounded ml-1 py-0 px-2">[1,3,7]</span>
             
           </div>
         
@@ -35878,10 +34854,6 @@ array
         
 
         
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional properties are allowed.</p>
-          
-        
 
         
 
@@ -35894,12 +34866,9 @@ array
 </div>
 
 
-            
           
+        
 
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional items are allowed.</p>
-          
         
 
         
@@ -35935,7 +34904,7 @@ array
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-array&lt;object&gt;
+
           
           
           
@@ -35965,18 +34934,14 @@ array&lt;object&gt;
     
       <div class="children bg-grey-lighter py-4 rounded">
         
-
-        
           
-            <p class="pl-6 mb-2 text-xs font-bold uppercase text-grey-darker">Items:</p>
             
-              
 
 <div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">0</span>
+        <span class="text-sm " style="word-break: break-word;">schedule_id</span>
         
         <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
           xmlns="http://www.w3.org/2000/svg" y="0">
@@ -35989,7 +34954,7 @@ array&lt;object&gt;
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-object
+
           
           
           
@@ -36026,7 +34991,7 @@ object
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">type</span>
+        <span class="text-sm " style="word-break: break-word;">start_timestamp</span>
         
         
       </div>
@@ -36054,23 +35019,76 @@ string
         </div>
 
         
-          <div class="text-sm markdown"><p>type of scheduling</p>
+          <div class="text-sm markdown"><p>start timestamp for scheduling (in unix timestamp)</p>
 </div>
         
         
         
         
+        
           <div class="text-xs">
-            Enum:
+            Examples:
             
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;weekdays&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;timestamp&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;time_period&quot;</span>
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;1572273590&quot;</span>
             
           </div>
         
+      </div>
+    </div>
+
+    
+  </div>
+</div>
+
+
+          
+            
+
+<div class="bg-grey-lightest pl-8 pr-8 rounded">
+  <div class="">
+    <div class=" flex property">
+      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
+        <span class="text-sm " style="word-break: break-word;">stop_timestamp</span>
+        
+        
+      </div>
+
+      <div>
+        <div class="capitalize text-sm text-teal font-bold">
+          
+string
+          
+          
+          
+          <div class="inline-block">
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+          </div>
+        </div>
+
+        
+          <div class="text-sm markdown"><p>stop timestamp for scheduling</p>
+</div>
+        
+        
+        
+        
+        
+          <div class="text-xs">
+            Examples:
+            
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;1572273591&quot;</span>
+            
+          </div>
         
       </div>
     </div>
@@ -36086,10 +35104,6 @@ string
         
 
         
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional properties are allowed.</p>
-          
-        
 
         
 
@@ -36102,12 +35116,9 @@ string
 </div>
 
 
-            
           
+        
 
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional items are allowed.</p>
-          
         
 
         
@@ -36143,7 +35154,7 @@ string
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-array&lt;object&gt;
+
           
           
           
@@ -36173,18 +35184,14 @@ array&lt;object&gt;
     
       <div class="children bg-grey-lighter py-4 rounded">
         
-
-        
           
-            <p class="pl-6 mb-2 text-xs font-bold uppercase text-grey-darker">Items:</p>
             
-              
 
 <div class="bg-grey-lighter pl-8 pr-8 rounded">
   <div class="">
     <div class="js-prop cursor-pointer py-2 flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">0</span>
+        <span class="text-sm " style="word-break: break-word;">schedule_id</span>
         
         <svg class="expand" version="1.1" viewBox="0 0 24 24" x="0"
           xmlns="http://www.w3.org/2000/svg" y="0">
@@ -36197,7 +35204,7 @@ array&lt;object&gt;
       <div>
         <div class="capitalize text-sm text-teal font-bold">
           
-object
+
           
           
           
@@ -36234,7 +35241,7 @@ object
   <div class="">
     <div class=" flex property">
       <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
-        <span class="text-sm " style="word-break: break-word;">type</span>
+        <span class="text-sm " style="word-break: break-word;">start_time</span>
         
         
       </div>
@@ -36262,23 +35269,76 @@ string
         </div>
 
         
-          <div class="text-sm markdown"><p>type of scheduling</p>
+          <div class="text-sm markdown"><p>start time for scheduling (hour, minute and second HH-MM-SS)</p>
 </div>
         
         
         
         
+        
           <div class="text-xs">
-            Enum:
+            Examples:
             
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;weekdays&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;timestamp&quot;</span>
-            
-              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;time_period&quot;</span>
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;07-49-00&quot;</span>
             
           </div>
         
+      </div>
+    </div>
+
+    
+  </div>
+</div>
+
+
+          
+            
+
+<div class="bg-grey-lightest pl-8 pr-8 rounded">
+  <div class="">
+    <div class=" flex property">
+      <div class="pr-4" style="margin-top:-2px; min-width: 25%;">
+        <span class="text-sm " style="word-break: break-word;">stop_time</span>
+        
+        
+      </div>
+
+      <div>
+        <div class="capitalize text-sm text-teal font-bold">
+          
+string
+          
+          
+          
+          <div class="inline-block">
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+          </div>
+        </div>
+
+        
+          <div class="text-sm markdown"><p>stop time for scheduling (hour, minute and second HH-MM-SS)</p>
+</div>
+        
+        
+        
+        
+        
+          <div class="text-xs">
+            Examples:
+            
+              <span class="border text-orange rounded ml-1 py-0 px-2">&quot;22-31-30&quot;</span>
+            
+          </div>
         
       </div>
     </div>
@@ -36294,10 +35354,6 @@ string
         
 
         
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional properties are allowed.</p>
-          
-        
 
         
 
@@ -36310,12 +35366,9 @@ string
 </div>
 
 
-            
           
+        
 
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional items are allowed.</p>
-          
         
 
         
@@ -36340,49 +35393,6 @@ string
           
             <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional properties are allowed.</p>
           
-        
-
-        
-
-        
-
-        
-      </div>
-    
-  </div>
-</div>
-
-
-          
-        
-
-        
-
-        
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional properties are allowed.</p>
-          
-        
-
-        
-
-        
-
-        
-      </div>
-    
-  </div>
-</div>
-
-
-            
-          
-
-          
-            <p class="pl-6 mb-2 mt-4 text-xs text-grey-darker">Additional items are allowed.</p>
-          
-        
-
         
 
         
@@ -36563,7 +35573,6 @@ string
   "uuid": "31b9448f-9ea3-429f-a04d-23c7c7ac77d3",
   "type": "config_import",
   "data": {
-    "uuid": "31b9448f-9ea3-429f-a04d-23c7c7ac77d3",
     "organizations": [
       {
         "name": "Ocular",
@@ -36571,52 +35580,49 @@ string
           {
             "server_id": "525400DC395E",
             "server_name": "string",
-            "cameras": [
-              {
-                "camera_id": {
-                  "name": "Reception camera #1",
-                  "address_primary": "rtsp://root:AaBbCc@91.154.24.22:554/FullHD_live.sdp",
-                  "address_secondary": "rtsp://root:AaBbCc@91.154.24.22:554/SD_live.sdp",
-                  "storage_id": 4,
-                  "schedule_id": 4,
-                  "storage_days": 7,
-                  "analysis_type": 1,
-                  "stream_address": "rtmp://80.254.48.93:1935/vasrc/cam20_2019-10-29_15-29-00.586164",
-                  "status": "RUNNING",
-                  "enabled": true
-                }
+            "cameras": {
+              "camera_id": {
+                "name": "Reception camera #1",
+                "address_primary": "rtsp://root:AaBbCc@91.154.24.22:554/FullHD_live.sdp",
+                "address_secondary": "rtsp://root:AaBbCc@91.154.24.22:554/SD_live.sdp",
+                "storage_id": 4,
+                "schedule_id": 4,
+                "storage_days": 7,
+                "analysis_type": 1,
+                "stream_address": "rtmp://80.254.48.93:1935/vasrc/cam20_2019-10-29_15-29-00.586164",
+                "status": "RUNNING",
+                "enabled": true
               }
-            ],
-            "storages": [
-              {
-                "storage_id": {
-                  "name": "main_storage_1",
-                  "path": "/home/_VideoArchive"
-                }
+            },
+            "storages": {
+              "storage_id": {
+                "name": "main_storage_1",
+                "path": "/home/_VideoArchive"
               }
-            ],
-            "schedules": [
-              {
-                "schedules": {
-                  "weekdays": [
-                    {
-                      "type": "weekdays",
-                      "days": 1
-                    }
-                  ],
-                  "timestamp": [
-                    {
-                      "type": "weekdays"
-                    }
-                  ],
-                  "time_period": [
-                    {
-                      "type": "weekdays"
-                    }
+            },
+            "schedules": {
+              "weekdays": {
+                "schedule_id": {
+                  "days": [
+                    1,
+                    3,
+                    7
                   ]
                 }
+              },
+              "timestamp": {
+                "schedule_id": {
+                  "start_timestamp": "1572273590",
+                  "stop_timestamp": "1572273591"
+                }
+              },
+              "time_period": {
+                "schedule_id": {
+                  "start_time": "07-49-00",
+                  "stop_time": "22-31-30"
+                }
               }
-            ]
+            }
           }
         ]
       }

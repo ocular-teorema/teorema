@@ -40,6 +40,4 @@ channels:
               description: data with list of cameras
               properties:
                 cameras:
-                  type: array
-                  items:
-                    $ref: '../base_types.yml#/components/schemas/camera_list_object'
+                  $ref: '../base_types.yml#/components/schemas/camera_list_object'

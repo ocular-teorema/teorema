@@ -7,7 +7,7 @@ info:
 
     # Notes:
     * All messages from subsribe channels must be sended with exchange "/ocular/{server_name}" and empty routing_key.
-    * All messages from publish channels will be sended to exchange "/ocular_driver/" and empty routing_key.
+    * All messages from publish channels will be sended to exchange "/ocular_driver" and empty routing_key.
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
@@ -58,7 +58,7 @@ channels:
     $ref: 'ref/cameras/add.yml#/channels/cameras_add_response'
   /ocular/{server_name}/cameras/list:
     $ref: 'ref/cameras/list.yml#/channels/cameras_list_request'
-  /ocular_driver/cameras/lis:
+  /ocular_driver/cameras/list:
     $ref: 'ref/cameras/list.yml#/channels/cameras_list_response'
 
   /ocular/{server_name}/cameras/update:

@@ -14,7 +14,7 @@ class QueueEndpoint:
 
     uuid = None
     request_required_params = None
-    response_exchange = '/ocular_driver/'
+    response_exchange = '/ocular_driver'
     response_message_type = None
 
     def __init__(self, exchange, server_name):
@@ -69,7 +69,7 @@ def pika_setup_connection():
     connection = pika.BlockingConnection(pika.ConnectionParameters(
         # 'localhost',
         host='10.10.110.1',
-        port=15672,
+        port=5672,
         virtual_host='ocular',
         credentials=pika.PlainCredentials('ocular', 'mC2QX0J7sx7i'),
         # heartbeat_interval=heartbeat

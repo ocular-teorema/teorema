@@ -46,7 +46,9 @@ components:
               - days
             properties:
               schedule_type:
-                $ref: '../base_types.yml#/components/schemas/schedule_type'
+                type: string
+                description: type of scheduling
+                const: "weekdays"
               days:
                 $ref: '../base_types.yml#/components/schemas/schedule_weekdays'
 
@@ -78,7 +80,9 @@ components:
               - stop_timestamp
             properties:
               schedule_type:
-                $ref: '../base_types.yml#/components/schemas/schedule_type'
+                type: string
+                description: type of scheduling
+                const: "timestamp"
               start_timestamp:
                 $ref: '../base_types.yml#/components/schemas/schedule_start_timestamp'
               stop_timestamp:
@@ -110,10 +114,10 @@ components:
               - start_time
               - stop_time
             properties:
-              uuid:
-                $ref: '../base_types.yml#/components/schemas/uuid'
               schedule_type:
-                $ref: '../base_types.yml#/components/schemas/schedule_type'
+                type: string
+                description: type of scheduling
+                const: "time_period"
               start_time:
                 $ref: '../base_types.yml#/components/schemas/schedule_start_time'
               stop_time:

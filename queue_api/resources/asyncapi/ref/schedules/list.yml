@@ -41,4 +41,7 @@ channels:
               type: string
               const: 'schedules_list'
             data:
-              $ref: '../base_types.yml#/components/schemas/schedules_list_object'
+              type: object
+              properties:
+                schedules:
+                  $ref: '../base_types.yml#/components/schemas/schedules_list_object'

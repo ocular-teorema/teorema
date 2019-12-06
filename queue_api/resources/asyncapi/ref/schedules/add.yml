@@ -101,8 +101,6 @@ components:
               - start_time
               - stop_time
             properties:
-              uuid:
-                $ref: '../base_types.yml#/components/schemas/uuid'
               schedule_type:
                 $ref: '../base_types.yml#/components/schemas/schedule_type'
               start_time:

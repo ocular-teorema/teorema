@@ -39,7 +39,5 @@ channels:
               type: object
               description: data with list of storages
               properties:
-                cameras:
-                  type: array
-                  items:
-                    $ref: '../base_types.yml#/components/schemas/storage_list_object'
+                storages:
+                  $ref: '../base_types.yml#/components/schemas/storage_list_object'

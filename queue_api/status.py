@@ -12,7 +12,6 @@ from queue_api.common import QueueEndpoint, get_supervisor_processes
 
 class StatusMessages(QueueEndpoint):
 
-
     def handle_request(self, params):
         print('message received', flush=True)
         self.send_response(params)

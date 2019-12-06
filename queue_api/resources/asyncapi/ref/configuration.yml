@@ -122,12 +122,36 @@ components:
       type: object
       description: Message with configuration
       required:
-        - uuid
         - organizations
       properties:
-        uuid:
-          $ref: 'base_types.yml#/components/schemas/uuid'
         organizations:
           type: array
           items:
-            $ref: 'base_types.yml#/components/schemas/organization_object'
+            type: object
+            required:
+              - name
+              - servers
+            properties:
+              name:
+                type: string
+                examples:
+                  - "Ocular"
+              servers:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    server_id:
+                      type: string
+                      description: Unique server id
+                      examples:
+                        - "525400DC395E"
+                    server_name:
+                      type: string
+                      description: Server name
+                    cameras:
+                        $ref: 'base_types.yml#/components/schemas/camera_list_object'
+                    storages:
+                        $ref: 'base_types.yml#/components/schemas/storage_list_object'
+                    schedules:
+                      $ref: 'base_types.yml#/components/schemas/schedules_list_object'

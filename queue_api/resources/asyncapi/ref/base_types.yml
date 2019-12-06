@@ -51,21 +51,7 @@ components:
               $ref: '#/components/schemas/storage_name'
             path:
               $ref: '#/components/schemas/storage_path'
-    schedule_weekdays_object:
-      type: object
-      required:
-        - name
-        - type
-      properties:
-        type:
-          $ref: '#/components/schemas/schedule_type'
-        days:
-          type: array
-          description: Array of weekdays
-          examples:
-            - 1
-            - 3 
-            - 7
+
     schedule_time_object:
       type: object
       properties:
@@ -82,25 +68,37 @@ components:
         type:
           $ref: '#/components/schemas/schedule_type'
 
+    weekd_obj:
+
 
     schedules_list_object:
       type: object
       properties:
-        schedules:
-          type: object
+        weekdays:
           properties:
-            weekdays:
-              type: array
-              items:
-                $ref: '#/components/schemas/schedule_weekdays_object'
-            timestamp:
-              type: array
-              items:
-                $ref: '#/components/schemas/schedule_timestamp_object'
-            time_period:
-              type: array
-              items:
-                $ref: '#/components/schemas/schedule_time_period_object'
+            schedule_id:
+              properties:
+                days:
+                  type: array
+                  description: Array of weekdays
+                  examples:
+                    - [1, 3, 7]
+        timestamp:
+          properties:
+            schedule_id:
+              properties:
+                start_timestamp:
+                  $ref: '#/components/schemas/schedule_start_timestamp'
+                stop_timestamp:
+                  $ref: '#/components/schemas/schedule_stop_timestamp'
+        time_period:
+          properties:
+            schedule_id:
+              properties:
+                start_time:
+                  $ref: '#/components/schemas/schedule_start_time'
+                stop_time:
+                  $ref: '#/components/schemas/schedule_stop_time'
 
     status_hardware_object:
       type: object
@@ -154,8 +152,8 @@ components:
         error_message:
           type: string
           examples:
-            - "Process exited because of error on launch"
             - null
+            - "Process exited because of error on launch"
     status_services_object:
       type: object
       description: Status of ocular services
@@ -189,45 +187,10 @@ components:
             error_message:
               type: string
               examples:
-                - "Connection refused"
                 - null
-    organization_object:
-      type: object
-      required:
-        - name
-        - servers
-      properties:
-        name:
-          type: string
-          examples: 
-            - "Ocular"
-        servers:
-          type: array
-          items:
-            $ref: '#/components/schemas/server_object'
-    server_object:
-      type: object
-      properties:
-        server_id:
-          type: string
-          description: Unique server id
-          examples:
-            - "525400DC395E"
-        server_name:
-          type: string
-          description: Server name
-        cameras:
-          type: array
-          items:
-            $ref: '#/components/schemas/camera_list_object'
-        storages:
-          type: array
-          items:
-            $ref: '#/components/schemas/storage_list_object'
-        schedules:
-          type: array
-          items:
-            $ref: '#/components/schemas/schedules_list_object'
+                - "Connection refused"
+
+
     error_code:
           type: integer
           examples:
@@ -316,12 +279,12 @@ components:
       examples:
         - [1, 3, 7]
     schedule_start_timestamp:
-      type: integer
+      type: string
       description: start timestamp for scheduling (in unix timestamp)
       examples:
           - "1572273590"
     schedule_stop_timestamp:
-      type: integer
+      type: string
       description: stop timestamp for scheduling
       examples:
           - "1572273591"
