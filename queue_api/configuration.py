@@ -53,7 +53,7 @@ class ConfigExportMessage(ConfigurationQueueEndpoint):
                         'name': camera.name,
                         'address_primary': camera.address,
                         'address_secondary': None,
-                        'storage_id': camera.storage.id,
+                        'storage_id': camera.storage.id if camera.storage is not None else 0,
                         'schedule_id': None,
                         'storage_days': camera.storage_life,
                         'analysis_type': camera.analysis,
