@@ -18,6 +18,7 @@ from queue_api.pika_handler import PikaHandler
 config = configparser.ConfigParser()
 config.read(SUPERVISOR_CAMERAS_CONF)
 raw_cams =[{'id': str(k[len('program:cam'):]), 'directory': v['directory']} for k,v in config.items() if k.startswith('program:cam')]
+event_message = PikaHandler()
 
 cams = []
 for c in raw_cams:
@@ -42,7 +43,6 @@ class CamListener(Protocol):
         print(self.camera_id, data, flush=True)
         if 'Hello from DataDirectory' not in data.decode():
             try:
-                event_message = PikaHandler()
                 event_message.cameras_event({'data': data})
                 print('message sent to queue', flush=True)
             except:
