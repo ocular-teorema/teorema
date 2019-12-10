@@ -11,6 +11,7 @@ from theorema.orgs.models import Organization
 from theorema.cameras.models import CameraGroup, Server, Storage
 
 from queue_api.messages import QueueMessage, QueueSuccessMessage, QueueErrorMessage, RequiredParamError
+from queue_api.settings import *
 
 
 class QueueEndpoint:
@@ -82,10 +83,10 @@ def base_send_in_queue(exchange, message):
 def pika_setup_connection():
     connection = pika.BlockingConnection(pika.ConnectionParameters(
         # 'localhost',
-        host='10.10.110.1',
-        port=15672,
-        virtual_host='ocular',
-        credentials=pika.PlainCredentials('ocular', 'mC2QX0J7sx7i'),
+        host=RABBITMQ_HOST,
+        port=RABBITMQ_PORT,
+        virtual_host=RABBITMQ_VHOST,
+        credentials=pika.PlainCredentials(RABBITMQ_CREDENTIALS['user'], RABBITMQ_CREDENTIALS['password']),
         # heartbeat_interval=heartbeat
     ))
     return connection
@@ -119,7 +120,8 @@ def get_supervisor_processes():
 
 
 def get_server_name():
-    return uuid.getnode()
+
+    return SERVER_ID.upper()
 
 
 def exchange_from_server_name(name):
