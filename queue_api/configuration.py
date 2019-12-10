@@ -1,8 +1,11 @@
+import os
+
 from theorema.orgs.models import Organization
 from theorema.cameras.models import Camera, Server, Storage
 
 from queue_api.common import QueueEndpoint, get_supervisor_processes
-from queue_api.messages import RequestParamValidationError
+from queue_api.messages import RequestParamValidationError, ConfigImportOrgsCountError, ConfigImportServerCountError,\
+    ConfigImportServerMacError, ConfigImportServerNameError, ConfigImportInvalidPathError, ConfigImportCameraStorageInvalidError
 from theorema.cameras.serializers import CameraSerializer
 
 
@@ -34,8 +37,8 @@ class ConfigExportMessage(ConfigurationQueueEndpoint):
             server_list = []
             for serv in servers:
 
-                server_id = 'id'
-                server_name = str(server_id)
+                server_id = serv.mac_address
+                server_name = serv.name
 
                 cameras = serv.camera_set.all()
 
@@ -104,37 +107,80 @@ class ConfigImportMessage(QueueEndpoint):
 
     def handle_request(self, message):
 
+        self.uuid = message['uuid']
+
         data = message['data']
         print('params', data, flush=True)
 
         if self.check_request_params(data):
             return
 
-        organization = data['organizations']
+        organizations = data['organizations']
+        if len(organizations.keys()) > 1:
+            org_error = ConfigImportOrgsCountError(self.uuid)
+            self.send_error_response(org_error)
 
-        for org_dict in organization:
+        for org_dict in organizations:
 
-            org = Organization(name=org_dict['name'])
+            org = self.default_org
+            org.name = org_dict['name']
             org.save()
 
             servers = org_dict['servers']
+            if len(servers.keys()) > 1:
+                server_error = ConfigImportServerCountError(self.uuid)
+                self.send_error_response(server_error)
+
             for server_dict in servers:
                 server_id = server_dict['server_id']
-                server_name = server_dict['server_name']
+                if server_id != self.default_serv.mac_address:
+                    mac_error = ConfigImportServerMacError(self.uuid)
+                    self.send_error_response(mac_error)
 
-                server = Server(name=server_name, organization=org)
-                server.save()
+                server_name = server_dict['server_name']
+                if str(server_name) != str(server_id):
+                    name_mac_error = ConfigImportServerNameError(self.uuid)
+                    self.send_error_response(name_mac_error)
+
+                storage_id_map = {}
+
+                storages = server_dict['storages']
+                for storage_id, storage in storages.items():
+                    path = storage['path']
+                    if not os.access(path, os.W_OK):
+                        path_error = ConfigImportInvalidPathError(storage['name'], path, self.uuid)
+                        self.send_error_response(path_error)
+
+                    if storage['name'] == 'default' and path != self.default_storage.path:
+                        imported_storage = self.default_storage
+                        imported_storage.path = storage['path']
+                    else:
+                        imported_storage = Storage(name=storage['name'], path=path)
+
+                    imported_storage.save()
+                    storage_id_map[storage_id] = imported_storage.id
 
                 cameras = server_dict['cameras']
-                for camera in cameras:
+                for camera_id, camera in cameras.items():
 
                     storage_indefinitely = True if camera['storage_days'] == 1000 else False
                     compress_level = 1
 
+                    if 'storage_id' in camera:
+                        old_storage_id = camera['storage_id']
+                        linked_storage_id = storage_id_map[old_storage_id]
+                        storage = Storage.objects.filter(id=linked_storage_id)
+                        if not storage:
+                            error = ConfigImportCameraStorageInvalidError(camera_id, linked_storage_id, self.uuid)
+                            self.send_error_response(error)
+                            return
+                    else:
+                        storage = self.default_storage
+
                     serializer_params = {
                         'name': camera['name'],
                         'organization': org,
-                        'server': server,
+                        'server': self.default_serv,
                         'camera_group': 'default',
                         'address': camera['address_primary'],
                         'analysis': camera['analysis'],
@@ -143,19 +189,7 @@ class ConfigImportMessage(QueueEndpoint):
                         'compress_level': compress_level,
                         'archive_path': storage.path,
                         'from_queue_api': True
-                        # 'storage'
                     }
-
-                    if 'storage_id' in camera:
-                        storage_id = camera['storage_id']
-                        storage = Storage.objects.filter(id=storage_id)
-                        if not storage:
-                            error = RequestParamValidationError('storage with id {id} not found'.format(id=storage_id))
-                            print(error, flush=True)
-                            self.send_error_response(error)
-                            return
-                    else:
-                        storage = self.default_storage
 
                     camera_serializer = CameraSerializer(data=serializer_params)
 
@@ -170,11 +204,6 @@ class ConfigImportMessage(QueueEndpoint):
                         print(msg, flush=True)
                         self.send_error_response(msg)
                         return
-
-                storages = server_dict['storages']
-                for storage in storages:
-                    imported_storage = Storage(name=storage['name'], path=storage['path'])
-                    imported_storage.save()
 
         self.send_success_response()
 

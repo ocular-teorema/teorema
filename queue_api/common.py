@@ -120,8 +120,7 @@ def get_supervisor_processes():
 
 
 def get_server_name():
-
-    return SERVER_ID.upper()
+    return Server.objects.all().first().name
 
 
 def exchange_from_server_name(name):

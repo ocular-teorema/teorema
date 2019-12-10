@@ -9,6 +9,8 @@ SERVER_TYPES = [
     ('analysis', 'analysis'),
     ('storage', 'storage')
 ]
+
+
 class Server(models.Model):
     parent_server_id=models.IntegerField(blank=True, null=True)
     name = models.CharField(max_length=100)
@@ -16,6 +18,7 @@ class Server(models.Model):
     local_address = models.GenericIPAddressField(default='0.0.0.0')
     organization = models.ForeignKey(Organization)
     type = models.CharField(choices=SERVER_TYPES, default='full', max_length=8)
+    mac_address = models.CharField(max_length=100, default='02420A0A6E0A')
 
 
 class CameraGroup(models.Model):

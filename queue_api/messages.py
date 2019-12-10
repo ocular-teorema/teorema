@@ -56,6 +56,7 @@ class QueueErrorMessage(QueueMessage):
 class InvalidMessageStructureError(QueueErrorMessage):
     code = 1
     message = "Message structure is not valid"
+    response_type = "error"
 
     def __init__(self, uuid=None):
         super().__init__(
@@ -68,6 +69,7 @@ class InvalidMessageStructureError(QueueErrorMessage):
 class InvalidMessageTypeError(QueueErrorMessage):
     code = 2
     message = "Declared type is not supported: {type}"
+    response_type = "error"
 
     def __init__(self, request_type, uuid=None):
         super().__init__(
@@ -99,4 +101,81 @@ class RequestParamValidationError(QueueErrorMessage):
             uuid=uuid,
             response_type=response_type,
             error=self.message.format(info=info)
+        )
+
+
+class ConfigImportOrgsCountError(QueueErrorMessage):
+    code = 5
+    message = 'Must be only one organization in configuration'
+    response_type = 'config_import'
+
+    def __init__(self, uuid=None):
+        super().__init__(
+            uuid=uuid,
+            response_type=self.response_type,
+            error=self.message
+        )
+
+
+class ConfigImportServerCountError(QueueErrorMessage):
+    code = 6
+    message = 'Must be only one server in configuration'
+    response_type = 'config_import'
+
+    def __init__(self, uuid=None):
+        super().__init__(
+            uuid=uuid,
+            response_type=self.response_type,
+            error=self.message
+        )
+
+
+class ConfigImportServerMacError(QueueErrorMessage):
+    code = 7
+    message = 'Given server_id does not match hardware id'
+    response_type = 'config_import'
+
+    def __init__(self, uuid=None):
+        super().__init__(
+            uuid=uuid,
+            response_type=self.response_type,
+            error=self.message
+        )
+
+
+class ConfigImportServerNameError(QueueErrorMessage):
+    code = 8
+    message = 'Given server_id and server_name does not match'
+    response_type = 'config_import'
+
+    def __init__(self, uuid=None):
+        super().__init__(
+            uuid=uuid,
+            response_type=self.response_type,
+            error=self.message
+        )
+
+
+class ConfigImportInvalidPathError(QueueErrorMessage):
+    code = 9
+    message = 'Invalid path for storage {name}: {path} does not exist'
+    response_type = 'config_import'
+
+    def __init__(self, name=None, path=None, uuid=None):
+        super().__init__(
+            uuid=uuid,
+            response_type=self.response_type,
+            error=self.message.format(name=name, path=path)
+        )
+
+
+class ConfigImportCameraStorageInvalidError(QueueErrorMessage):
+    code = 4
+    message = "Error when creating camera {cam_id}: storage with id {storage_id} not presented in config"
+
+    def __init__(self, cam_id=None, storage_id=None, uuid=None, response_type=None):
+        super().__init__(
+            uuid=uuid,
+            response_type=response_type,
+            error=self.message.format(cam_id=cam_id, storage_id=storage_id)
         )

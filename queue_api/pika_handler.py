@@ -65,7 +65,8 @@ class PikaHandler(threading.Thread):
             valid = True
 
         if not valid:
-            error = InvalidMessageStructureError()
+            uuid = message['uuid'] if 'uuid' in message else None
+            error = InvalidMessageStructureError(uuid=uuid)
             base_send_in_queue(self.response_exchange, str(error))
             return False
         else:

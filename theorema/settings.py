@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_auth.registration',
 #    'djcelery_email',
 
+    'theorema',
     'theorema.users',
     'theorema.cameras',
     'theorema.orgs',

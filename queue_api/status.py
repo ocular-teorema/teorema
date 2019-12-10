@@ -22,7 +22,7 @@ class StatusMessages(QueueEndpoint):
         self.uuid = params['uuid']
 
         # hardware info
-        local_ip_address = Server.objects.all().first().address
+        local_ip_address = Server.objects.all().first().local_address
 
         uptime_job = subprocess.Popen(
             '/usr/bin/uptime',
