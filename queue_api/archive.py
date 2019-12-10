@@ -37,9 +37,12 @@ class VideosGetMessage(ArchiveQueueEndpoint):
 
         camera_query = ','.join(camera_list_query)
 
+        startTs = int(data['start_timestamp']) if int(data['start_timestamp']) % 600 == 0 else int(data['start_timestamp']) - 600
+        endTs = int(data['stop_timestamp']) if int(data['stop_timestamp']) % 600 == 0 else int(data['stop_timestamp']) + 600
+
         query_params = {
-            'startTs': int(data['start_timestamp']) * 1000,
-            'endTs': int(data['stop_timestamp']) * 1000,
+            'startTs': startTs * 1000,
+            'endTs': endTs * 1000,
             'cameras': camera_query,
             'skip': 0 if 'skip' not in data.keys() else data['skip'],
             'limit': 10000 if 'limit' not in data.keys() else data['limit']
