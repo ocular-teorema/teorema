@@ -143,7 +143,7 @@ class CameraAddMessages(CameraQueueEndpoint):
 
 class CameraUpdateMessages(CameraQueueEndpoint):
 
-    response_topic = '/cameras/{cam_id}/update/response'
+    response_message_type = 'cameras_update_response'
 
     def handle_request(self, message):
         print('message received', flush=True)
@@ -206,7 +206,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
 
 class CameraListMessages(QueueEndpoint):
 
-    response_message_type = 'cameras_list'
+    response_message_type = 'cameras_list_response'
 
     def handle_request(self, params):
         print('message received', flush=True)
@@ -254,6 +254,8 @@ class CameraListMessages(QueueEndpoint):
 
 class CameraSetRecordingMessages(CameraQueueEndpoint):
 
+    response_message_type = 'cameras_set_recording_response'
+
     request_required_params = [
         'recording'
     ]
@@ -290,8 +292,7 @@ class CameraSetRecordingMessages(CameraQueueEndpoint):
 
 class CameraDeleteMessages(CameraQueueEndpoint):
 
-    response_topic = '/cameras/{cam_id}/delete/response'
-    response_message_type = 'delete_response'
+    response_message_type = 'cameras_delete_response'
 
     def handle_request(self, params):
         print('preparing response', flush=True)

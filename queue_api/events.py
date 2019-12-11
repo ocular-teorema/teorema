@@ -8,7 +8,7 @@ class EventQueueEndpoint(QueueEndpoint):
 
 
 class EventsSendMessage(EventQueueEndpoint):
-    response_topic = '/cameras/events'
+
     response_message_type = 'cameras_event'
 
     def handle_request(self, params):

@@ -15,7 +15,6 @@ class StorageAddMessages(StorageQueueEndpoint):
         'path'
     ]
 
-    response_topic = '/storages/add/request'
     response_message_type = 'storages_add_response'
 
     def handle_request(self, params):
@@ -46,7 +45,6 @@ class StorageAddMessages(StorageQueueEndpoint):
 
 class StorageDeleteMessage(StorageQueueEndpoint):
 
-    response_topic = '/storages/delete/request'
     response_message_type = 'storages_delete_response'
 
     def handle_request(self, params):
@@ -70,7 +68,6 @@ class StorageDeleteMessage(StorageQueueEndpoint):
 
 class StorageListMessage(StorageQueueEndpoint):
 
-    response_topic = '/storages/list/request'
     response_message_type = 'storages_list_response'
 
     def handle_request(self, params):
@@ -97,7 +94,6 @@ class StorageUpdateMessage(StorageQueueEndpoint):
         'name',
         'path'
     ]
-    response_topic = '/storages/update/request'
     response_message_type = 'storages_update_response'
 
     def handle_request(self, params):
