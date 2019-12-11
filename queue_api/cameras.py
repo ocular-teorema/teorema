@@ -236,32 +236,6 @@ class CameraSetRecordingMessages(CameraQueueEndpoint):
 
         camera_repr['is_active'] = recording
         CameraSerializer().update(camera, camera_repr)
-
-        # camera = Camera.objects.filter(uid=params['camera_id']).first()
-        # if camera:
-        #
-        #     data = dict(CameraSerializer().basic_to_representation(camera))
-        #     data['unique_id'] = str(camera.id) + camera.add_time
-        #     data['ws_video_url'] = 'ws://%s/video_ws/?port=%s' % (camera.server.address, camera.port+50)
-        #     data['thumb_url'] = 'http://%s:5005/thumb/%s/' % (camera.server.address, camera.id)
-        #     data['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (camera.server.address, str(camera.id) + camera.add_time)
-        #     data['m3u8_video_url'] = 'http://%s:8080/vasrc/cam%s/index.m3u8' % (camera.server.address, str(camera.id))
-        #     data['camera_group'] = camera.camera_group.id
-        #     if camera.is_active:
-        #         data['is_active'] = False
-        #     else:
-        #         data['is_active'] = True
-        #     data['server'] = camera.server
-        #     data['organization'] = camera.organization
-        #
-        #     CameraSerializer().update(camera, data)
-        #
-        # else:
-        #     error = RequestParamValidationError(info='camera with id {id} not found'.format(id=params['camera_id']))
-        #     print(error, flush=True)
-        #     self.send_error_response(error)
-        #     return
-
         self.send_success_response()
 
 

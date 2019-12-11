@@ -26,7 +26,7 @@ class QueueEndpoint:
     response_message_type = None
 
     def __init__(self):
-        self.server_name, self.exchange = get_server_name_exchange()
+        self.server_name = get_server_name()
 
         self.default_org = Organization.objects.all().first()
         self.default_serv = Server.objects.all().first()
@@ -68,7 +68,7 @@ def base_send_in_queue(exchange, message):
     connection = pika_setup_connection()
 
     channel = connection.channel()
-    channel.exchange_declare(exchange=exchange, exchange_type='topic')
+    channel.exchange_declare(exchange=exchange, exchange_type='direct', durable=False, auto_delete=False)
 
     channel.basic_publish(
         exchange=exchange,
@@ -122,21 +122,3 @@ def get_supervisor_processes():
 def get_server_name():
     return Server.objects.all().first().name
 
-
-def exchange_from_server_name(name):
-    return '/ocular/{server}'.format(server=name)
-
-
-def get_server_name_exchange():
-    server_name = get_server_name()
-    exchange = exchange_from_server_name(server_name)
-    return server_name, exchange
-#
-# def exchange_with_camera_name(base_exchange, camera_id):
-#     camera_postfix = '/cameras/{camera_id}'.format(camera_id=camera_id)
-#     return base_exchange + camera_postfix
-#
-#
-# def exchange_with_storage_name(base_exchange, storage_id):
-#     storage_postfix = '/storages/{storage_id}'.format(storage_id=storage_id)
-#     return base_exchange + storage_postfix

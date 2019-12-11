@@ -28,20 +28,20 @@ class PikaHandler(threading.Thread):
         super().__init__()
 
         self.server_name, self.server_exchange = get_server_name_exchange()
-        self.response_exchange = '/ocular_driver'
-        print('server name: {name}'.format(name=self.server_name), flush=True)
-        print('exchange:', self.server_exchange, flush=True)
+        self.response_exchange = 'driver'
+        print('server name (exchange): {name}'.format(name=self.server_name), flush=True)
+        print('server response exchange: {name}'.format(name=self.response_exchange), flush=True)
 
     def run(self):
         print('starting receiver', flush=True)
         connection = pika_setup_connection()
         channel = connection.channel()
 
-        channel.exchange_declare(exchange=self.server_exchange, exchange_type='topic')
-        result = channel.queue_declare('', exclusive=True)
+        channel.exchange_declare(exchange=self.server_name, exchange_type='direct', durable=False, auto_delete=False)
+        result = channel.queue_declare('')
 
         queue_name = result.method.queue
-        channel.queue_bind(exchange=self.server_exchange, queue=queue_name, routing_key='')
+        channel.queue_bind(exchange=self.server_name, queue=queue_name, routing_key='')
 
         channel.basic_consume(
             queue=queue_name,
