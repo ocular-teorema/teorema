@@ -1,7 +1,7 @@
 import os
 
 from theorema.orgs.models import Organization
-from theorema.cameras.models import Camera, Server, Storage
+from theorema.cameras.models import Camera, Server, Storage, CameraSchedule
 
 from queue_api.common import QueueEndpoint, get_supervisor_processes
 from queue_api.messages import RequestParamValidationError, ConfigImportOrgsCountError, ConfigImportServerCountError,\
@@ -42,7 +42,7 @@ class ConfigExportMessage(ConfigurationQueueEndpoint):
 
                 cameras = serv.camera_set.all()
 
-                camera_dict = {}
+                camera_list = []
                 for camera in cameras:
 
                     stream_address = 'rtmp://{host}:1935/vasrc/{id}'.format(host=serv.address, id=camera.uid)
@@ -53,6 +53,7 @@ class ConfigExportMessage(ConfigurationQueueEndpoint):
                             status = x['status']
 
                     camera_data = {
+                        'id': camera.id,
                         'name': camera.name,
                         'address_primary': camera.address,
                         'address_secondary': None,
@@ -65,26 +66,61 @@ class ConfigExportMessage(ConfigurationQueueEndpoint):
                         'enabled': camera.is_active,
                     }
 
-                    camera_dict[camera.uid] = camera_data
+                    camera_list.append(camera_data)
 
-                    storages = Storage.objects.all()
-                    storage_dict = {}
-                    for storage in storages:
-                        storage_data = {
-                            'name': storage.name,
-                            'path': storage.path
-                        }
-                        storage_dict[storage.id] = storage_data
+                storages = Storage.objects.all()
+                storage_list = []
+                for storage in storages:
+                    storage_data = {
+                        'id': storage.name,
+                        'name': storage.name,
+                        'path': storage.path
+                    }
+                    storage_list.append(storage_data)
 
-                    #schedules = Schedule.objects.all()
-                    schedule_dict = {}
+                all_schedules = CameraSchedule.objects.all()
+
+                schedule_weekdays_list = []
+                schedules_weekdays = all_schedules.filter(schedule_type='weekdays')
+                for schedule in schedules_weekdays:
+                    schedule_data = {
+                        'id': schedule.id,
+                        'days': [int(day) for day in schedule.days.split(', ')]
+                    }
+                    schedule_weekdays_list.append(schedule_data)
+
+                schedule_timestamp_list = []
+                schedules_timestamp = all_schedules.filter(schedule_type='timestamp')
+                for schedule in schedules_timestamp:
+                    schedule_data = {
+                        'id': schedule.id,
+                        'start_timestamp': schedule.start_timestamp,
+                        'stop_timestamp': schedule.stop_timestamp
+                    }
+                    schedule_timestamp_list.append(schedule_data)
+
+                schedule_time_list = []
+                schedules_time = all_schedules.filter(schedule_type='time_period')
+                for schedule in schedules_time:
+                    schedule_data = {
+                        'id': schedule.id,
+                        'start_timestamp': schedule.start_timestamp,
+                        'stop_timestamp': schedule.stop_timestamp
+                    }
+                    schedule_time_list.append(schedule_data)
+
+                schedule_data = {
+                    'weekdays': schedule_weekdays_list,
+                    'timestamp': schedule_timestamp_list,
+                    'time_period': schedule_time_list
+                }
 
                 server_data = {
                     'server_id': server_id,
                     'server_name': server_name,
-                    'cameras': camera_dict,
-                    'storages': storage_dict,
-                    'schedules': schedule_dict
+                    'cameras': camera_list,
+                    'storages': storage_list,
+                    'schedules': schedule_data
                 }
 
                 server_list.append(server_data)
@@ -145,7 +181,7 @@ class ConfigImportMessage(QueueEndpoint):
                 storage_id_map = {}
 
                 storages = server_dict['storages']
-                for storage_id, storage in storages.items():
+                for storage in storages:
                     path = storage['path']
                     if not os.access(path, os.W_OK):
                         path_error = ConfigImportInvalidPathError(storage['name'], path, self.uuid)
@@ -158,10 +194,10 @@ class ConfigImportMessage(QueueEndpoint):
                         imported_storage = Storage(name=storage['name'], path=path)
 
                     imported_storage.save()
-                    storage_id_map[storage_id] = imported_storage.id
+                    storage_id_map[storage.id] = imported_storage.id
 
                 cameras = server_dict['cameras']
-                for camera_id, camera in cameras.items():
+                for camera in cameras:
 
                     storage_indefinitely = True if camera['storage_days'] == 1000 else False
                     compress_level = 1
@@ -171,7 +207,7 @@ class ConfigImportMessage(QueueEndpoint):
                         linked_storage_id = storage_id_map[old_storage_id]
                         storage = Storage.objects.filter(id=linked_storage_id)
                         if not storage:
-                            error = ConfigImportCameraStorageInvalidError(camera_id, linked_storage_id, self.uuid)
+                            error = ConfigImportCameraStorageInvalidError(camera['id'], linked_storage_id, self.uuid)
                             self.send_error_response(error)
                             return
                     else:
@@ -205,8 +241,25 @@ class ConfigImportMessage(QueueEndpoint):
                         self.send_error_response(msg)
                         return
 
+                schedules = server_dict['schedules']
+                for schedule in schedules:
+
+                    schedule_type = schedule['schedule_type']
+                    days = str(schedule['days'])[1:-1] if 'days' in schedule else None
+                    start_timestamp = schedule['start_timestamp'] if 'start_timestamp' in schedule else None
+                    stop_itmestamp = schedule['stop_timestamp'] if 'stop_timestamp' in schedule else None
+                    start_time = schedule['start_time'] if 'start_time' in schedule else None
+                    stop_time = schedule['stop_time'] if 'stop_time' in schedule else None
+
+                    schedule = CameraSchedule(
+                        schedule_type=schedule_type,
+                        weekdays=days,
+                        start_timestamp=start_timestamp,
+                        stop_itmestamp=stop_itmestamp,
+                        start_time=start_time,
+                        stop_time=stop_time
+                    )
+
+                    schedule.save()
+
         self.send_success_response()
-
-
-
-
