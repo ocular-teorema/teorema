@@ -79,9 +79,7 @@ class StorageListMessage(StorageQueueEndpoint):
 
         storages = Storage.objects.all()
 
-        message = {
-            'storage_list': []
-        }
+        storage_list = []
 
         for storage in storages:
             data = {
@@ -89,9 +87,9 @@ class StorageListMessage(StorageQueueEndpoint):
                 'name': storage.name,
                 'path': storage.path
             }
-            message['storage_list'].append(data)
+            storage_list.append(data)
 
-        self.send_data_response(message)
+        self.send_data_response(storage_list)
 
 
 class StorageUpdateMessage(StorageQueueEndpoint):

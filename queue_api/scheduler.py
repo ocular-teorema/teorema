@@ -6,23 +6,54 @@ from theorema.cameras.models import CameraSchedule
 
 from queue_api.common import QueueEndpoint
 from queue_api.messages import RequiredParamError, RequestParamValidationError, InvalidScheduleTypeError
-
+from queue_api.cameras import enable_camera, disable_camera
 
 class CameraScheduler:
 
+    def __init__(self):
+        self.scheduler = BackgroundScheduler()
+
     def start(self):
-        scheduler = BackgroundScheduler()
         #scheduler.add_job(forecastApi.update_forecast, 'interval', minutes=5)
-        scheduler.start()
+        self.scheduler.start()
         print('scheduler started', flush=True)
+
+    def add_weekdays_schedule(self, camera, days):
+        days_to_zero = []
+        for el in days:
+            el -= 1
+            days_to_zero.append(el)
+
+        converted_days = str(days_to_zero)[1:-1]
+        enable_job = self.scheduler.add_job(enable_camera(camera), 'cron', day_of_week=converted_days, hour=0, minute=0, second=1)
+        disable_job = self.scheduler.add_job(disable_camera(camera), 'cron', day_of_week=converted_days, hour=23, minute=59, second=59)
+        return enable_job, disable_job
+
+    def add_timestamp_schedule(self, camera, start_timestamp, stop_timestamp):
+        start_datetime = datetime.fromtimestamp(int(start_timestamp))
+        stop_datetime = datetime.fromtimestamp(int(stop_timestamp))
+
+        enable_job = self.scheduler.add_job(enable_camera(camera), 'date', run_date=start_datetime)
+        disable_job = self.scheduler.add_job(disable_camera(camera), 'date', run_date=stop_datetime)
+        return enable_job, disable_job
+
+    def add_time_schedule(self, camera, start_time, stop_time):
+        start_times = [int(value) for value in start_time.split('-')]
+        stop_times = [int(value) for value in stop_time.split('-')]
+
+        enable_job = self.scheduler.add_job(enable_camera(camera), 'cron',
+                                            hour=start_times[0], minute=start_times[1], second=start_times[2])
+        disable_job = self.scheduler.add_job(disable_camera(camera), 'cron',
+                                             hour=stop_times[0], minute=stop_times[1], second=stop_times[2])
+        return enable_job, disable_job
+
+    def delete_schedule(self, start_job_id, stop_job_id):
+        self.scheduler.delete_job(start_job_id)
+        self.scheduler.delete_job(stop_job_id)
+        return True
 
 
 class ScheduleQueueEndpoint(QueueEndpoint):
-
-    def __init__(self, scheduler):
-        super().__init__()
-
-        self.scheduler = scheduler
 
     def check_request_params(self, actual):
         actual_keys = actual.keys()
@@ -71,7 +102,9 @@ class ScheduleQueueEndpoint(QueueEndpoint):
                 return True
 
 
-class ScheduleAddMessage(ScheduleQueueEndpoint):
+class SchedulesAddMessage(ScheduleQueueEndpoint):
+
+    response_message_type = 'schedules_add_response'
 
     def handle_request(self, message):
         print('message received', flush=True)
@@ -83,7 +116,7 @@ class ScheduleAddMessage(ScheduleQueueEndpoint):
             return
 
         schedule_type = params['schedule_type']
-        days = str(params['days']) if 'days' in params else None
+        days = str(params['days'])[1:-1] if 'days' in params else None
         start_timestamp = params['start_timestamp'] if 'start_timestamp' in params else None
         stop_itmestamp = params['stop_timestamp'] if 'stop_timestamp' in params else None
         start_time = params['start_time'] if 'start_time' in params else None
@@ -104,6 +137,8 @@ class ScheduleAddMessage(ScheduleQueueEndpoint):
 
 class ScheduleListMessage(ScheduleQueueEndpoint):
 
+    response_message_type = 'schedules_list_response'
+
     def handle_request(self, params):
         print('message received', flush=True)
         self.send_response(params)
@@ -114,36 +149,39 @@ class ScheduleListMessage(ScheduleQueueEndpoint):
 
         all_schedules = CameraSchedule.objects.all()
 
-        schedule_weekdays_dict = {}
+        schedule_weekdays_list = []
         schedules_weekdays = all_schedules.filter(schedule_type='weekdays')
         for schedule in schedules_weekdays:
             schedule_data = {
-                'days': list(schedule.days)
+                'id': schedule.id,
+                'days': [int(day) for day in schedule.days.split(', ')]
             }
-            schedule_weekdays_dict[schedule.id] = schedule_data
+            schedule_weekdays_list.append(schedule_data)
 
-        schedule_timestamp_dict = {}
+        schedule_timestamp_list = []
         schedules_timestamp = all_schedules.filter(schedule_type='timestamp')
         for schedule in schedules_timestamp:
             schedule_data = {
+                'id': schedule.id,
                 'start_timestamp': schedule.start_timestamp,
                 'stop_timestamp': schedule.stop_timestamp
             }
-            schedule_timestamp_dict[schedule.id] = schedule_data
+            schedule_timestamp_list.append(schedule_data)
 
-        schedule_time_dict = {}
+        schedule_time_list = []
         schedules_time = all_schedules.filter(schedule_type='time_period')
         for schedule in schedules_time:
             schedule_data = {
+                'id': schedule.id,
                 'start_timestamp': schedule.start_timestamp,
                 'stop_timestamp': schedule.stop_timestamp
             }
-            schedule_time_dict[schedule.id] = schedule_data
+            schedule_time_list.append(schedule_data)
 
         data = {
-            'weekdays': schedule_weekdays_dict,
-            'timestamp': schedule_timestamp_dict
-            'time_period': schedule_time_dict
+            'weekdays': schedule_weekdays_list,
+            'timestamp': schedule_timestamp_list,
+            'time_period': schedule_time_list
         }
 
         self.send_data_response(data)
@@ -151,6 +189,8 @@ class ScheduleListMessage(ScheduleQueueEndpoint):
 
 
 class SchedulesUpdateMessage(ScheduleQueueEndpoint):
+
+    response_message_type = 'schedules_update_response'
 
     def handle_request(self, message):
         print('message received', flush=True)
@@ -172,12 +212,12 @@ class SchedulesUpdateMessage(ScheduleQueueEndpoint):
         schedule_type = params['schedule_type']
         schedule.schedule_type = schedule_type
 
-        if schedule_type == 'weekdays'
+        if schedule_type == 'weekdays':
             schedule.days = str(params['days']) if 'days' in params else schedule.days
-        elif schedule_type == 'timestamp'
+        elif schedule_type == 'timestamp':
             schedule.start_timestamp = params['start_timestamp'] if 'start_time in params' else schedule.start_timestamp
             schedule.stop_timestamp = params['stop_timestamp'] if 'stop_timestamp' in params else schedule.stop_timestamp
-        elif schedule_type == 'time_period'
+        elif schedule_type == 'time_period':
             schedule.start_time = params['start_time'] if 'start_time' in params else schedule.start_time
             schedule.stop_time = params['stop_time'] if 'stop_time' in params else schedule.stop_time
 
@@ -187,6 +227,7 @@ class SchedulesUpdateMessage(ScheduleQueueEndpoint):
 
 class SchedulesDeleteMessage(ScheduleQueueEndpoint):
 
+    response_message_type = 'schedules_delete_response'
     def handle_request(self, params):
         print('message received', flush=True)
         self.uuid = params['uuid']

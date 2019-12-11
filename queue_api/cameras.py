@@ -10,13 +10,22 @@ from theorema.cameras.serializers import CameraSerializer
 
 from queue_api.common import QueueEndpoint, get_supervisor_processes
 from queue_api.messages import RequestParamValidationError
+from queue_api.scheduler import CameraSchedule
 
 
 class CameraQueueEndpoint(QueueEndpoint):
-    pass
+
+    def __init__(self, scheduler=None):
+        super().__init__()
+        self.scheduler = scheduler
+
+    def scheduler_add_job(self, camera):
+        self.scheduler.add_job()
 
 
 class CameraAddMessages(CameraQueueEndpoint):
+
+    response_message_type = 'cameras_add_response'
 
     request_required_params = [
         'name', 'address_primary',
@@ -43,14 +52,30 @@ class CameraAddMessages(CameraQueueEndpoint):
 
         if 'storage_id' in params:
             storage_id = params['storage_id']
-            storage = Storage.objects.filter(id=storage_id)
-            if not storage:
+            try:
+                storage = Storage.objects.get(id=storage_id)
+            except ObjectDoesNotExist:
                 error = RequestParamValidationError('storage with id {id} not found'.format(id=storage_id))
                 print(error, flush=True)
                 self.send_error_response(error)
                 return
         else:
             storage = self.default_storage
+
+        if 'schedule_id' in params:
+            schedule_id = params['schedule_id']
+            try:
+                schedule = CameraSchedule.objects.get(id=schedule_id)
+            except ObjectDoesNotExist:
+                error = RequestParamValidationError('schedule with id {id} not found'.format(id=schedule_id))
+                print(error, flush=True)
+                self.send_error_response(error)
+                return
+
+        else:
+            schedule = None
+
+
 
         # disabled for now
         #
@@ -78,6 +103,33 @@ class CameraAddMessages(CameraQueueEndpoint):
             camera = camera_serializer.save()
             camera.storage = storage
             camera.save()
+
+            start_job = None
+            stop_job = None
+            if schedule.schedule_type == 'weekdays':
+                start_job, stop_job = self.scheduler.add_weekdays_schedule(
+                    camera=camera,
+                    days=schedule.weekdays
+                )
+            elif schedule.schedule_type == 'timestamp':
+                start_job, stop_job = self.scheduler.add_timestamp_schedule(
+                    camera=camera,
+                    start_timestamp=schedule.start_timestamp,
+                    stop_timestamp=schedule.stop_timestamp
+                )
+            elif schedule.schedule_type == 'time_period':
+                start_job, stop_job = self.scheduler.add_timestamp_schedule(
+                    camera=camera,
+                    start_time=schedule.start_time,
+                    stop_time=schedule.stop_time
+                )
+            else:
+                pass
+
+            camera.schedule_job_start = start_job
+            camera.schedule_job_start = stop_job
+            camera.save()
+
         else:
             errors = camera_serializer.errors
             error_str = 'Validation error: "err"'.format(err=errors)
@@ -154,8 +206,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
 
 class CameraListMessages(QueueEndpoint):
 
-    response_topic = '/cameras/list/response'
-    response_message_type = 'cameras_list_response'
+    response_message_type = 'cameras_list'
 
     def handle_request(self, params):
         print('message received', flush=True)
@@ -196,10 +247,8 @@ class CameraListMessages(QueueEndpoint):
 
         print(self.uuid, flush=True)
         print(camera_list, flush=True)
-        data = {
-            'camera_list': camera_list
-        }
-        self.send_data_response(data)
+
+        self.send_data_response(camera_list)
         return
 
 
@@ -295,8 +344,19 @@ class CameraDeleteMessages(CameraQueueEndpoint):
         self.send_success_response()
 
 
-def enable_camera():
-    pass
+def set_camera_recording(camera, recording):
 
-def disable_camera():
-    pass
+    camera_repr = CameraSerializer().to_representation(camera)
+    camera_repr['is_active'] = recording
+    CameraSerializer().update(camera, camera_repr)
+    return
+
+
+def enable_camera(camera):
+    set_camera_recording(camera, True)
+    return
+
+
+def disable_camera(camera):
+    set_camera_recording(camera, False)
+    return

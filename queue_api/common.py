@@ -22,7 +22,7 @@ class QueueEndpoint:
 
     uuid = None
     request_required_params = None
-    response_exchange = '/ocular_driver'
+    response_exchange = 'ocular_driver'
     response_message_type = None
 
     def __init__(self):

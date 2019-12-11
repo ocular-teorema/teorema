@@ -14,7 +14,8 @@ django.setup()
 from queue_api.status import StatusMessages
 from queue_api.storages import StorageListMessage, StorageDeleteMessage, StorageAddMessages, StorageUpdateMessage
 from queue_api.cameras import CameraAddMessages, CameraListMessages, CameraSetRecordingMessages, CameraDeleteMessages, CameraUpdateMessages
-from queue_api.common import pika_setup_connection, get_server_name_exchange, base_send_in_queue
+from queue_api.scheduler import SchedulesAddMessage, ScheduleListMessage, SchedulesDeleteMessage, SchedulesUpdateMessage
+from queue_api.common import pika_setup_connection, base_send_in_queue, get_server_name
 from queue_api.ptz_control import PanControlMessage, TiltControlMessage, ZoomControlMessage
 from queue_api.archive import VideosGetMessage
 from queue_api.events import EventsSendMessage
@@ -28,7 +29,7 @@ class PikaHandler(threading.Thread):
     def __init__(self):
         super().__init__()
 
-        self.server_name, self.server_exchange = get_server_name_exchange()
+        self.server_name = get_server_name()
         self.response_exchange = 'driver'
         print('server name (exchange): {name}'.format(name=self.server_name), flush=True)
         print('server response exchange: {name}'.format(name=self.response_exchange), flush=True)
@@ -99,7 +100,7 @@ class PikaHandler(threading.Thread):
     def cameras_add(self, message):
         print('camera add request message received', flush=True)
 
-        camera_message = CameraAddMessages()
+        camera_message = CameraAddMessages(self.scheduler)
         camera_message.handle_request(message)
         print('message ok', flush=True)
 
@@ -113,7 +114,7 @@ class PikaHandler(threading.Thread):
     def cameras_update(self, message):
         print('camera update request message received', flush=True)
 
-        camera_message = CameraUpdateMessages()
+        camera_message = CameraUpdateMessages(self.scheduler)
         camera_message.handle_request(message)
         print('message ok')
 
@@ -177,7 +178,7 @@ class PikaHandler(threading.Thread):
     def cameras_delete(self, message):
         print('cameras delete request', flush=True)
 
-        cameras_request = CameraDeleteMessages()
+        cameras_request = CameraDeleteMessages(self.scheduler)
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
@@ -228,6 +229,46 @@ class PikaHandler(threading.Thread):
 
         config_export_msg = ConfigImportMessage()
         config_export_msg.handle_request(message)
+        print('message ok', flush=True)
+
+    def schedules_add(self, message):
+        print('schedule add request message received', flush=True)
+        print('message', message, flush=True)
+        uuid = message['uuid']
+        print(uuid, flush=True)
+
+        schedules_request = SchedulesAddMessage()
+        schedules_request.handle_request(message)
+        print('message ok', flush=True)
+
+    def schedules_delete(self, message):
+        print('schedule delete request message received', flush=True)
+        print('message', message, flush=True)
+        uuid = message['uuid']
+        print(uuid, flush=True)
+
+        schedules_request = SchedulesDeleteMessage()
+        schedules_request.handle_request(message)
+        print('message ok', flush=True)
+
+    def schedules_list(self, message):
+        print('schedule get request message received', flush=True)
+        print('message', message, flush=True)
+        uuid = message['uuid']
+        print(uuid, flush=True)
+
+        schedules_request = ScheduleListMessage()
+        schedules_request.handle_request(message)
+        print('message ok', flush=True)
+
+    def schedules_update(self, message):
+        print('schedule get request message received', flush=True)
+        print('message', message, flush=True)
+        uuid = message['uuid']
+        print(uuid, flush=True)
+
+        schedules_request = SchedulesUpdateMessage()
+        schedules_request.handle_request(message)
         print('message ok', flush=True)
 
 
