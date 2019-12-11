@@ -49,4 +49,6 @@ def find_last_day(videos):
         name_path = create_name_path(name, video_file)
         date = convert_name_to_datetime(list(name_path.keys())[0])
         dates.append(date)
-    return sorted(dates)[0]
+    if len(dates) > 0:
+        return sorted(dates)[0]
+    return datetime.datetime.now()
