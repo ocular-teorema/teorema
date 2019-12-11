@@ -59,8 +59,6 @@ class PikaHandler(threading.Thread):
             valid = False
         elif not isinstance(message['type'], str):
             valid = False
-        elif not isinstance(message['data'], dict):
-            valid = False
         else:
             valid = True
 
