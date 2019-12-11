@@ -31,6 +31,17 @@ class Storage(models.Model):
     path = models.CharField(max_length=150)
 
 
+class CameraSchedule(models.Model):
+    #camera = models.ForeignKey(Camera, default=None, null=True)
+    schedule_type = models.CharField(max_length=100)
+    weekdays = models.CharField(max_length=50, default=None, null=True)
+    start_timestamp = models.CharField(max_length=50, default=None, null=True)
+    stop_timestamp = models.CharField(max_length=50, default=None, null=True)
+    start_daytime = models.CharField(max_length=50, default=None, null=True)
+    stop_daytime = models.CharField(max_length=50, default=None, null=True)
+
+
+
 CameraAnalysisTypes = [
     (1, 'Full'),
     (2, 'Move'),
@@ -72,6 +83,9 @@ class Camera(models.Model):
     add_time = models.CharField(max_length=50, default='')
     from_queue_api = models.BooleanField(default=False)
     storage = models.ForeignKey(Storage, on_delete=models.SET_NULL, null=True)
+    schedule = models.ForeignKey(CameraSchedule, null=True, default=None)
+    schedule_job_start = models.CharField(max_length=50, null=True, default=None)
+    schedule_job_stop = models.CharField(max_length=50, null=True, default=None)
     uid = models.CharField(max_length=50, default='')
 
 
@@ -102,6 +116,7 @@ class Quadrator(models.Model):
     port = models.IntegerField()
     organization = models.ForeignKey(Organization)
     server = models.ForeignKey(Server)
+
 
 class Camera2Quadrator(models.Model):
     camera = models.ForeignKey(Camera)
