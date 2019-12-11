@@ -19,6 +19,7 @@ from queue_api.ptz_control import PanControlMessage, TiltControlMessage, ZoomCon
 from queue_api.archive import VideosGetMessage
 from queue_api.events import EventsSendMessage
 from queue_api.configuration import ConfigExportMessage, ConfigImportMessage
+from queue_api.scheduler import CameraScheduler
 from queue_api.messages import InvalidMessageStructureError, InvalidMessageTypeError
 
 
@@ -31,6 +32,8 @@ class PikaHandler(threading.Thread):
         self.response_exchange = 'driver'
         print('server name (exchange): {name}'.format(name=self.server_name), flush=True)
         print('server response exchange: {name}'.format(name=self.response_exchange), flush=True)
+
+        self.scheduler = CameraScheduler()
 
     def run(self):
         print('starting receiver', flush=True)
@@ -51,9 +54,11 @@ class PikaHandler(threading.Thread):
 
         print('receiver started', flush=True)
         channel.start_consuming()
+        self.scheduler.start()
+
 
     def verify_message(self, message):
-        if 'uuid' and 'type' and 'data' not in message:
+        if 'uuid' and 'type' not in message:
             valid = False
         elif not isinstance(message['uuid'], str):
             valid = False

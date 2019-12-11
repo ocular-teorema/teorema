@@ -45,9 +45,6 @@ class StorageAddMessages(StorageQueueEndpoint):
 
 
 class StorageDeleteMessage(StorageQueueEndpoint):
-    request_required_params = [
-        'id'
-    ]
 
     response_topic = '/storages/delete/request'
     response_message_type = 'storages_delete_response'

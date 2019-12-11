@@ -13,7 +13,7 @@ class QueueMessage:
         if uuid is not None:
             self.uuid = uuid
         if response_type is not None:
-            self.response_type = uuid
+            self.response_type = response_type
 
     def __repr__(self):
         return json.dumps({
@@ -61,7 +61,7 @@ class InvalidMessageStructureError(QueueErrorMessage):
     def __init__(self, uuid=None):
         super().__init__(
             uuid=uuid,
-            response_type='error',
+            response_type=self.response_type,
             error=self.message
         )
 
@@ -178,4 +178,17 @@ class ConfigImportCameraStorageInvalidError(QueueErrorMessage):
             uuid=uuid,
             response_type=response_type,
             error=self.message.format(cam_id=cam_id, storage_id=storage_id)
+        )
+
+
+class InvalidScheduleTypeError(QueueErrorMessage):
+    code = 7
+    message = 'Given schedule type not supported: {type}'
+    response_type = 'config_import'
+
+    def __init__(self, type=None, uuid=None):
+        super().__init__(
+            uuid=uuid,
+            response_type=self.response_type,
+            error=self.message.format(type=type)
         )

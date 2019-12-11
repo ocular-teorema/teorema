@@ -185,7 +185,7 @@ class CameraListMessages(QueueEndpoint):
                 'name': cam.name,
                 'address_primary': cam.address,
                 # 'address_secondary': cam.address_secondary,
-                'storage_id': cam.storage.id,
+                'storage_id': cam.storage.id if cam.storage is not None else 0,
                 # 'schedule_id': cam.schedule.id,
                 'storage_days': cam.storage_life,
                 'analysis_type': cam.analysis,
@@ -293,3 +293,10 @@ class CameraDeleteMessages(CameraQueueEndpoint):
             camera_group_to_delete.delete()
 
         self.send_success_response()
+
+
+def enable_camera():
+    pass
+
+def disable_camera():
+    pass
