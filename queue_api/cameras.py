@@ -5,12 +5,11 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from theorema.users.models import CamSet
 
-from theorema.cameras.models import Camera, Storage
+from theorema.cameras.models import Camera, Storage, CameraSchedule
 from theorema.cameras.serializers import CameraSerializer
 
 from queue_api.common import QueueEndpoint, get_supervisor_processes
 from queue_api.messages import RequestParamValidationError
-from queue_api.scheduler import CameraSchedule
 
 
 class CameraQueueEndpoint(QueueEndpoint):
