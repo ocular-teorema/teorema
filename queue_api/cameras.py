@@ -149,6 +149,9 @@ class CameraUpdateMessages(CameraQueueEndpoint):
 
         try:
             camera = Camera.objects.get(uid=camera_id)
+            if not camera.from_queue_api:
+                camera.from_queue_api = True
+                camera.save()
             camera_repr = CameraSerializer().to_representation(camera)
         except ObjectDoesNotExist:
             error = RequestParamValidationError('camera with id {id} not found'.format(id=camera_id))
@@ -188,7 +191,6 @@ class CameraUpdateMessages(CameraQueueEndpoint):
         camera_repr['analysis_type'] = analysis_type
         camera_repr['storage_life'] = storage_days
         camera_repr['indefinitely'] = storage_indefinitely
-        camera_repr['from_queue_api'] = True
 
         CameraSerializer().update(camera, camera_repr)
 
@@ -267,6 +269,9 @@ class CameraSetRecordingMessages(CameraQueueEndpoint):
 
         try:
             camera = Camera.objects.get(uid=camera_id)
+            if not camera.from_queue_api:
+                camera.from_queue_api = True
+                camera.save()
             camera_repr = CameraSerializer().to_representation(camera)
         except ObjectDoesNotExist:
             error = RequestParamValidationError('camera with id {id} not found'.format(id=camera_id))
@@ -282,7 +287,6 @@ class CameraSetRecordingMessages(CameraQueueEndpoint):
             return
 
         camera_repr['is_active'] = recording
-        camera_repr['from_queue_api'] = True
         CameraSerializer().update(camera, camera_repr)
         self.send_success_response()
 
@@ -344,9 +348,11 @@ class CameraDeleteMessages(CameraQueueEndpoint):
 
 def set_camera_recording(camera, recording):
 
+    if not camera.from_queue_api:
+        camera.from_queue_api = True
+        camera.save()
     camera_repr = CameraSerializer().to_representation(camera)
     camera_repr['is_active'] = recording
-    camera_repr['from_queue_api'] = True
     CameraSerializer().update(camera, camera_repr)
     return
 
