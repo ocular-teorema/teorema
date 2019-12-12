@@ -4,6 +4,7 @@ import os
 import sys
 import traceback
 import threading
+import logging
 import json
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
@@ -19,9 +20,10 @@ from queue_api.common import pika_setup_connection, base_send_in_queue, get_serv
 from queue_api.ptz_control import PanControlMessage, TiltControlMessage, ZoomControlMessage
 from queue_api.archive import VideosGetMessage
 from queue_api.events import EventsSendMessage
-from queue_api.configuration import ConfigExportMessage, ConfigImportMessage
+from queue_api.configuration import ConfigExportMessage, ConfigImportMessage, ConfigurationResetMessage
 from queue_api.scheduler import CameraScheduler
 from queue_api.messages import InvalidMessageStructureError, InvalidMessageTypeError
+from queue_api.settings import *
 
 
 class PikaHandler(threading.Thread):
@@ -41,7 +43,7 @@ class PikaHandler(threading.Thread):
         connection = pika_setup_connection()
         channel = connection.channel()
 
-        channel.exchange_declare(exchange=self.server_name, exchange_type='direct', durable=False, auto_delete=False)
+        channel.exchange_declare(exchange=self.server_name, exchange_type=RABBITMQ_EXCHANGE_TYPE_OCULAR, durable=False, auto_delete=False)
         result = channel.queue_declare('')
 
         queue_name = result.method.queue
@@ -231,6 +233,13 @@ class PikaHandler(threading.Thread):
         config_export_msg.handle_request(message)
         print('message ok', flush=True)
 
+    def reset(self, message):
+        print('reset message request', flush=True)
+
+        reset_msg = ConfigurationResetMessage()
+        reset_msg.handle_request(message)
+        print('message ok', flush=True)
+
     def schedules_add(self, message):
         print('schedule add request message received', flush=True)
         print('message', message, flush=True)
@@ -274,5 +283,6 @@ class PikaHandler(threading.Thread):
 
 if __name__ == '__main__':
 
+    logging.getLogger('pika').setLevel(logging.WARNING)
     receiver = PikaHandler()
     receiver.start()

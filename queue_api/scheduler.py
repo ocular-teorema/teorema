@@ -158,7 +158,7 @@ class ScheduleListMessage(ScheduleQueueEndpoint):
         for schedule in schedules_weekdays:
             schedule_data = {
                 'id': schedule.id,
-                'days': [int(day) for day in schedule.days.split(', ')]
+                'days': [int(day) for day in schedule.weekdays.split(', ')]
             }
             schedule_weekdays_list.append(schedule_data)
 

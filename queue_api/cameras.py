@@ -8,7 +8,7 @@ from theorema.users.models import CamSet
 from theorema.cameras.models import Camera, Storage, CameraSchedule
 from theorema.cameras.serializers import CameraSerializer
 
-from queue_api.common import QueueEndpoint, get_supervisor_processes
+from queue_api.common import QueueEndpoint, get_supervisor_processes, get_default_cgroup
 from queue_api.messages import RequestParamValidationError
 
 
@@ -158,7 +158,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
             self.send_error_response(error)
             return
 
-        params = message['camera']
+        params = message['data']
         print('params', params, flush=True)
 
         name = params['name'] if 'name' in params else camera_repr['name']
@@ -190,6 +190,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
         camera_repr['analysis_type'] = analysis_type
         camera_repr['storage_life'] = storage_days
         camera_repr['indefinitely'] = storage_indefinitely
+        camera_repr['camera_group'] = self.default_camera_group
 
         CameraSerializer().update(camera, camera_repr)
 
@@ -225,9 +226,19 @@ class CameraListMessages(QueueEndpoint):
 
             status = None
             supervisor_cameras = get_supervisor_processes()['cameras']
-            for x in supervisor_cameras:
-                if x['id'] == cam.uid:
-                    status = x['status']
+
+            try:
+                status = supervisor_cameras[cam.uid]['status']
+            except KeyError:
+                status = 'DISABLED'
+            # for x in supervisor_cameras:
+            #     status = x['status']
+            #     if
+            #     if x['id'] == cam.uid:
+            #         status = x['status']
+            #     else:4
+            #         status = 'DISABLED'
+
 
             camera_list.append({
                 'id': cam.uid,
@@ -286,6 +297,7 @@ class CameraSetRecordingMessages(CameraQueueEndpoint):
             return
 
         camera_repr['is_active'] = recording
+        camera_repr['camera_group'] = self.default_camera_group
         CameraSerializer().update(camera, camera_repr)
         self.send_success_response()
 
@@ -304,7 +316,11 @@ class CameraDeleteMessages(CameraQueueEndpoint):
 
         camera = Camera.objects.filter(uid=params['camera_id']).first()
 
-        if camera:
+        if not camera:
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
+            self.send_error_response(error)
+            return
+        else:
             try:
                 # camera = Camera.objects.get(uid=self.uuid)
                 worker_data = {'id': camera.id, 'type': 'cam', 'add_time': camera.add_time}
@@ -326,21 +342,17 @@ class CameraDeleteMessages(CameraQueueEndpoint):
                 msg = RequestParamValidationError(str(e))
                 self.send_error_response(msg)
                 return
-        else:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
-            self.send_error_response(error)
-            return
 
-        if worker_response['status']:
-            # raise Exception(code=400, detail={'message': worker_response['message']})
-            msg = RequestParamValidationError(worker_response['message'])
-            self.send_error_response(msg)
-            return
+            if worker_response['status']:
+                # raise Exception(code=400, detail={'message': worker_response['message']})
+                msg = RequestParamValidationError(worker_response['message'])
+                self.send_error_response(msg)
+                return
 
-        camera.delete()
+            camera.delete()
 
-        if camera_group_to_delete:
-            camera_group_to_delete.delete()
+            if camera_group_to_delete:
+                camera_group_to_delete.delete()
 
         self.send_success_response()
 
@@ -352,6 +364,7 @@ def set_camera_recording(camera, recording):
         camera.save()
     camera_repr = CameraSerializer().to_representation(camera)
     camera_repr['is_active'] = recording
+    camera_repr['camera_group'] = get_default_cgroup()
     CameraSerializer().update(camera, camera_repr)
     return
 

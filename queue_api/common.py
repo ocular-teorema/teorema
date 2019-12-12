@@ -22,7 +22,7 @@ class QueueEndpoint:
 
     uuid = None
     request_required_params = None
-    response_exchange = 'ocular_driver'
+    response_exchange = RABBITMQ_RESPONSE_EXCHANGE
     response_message_type = None
 
     def __init__(self):
@@ -68,7 +68,7 @@ def base_send_in_queue(exchange, message):
     connection = pika_setup_connection()
 
     channel = connection.channel()
-    channel.exchange_declare(exchange=exchange, exchange_type='direct', durable=False, auto_delete=False)
+    channel.exchange_declare(exchange=exchange, exchange_type=RABBITMQ_EXCHANGE_TYPE_DRIVER, durable=False, auto_delete=False)
 
     channel.basic_publish(
         exchange=exchange,
@@ -99,7 +99,7 @@ def get_supervisor_processes():
     supervisor_processes = supervisor_proxy.supervisor.getAllProcessInfo()
 
     services = {}
-    cameras = []
+    cameras = {}
     for process in supervisor_processes:
         name = process['name']
 
@@ -110,8 +110,9 @@ def get_supervisor_processes():
         if 'cam' not in name:
             services[name] = res
         else:
-            res['id'] = name
-            cameras.append(res)
+            cameras[name] = res
+            #res['id'] = name
+            #cameras['id'] = (res)
 
     return {
         'services': services,
@@ -122,3 +123,11 @@ def get_supervisor_processes():
 def get_server_name():
     return Server.objects.all().first().name
 
+
+def get_default_cgroup():
+    cgroup = CameraGroup.objects.all().first()
+    if cgroup is None:
+        cgroup = 'default'
+    else:
+        cgroup = cgroup.id
+    return cgroup

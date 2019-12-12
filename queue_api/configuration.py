@@ -1,7 +1,10 @@
 import os
+import json
+import requests
 
 from theorema.orgs.models import Organization
 from theorema.cameras.models import Camera, Server, Storage, CameraSchedule
+from theorema.users.models import CamSet
 
 from queue_api.common import QueueEndpoint, get_supervisor_processes
 from queue_api.messages import RequestParamValidationError, ConfigImportOrgsCountError, ConfigImportServerCountError,\
@@ -48,9 +51,10 @@ class ConfigExportMessage(ConfigurationQueueEndpoint):
                     stream_address = 'rtmp://{host}:1935/vasrc/{id}'.format(host=serv.address, id=camera.uid)
                     status = None
 
-                    for x in supervisor_cameras:
-                        if x['id'] == camera.uid:
-                            status = x['status']
+                    try:
+                        status = supervisor_cameras[camera.uid]
+                    except KeyError:
+                        status = 'DISABLED'
 
                     camera_data = {
                         'id': camera.id,
@@ -261,5 +265,65 @@ class ConfigImportMessage(QueueEndpoint):
                     )
 
                     schedule.save()
+
+        self.send_success_response()
+
+
+class ConfigurationResetMessage(ConfigurationQueueEndpoint):
+
+    response_message_type = 'reset_response'
+
+    def handle_request(self, params):
+        print('reset message received', flush=True)
+        self.send_response(params)
+
+    def send_response(self, params):
+        print('sending message', flush=True)
+        print('params', params, flush=True)
+
+        all_cameras = Camera.objects.all()
+        for camera in all_cameras:
+            try:
+                # camera = Camera.objects.get(uid=self.uuid)
+                worker_data = {'id': camera.id, 'type': 'cam', 'add_time': camera.add_time}
+                raw_response = requests.delete('http://{}:5005'.format(camera.server.address), json=worker_data)
+                worker_response = json.loads(raw_response.content.decode())
+
+                if camera.camera_group.camera_set.exclude(id=camera.id).count() == 0:
+                    camera_group_to_delete = camera.camera_group
+                else:
+                    camera_group_to_delete = None
+
+                for camset in CamSet.objects.all():
+                    if camera.id in camset.cameras:
+                        camset.cameras.remove(camera.id)
+                        camset.save()
+
+            except Exception as e:
+                # raise Exception(code=400, detail={'message': str(e)})
+                msg = RequestParamValidationError(str(e))
+                self.send_error_response(msg)
+                return
+
+            if worker_response['status']:
+                # raise Exception(code=400, detail={'message': worker_response['message']})
+                msg = RequestParamValidationError(worker_response['message'])
+                self.send_error_response(msg)
+                return
+
+            camera.delete()
+
+            if camera_group_to_delete:
+                camera_group_to_delete.delete()
+
+        all_schedules = CameraSchedule.objects.all()
+        for schedule in all_schedules:
+            schedule.delete()
+
+        all_storages = Storage.objects.all()
+
+        all_storages.exclude(id=self.default_storage.id)
+        for storage in all_storages:
+            storage.delete()
 
         self.send_success_response()
