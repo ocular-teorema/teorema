@@ -159,8 +159,10 @@ class CameraSerializer(M2MHelperSerializer):
                 camera.save()
             if isinstance(validated_data['server'], int):
                 data_server = Server.objects.get(id=validated_data['server'])
+                validated_data['server'] = data_server
             else:
                 data_server = validated_data['server']
+
             if data_server.address != camera.server.address:
                 worker_data = {'id': camera.id, 'type': 'cam', 'add_time': camera.add_time}
                 # worker_data = {'id': camera.id, 'type': 'cam'}
@@ -188,15 +190,25 @@ class CameraSerializer(M2MHelperSerializer):
 
         if isinstance(validated_data['organization'], int):
             org = Organization.objects.get(id=validated_data['organization'])
+            validated_data['organization'] = org
         else:
             org = validated_data['organization']
 
         if isinstance(validated_data['camera_group'], int):
             validated_data['camera_group'] = CameraGroup.objects.get(id=int(validated_data['camera_group']))
+            camera_group = None
         else:
-            camera_group = CameraGroup(name=validated_data['camera_group'], organization=org)
-            camera_group.save()
-            validated_data['camera_group'] = camera_group
+            camera_group_exist = CameraGroup.objects.filter(
+                name=validated_data['camera_group'],
+                organization=validated_data['organization'])
+            if camera_group_exist:
+                validated_data['camera_group'] = camera_group_exist.first()
+                camera_group = None
+            else:
+                camera_group = CameraGroup(name=validated_data['camera_group'],
+                                           organization=validated_data['organization'])
+                camera_group.save()
+                validated_data['camera_group'] = camera_group
 
         res = super().update(camera, validated_data)
 

@@ -239,7 +239,6 @@ class CameraListMessages(QueueEndpoint):
             #     else:4
             #         status = 'DISABLED'
 
-
             camera_list.append({
                 'id': cam.uid,
                 'name': cam.name,
