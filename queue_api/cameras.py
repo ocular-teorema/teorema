@@ -50,37 +50,32 @@ class CameraAddMessages(CameraQueueEndpoint):
         storage_indefinitely = True if storage_days == 1000 else False
         compress_level = 1
 
+        storage = self.default_storage
         if 'storage_id' in params:
             storage_id = params['storage_id']
-            try:
-                storage = Storage.objects.get(id=storage_id)
-            except ObjectDoesNotExist:
-                error = RequestParamValidationError('storage with id {id} not found'.format(id=storage_id))
-                print(error, flush=True)
-                self.send_error_response(error)
-                return
-        else:
-            storage = self.default_storage
+            if storage_id:
+                try:
+                    storage = Storage.objects.get(id=storage_id)
+                except ObjectDoesNotExist:
+                    error = RequestParamValidationError('storage with id {id} not found'.format(id=storage_id))
+                    print(error, flush=True)
+                    self.send_error_response(error)
+                    return
 
+        schedule = None
         if 'schedule_id' in params:
             schedule_id = params['schedule_id']
-            try:
-                schedule = CameraSchedule.objects.get(id=schedule_id)
-            except ObjectDoesNotExist:
-                error = RequestParamValidationError('schedule with id {id} not found'.format(id=schedule_id))
-                print(error, flush=True)
-                self.send_error_response(error)
-                return
+            if schedule_id:
+                try:
+                    schedule = CameraSchedule.objects.get(id=schedule_id)
+                except ObjectDoesNotExist:
+                    error = RequestParamValidationError('schedule with id {id} not found'.format(id=schedule_id))
+                    print(error, flush=True)
+                    self.send_error_response(error)
+                    return
 
         else:
             schedule = None
-
-
-
-        # disabled for now
-        #
-        # schedule_id = params['schedule_id']
-        # address_secondary = params['address_secondary']
 
         serializer_params = {
             'name': name,
@@ -106,29 +101,30 @@ class CameraAddMessages(CameraQueueEndpoint):
 
             start_job = None
             stop_job = None
-            if schedule.schedule_type == 'weekdays':
-                start_job, stop_job = self.scheduler.add_weekdays_schedule(
-                    camera=camera,
-                    days=schedule.weekdays
-                )
-            elif schedule.schedule_type == 'timestamp':
-                start_job, stop_job = self.scheduler.add_timestamp_schedule(
-                    camera=camera,
-                    start_timestamp=schedule.start_timestamp,
-                    stop_timestamp=schedule.stop_timestamp
-                )
-            elif schedule.schedule_type == 'time_period':
-                start_job, stop_job = self.scheduler.add_timestamp_schedule(
-                    camera=camera,
-                    start_time=schedule.start_time,
-                    stop_time=schedule.stop_time
-                )
-            else:
-                pass
+            if schedule:
+                if schedule.schedule_type == 'weekdays':
+                    start_job, stop_job = self.scheduler.add_weekdays_schedule(
+                        camera=camera,
+                        days=schedule.weekdays
+                    )
+                elif schedule.schedule_type == 'timestamp':
+                    start_job, stop_job = self.scheduler.add_timestamp_schedule(
+                        camera=camera,
+                        start_timestamp=schedule.start_timestamp,
+                        stop_timestamp=schedule.stop_timestamp
+                    )
+                elif schedule.schedule_type == 'time_period':
+                    start_job, stop_job = self.scheduler.add_timestamp_schedule(
+                        camera=camera,
+                        start_time=schedule.start_time,
+                        stop_time=schedule.stop_time
+                    )
+                else:
+                    pass
 
-            camera.schedule_job_start = start_job
-            camera.schedule_job_start = stop_job
-            camera.save()
+                camera.schedule_job_start = start_job
+                camera.schedule_job_start = stop_job
+                camera.save()
 
         else:
             errors = camera_serializer.errors
@@ -176,16 +172,16 @@ class CameraUpdateMessages(CameraQueueEndpoint):
 
         if 'storage_id' in params:
             storage_id = params['storage_id']
+            if storage_id:
+                try:
+                    storage = Storage.objects.get(id=storage_id)
+                except ObjectDoesNotExist:
+                    error = RequestParamValidationError('storage with id {id} not found'.format(id=storage_id))
+                    print(error, flush=True)
+                    self.send_error_response(error)
+                    return
 
-            try:
-                storage = Storage.objects.get(id=storage_id)
-            except ObjectDoesNotExist:
-                error = RequestParamValidationError('storage with id {id} not found'.format(id=storage_id))
-                print(error, flush=True)
-                self.send_error_response(error)
-                return
-
-            camera.storage = storage
+                camera.storage = storage
 
         camera_repr['name'] = name
         camera_repr['address'] = address_primary
@@ -257,16 +253,15 @@ class CameraSetRecordingMessages(CameraQueueEndpoint):
     response_message_type = 'cameras_set_recording_response'
 
     request_required_params = [
-        'recording'
+        'data'
     ]
 
     def handle_request(self, params):
         print('preparing response', flush=True)
         self.uuid = params['uuid']
         camera_id = params['camera_id']
-        data = params['data']
 
-        if self.check_request_params(data):
+        if self.check_request_params(params):
             return
 
         try:
@@ -278,7 +273,7 @@ class CameraSetRecordingMessages(CameraQueueEndpoint):
             self.send_error_response(error)
             return
 
-        recording = data['recording']
+        recording = params['data']
         if not isinstance(recording, bool):
             error = RequestParamValidationError('parameter must be Boolean')
             print(error, flush=True)
