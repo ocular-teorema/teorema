@@ -131,8 +131,8 @@ class SchedulesAddMessage(ScheduleQueueEndpoint):
             weekdays=days,
             start_timestamp=start_timestamp,
             stop_itmestamp=stop_timestamp,
-            start_time=start_time,
-            stop_time=stop_time
+            start_daytime=start_time,
+            stop_daytime=stop_time
         )
 
         schedule.save()
@@ -177,8 +177,8 @@ class ScheduleListMessage(ScheduleQueueEndpoint):
         for schedule in schedules_time:
             schedule_data = {
                 'id': schedule.id,
-                'start_timestamp': schedule.start_timestamp,
-                'stop_timestamp': schedule.stop_timestamp
+                'start_times': schedule.start_daytime,
+                'stop_time': schedule.stop_daytime
             }
             schedule_time_list.append(schedule_data)
 
@@ -222,8 +222,8 @@ class SchedulesUpdateMessage(ScheduleQueueEndpoint):
             schedule.start_timestamp = params['start_timestamp'] if 'start_time in params' else schedule.start_timestamp
             schedule.stop_timestamp = params['stop_timestamp'] if 'stop_timestamp' in params else schedule.stop_timestamp
         elif schedule_type == 'time_period':
-            schedule.start_time = params['start_time'] if 'start_time' in params else schedule.start_time
-            schedule.stop_time = params['stop_time'] if 'stop_time' in params else schedule.stop_time
+            schedule.start_daytime = params['start_time'] if 'start_time' in params else schedule.start_daytime
+            schedule.stop_daytime = params['stop_time'] if 'stop_time' in params else schedule.stop_daytime
 
         schedule.save()
         self.send_success_response()
