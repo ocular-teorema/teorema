@@ -35,9 +35,5 @@ channels:
             type:
               type: string
               const: 'cameras_list'
-            data:         
-              type: object
-              description: data with list of cameras
-              properties:
-                cameras:
-                  $ref: '../base_types.yml#/components/schemas/camera_list_object'
+            data:
+              $ref: '../base_types.yml#/components/schemas/camera_list_object'

@@ -37,6 +37,8 @@ class PikaHandler(threading.Thread):
         print('server response exchange: {name}'.format(name=self.response_exchange), flush=True)
 
         self.scheduler = CameraScheduler()
+        self.scheduler.start()
+        print('scheduler started', flush=True)
 
     def run(self):
         print('starting receiver', flush=True)

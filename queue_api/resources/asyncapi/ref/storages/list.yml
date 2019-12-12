@@ -36,8 +36,4 @@ channels:
               type: string
               const: 'storages_list'
             data:
-              type: object
-              description: data with list of storages
-              properties:
-                storages:
-                  $ref: '../base_types.yml#/components/schemas/storage_list_object'
+              $ref: '../base_types.yml#/components/schemas/storage_list_object'

@@ -1,75 +1,84 @@
 components:
   schemas:
     camera_list_object:
+      type: array
+      description: List of camera objects
+      items:
+        $ref: '#/components/schemas/camera_obj'
+    camera_obj:
       type: object
-      description: Camera object
+      description: camera object
       properties:
-        camera_id:     
-          type: object
-          properties:
-#            id: 
-#              $ref: '#/components/schemas/camera_id'
-            name:
-              $ref: '#/components/schemas/camera_name'
-            address_primary:
-              $ref: '#/components/schemas/camera_address_primary' 
-            address_secondary:
-              $ref: '#/components/schemas/camera_address_secondary' 
-            storage_id:
-              $ref: '#/components/schemas/storage_id'
-    #        archive_path:
-    #          $ref: '#/components/schemas/camera_archive_path'
-            schedule_id:
-              $ref: '#/components/schemas/schedule_id'
-            storage_days:
-              $ref: '#/components/schemas/camera_storage_days'
-            analysis_type:
-              $ref: '#/components/schemas/camera_analysis_type'
-            stream_address:
-              type: string
-              examples:
-                - 'rtmp://80.254.48.93:1935/vasrc/cam20_2019-10-29_15-29-00.586164'
-            status:
-              type: string
-              description: camera status
-              examples:
-                - "RUNNING"
-                - "BACKOFF"
-            enabled:
-              type: boolean
-              description: recording status
-              examples:
-                - True
-    storage_list_object:
-      type: object
-      description: Storage object
-      properties:
+        id:
+          $ref: '#/components/schemas/camera_id'
+        name:
+          $ref: '#/components/schemas/camera_name'
+        address_primary:
+          $ref: '#/components/schemas/camera_address_primary'
+        address_secondary:
+          $ref: '#/components/schemas/camera_address_secondary'
         storage_id:
-          type: object
-          properties:
-            name:
-              $ref: '#/components/schemas/storage_name'
-            path:
-              $ref: '#/components/schemas/storage_path'
+          $ref: '#/components/schemas/storage_id'
+#        archive_path:
+#          $ref: '#/components/schemas/camera_archive_path'
+        schedule_id:
+          $ref: '#/components/schemas/schedule_id'
+        storage_days:
+          $ref: '#/components/schemas/camera_storage_days'
+        analysis_type:
+          $ref: '#/components/schemas/camera_analysis_type'
+        stream_address:
+          type: string
+          examples:
+            - 'rtmp://80.254.48.93:1935/vasrc/cam20_2019-10-29_15-29-00.586164'
+        status:
+          type: string
+          description: camera status
+          examples:
+            - "RUNNING"
+            - "BACKOFF"
+        enabled:
+          type: boolean
+          description: recording status
+          examples:
+            - True
+    storage_list_object:
+      type: array
+      description: list of storage objects
+      items:
+        $ref: '#/components/schemas/storage_obj'
+    storage_obj:
+      type: object
+      description: storage object
+      properties:
+        id:
+          $ref: '#/components/schemas/storage_id'
+        name:
+          $ref: '#/components/schemas/storage_name'
+        path:
+          $ref: '#/components/schemas/storage_path'
 
     schedule_time_object:
       type: object
       properties:
+        id:
+          $ref: '#/components/schemas/schedule_id'
         type:
           $ref: '#/components/schemas/schedule_type'
     schedule_timestamp_object:
       type: object
       properties:
+        id:
+          $ref: '#/components/schemas/schedule_id'
         type:
           $ref: '#/components/schemas/schedule_type'
     schedule_time_period_object:
       type: object
       properties:
+        id:
+          $ref: '#/components/schemas/schedule_id'
         type:
           $ref: '#/components/schemas/schedule_type'
-
-    weekd_obj:
-
 
     schedules_list_object:
       type: object
@@ -182,6 +191,7 @@ components:
               examples:
                 - "RUNNING"
                 - "BACKOFF"
+                - "DISABLED"
             error_code:
               $ref:  '#/components/schemas/error_code'
             error_message:

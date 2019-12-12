@@ -2,6 +2,8 @@ from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from django.core.exceptions import ObjectDoesNotExist
 
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+
 from theorema.cameras.models import CameraSchedule
 
 from queue_api.common import QueueEndpoint
@@ -11,7 +13,23 @@ from queue_api.cameras import enable_camera, disable_camera
 class CameraScheduler:
 
     def __init__(self):
-        self.scheduler = BackgroundScheduler()
+        self.scheduler = BackgroundScheduler({
+            'apscheduler.jobstores.default': {
+                'type': 'sqlalchemy',
+                'url': 'postgresql://postgres:Blizzard@localhost/theorema_schedules'
+            },
+            'apscheduler.executors.default': {
+                'class': 'apscheduler.executors.pool:ThreadPoolExecutor',
+                'max_workers': '20'
+            },
+            'apscheduler.executors.processpool': {
+                'type': 'processpool',
+                'max_workers': '5'
+            },
+            'apscheduler.job_defaults.coalesce': 'false',
+            'apscheduler.job_defaults.max_instances': '3',
+            'apscheduler.timezone': 'UTC',
+        })
 
     def start(self):
         #scheduler.add_job(forecastApi.update_forecast, 'interval', minutes=5)
@@ -25,31 +43,31 @@ class CameraScheduler:
             days_to_zero.append(el)
 
         converted_days = str(days_to_zero)[1:-1]
-        enable_job = self.scheduler.add_job(enable_camera(camera), 'cron', day_of_week=converted_days, hour=0, minute=0, second=1)
-        disable_job = self.scheduler.add_job(disable_camera(camera), 'cron', day_of_week=converted_days, hour=23, minute=59, second=59)
+        enable_job = self.scheduler.add_job(enable_camera, 'cron', [camera], day_of_week=converted_days, hour=0, minute=0, second=1)
+        disable_job = self.scheduler.add_job(disable_camera, 'cron', [camera], day_of_week=converted_days, hour=23, minute=59, second=59)
         return enable_job, disable_job
 
     def add_timestamp_schedule(self, camera, start_timestamp, stop_timestamp):
         start_datetime = datetime.fromtimestamp(int(start_timestamp))
         stop_datetime = datetime.fromtimestamp(int(stop_timestamp))
 
-        enable_job = self.scheduler.add_job(enable_camera(camera), 'date', run_date=start_datetime)
-        disable_job = self.scheduler.add_job(disable_camera(camera), 'date', run_date=stop_datetime)
+        enable_job = self.scheduler.add_job(enable_camera, 'date', [camera], run_date=start_datetime)
+        disable_job = self.scheduler.add_job(disable_camera, 'date', [camera], run_date=stop_datetime)
         return enable_job, disable_job
 
     def add_time_schedule(self, camera, start_time, stop_time):
         start_times = [int(value) for value in start_time.split('-')]
         stop_times = [int(value) for value in stop_time.split('-')]
 
-        enable_job = self.scheduler.add_job(enable_camera(camera), 'cron',
+        enable_job = self.scheduler.add_job(enable_camera(camera), 'cron', [camera],
                                             hour=start_times[0], minute=start_times[1], second=start_times[2])
-        disable_job = self.scheduler.add_job(disable_camera(camera), 'cron',
+        disable_job = self.scheduler.add_job(disable_camera(camera), 'cron', [camera],
                                              hour=stop_times[0], minute=stop_times[1], second=stop_times[2])
         return enable_job, disable_job
 
     def delete_schedule(self, start_job_id, stop_job_id):
-        self.scheduler.delete_job(start_job_id)
-        self.scheduler.delete_job(stop_job_id)
+        self.scheduler.remove_job(start_job_id)
+        self.scheduler.remove_job(stop_job_id)
         return True
 
 

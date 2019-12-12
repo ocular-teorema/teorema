@@ -6,8 +6,8 @@ info:
     ## AsyncAPI specification for Ocular project
 
     # Notes:
-    * All messages from subsribe channels must be sended with exchange "/ocular/{server_name}" and empty routing_key.
-    * All messages from publish channels will be sended to exchange "/ocular_driver" and empty routing_key.
+    * All messages from subsribe channels must be sended with exchange "{server_name}" and empty routing_key.
+    * All messages from publish channels will be sended to exchange "driver" and empty routing_key.
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
@@ -20,6 +20,12 @@ servers:
       port:
         description: Secure connection (TLS) is available through port 5672.
         default: '5672'
+      vhost:
+        default: '/ocular'
+      exchange:
+        enum:
+          - "{server_name}"
+          - "driver"
 
 defaultContentType: application/json
 

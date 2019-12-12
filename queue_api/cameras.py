@@ -62,7 +62,7 @@ class CameraAddMessages(CameraQueueEndpoint):
                     return
 
         schedule = None
-        if 'schedule_id' in params:
+        if 'schedule_id' in params and params['schedule_id']:
             schedule_id = params['schedule_id']
             if schedule_id:
                 try:
@@ -104,7 +104,7 @@ class CameraAddMessages(CameraQueueEndpoint):
                 if schedule.schedule_type == 'weekdays':
                     start_job, stop_job = self.scheduler.add_weekdays_schedule(
                         camera=camera,
-                        days=schedule.weekdays
+                        days=[int(day) for day in schedule.weekdays.split(', ')]
                     )
                 elif schedule.schedule_type == 'timestamp':
                     start_job, stop_job = self.scheduler.add_timestamp_schedule(
@@ -163,7 +163,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
 
         name = params['name'] if 'name' in params else camera_repr['name']
         address_primary = params['address_primary'] if 'address_primary' in params else camera_repr['address']
-        analysis_type = params['analysis_type'] if 'analysis_type' in params else camera_repr['analysis_type']
+        analysis_type = params['analysis_type'] if 'analysis_type' in params else camera_repr['analysis']
 
         if 'storage_days' in params:
             storage_days = params['storage_days']
@@ -184,6 +184,48 @@ class CameraUpdateMessages(CameraQueueEndpoint):
                     return
 
                 camera.storage = storage
+
+        schedule = None
+        if 'schedule_id' in params and params['schedule_id']:
+            schedule_id = params['schedule_id']
+            if schedule_id:
+                try:
+                    schedule = CameraSchedule.objects.get(id=schedule_id)
+                except ObjectDoesNotExist:
+                    error = RequestParamValidationError('schedule with id {id} not found'.format(id=schedule_id))
+                    print(error, flush=True)
+                    self.send_error_response(error)
+                    return
+
+        if schedule:
+            if schedule.schedule_type == 'weekdays':
+                start_job, stop_job = self.scheduler.add_weekdays_schedule(
+                    camera=camera,
+                    days=[int(day) for day in schedule.weekdays.split(', ')]
+                )
+            elif schedule.schedule_type == 'timestamp':
+                start_job, stop_job = self.scheduler.add_timestamp_schedule(
+                    camera=camera,
+                    start_timestamp=schedule.start_timestamp,
+                    stop_timestamp=schedule.stop_timestamp
+                )
+            elif schedule.schedule_type == 'time_period':
+                start_job, stop_job = self.scheduler.add_timestamp_schedule(
+                    camera=camera,
+                    start_time=schedule.start_time,
+                    stop_time=schedule.stop_time
+                )
+            else:
+                self.scheduler.delete_schedule(
+                    start_job_id=int(camera.schedule_job_start),
+                    stop_job_id=int(camera.schedule_job_stop)
+                )
+
+                start_job = stop_job = None
+
+            camera.schedule_job_start = start_job.id
+            camera.schedule_job_start = stop_job.id
+            camera.save()
 
         camera_repr['name'] = name
         camera_repr['address'] = address_primary
@@ -224,7 +266,6 @@ class CameraListMessages(QueueEndpoint):
                 cam=cam.uid
             )
 
-            status = None
             supervisor_cameras = get_supervisor_processes()['cameras']
 
             try:
@@ -365,14 +406,15 @@ def set_camera_recording(camera, recording):
     camera_repr['is_active'] = recording
     camera_repr['camera_group'] = get_default_cgroup()
     CameraSerializer().update(camera, camera_repr)
-    return
+    return True
 
 
 def enable_camera(camera):
     set_camera_recording(camera, True)
-    return
+    return True
 
 
 def disable_camera(camera):
     set_camera_recording(camera, False)
-    return
+    return True
+
