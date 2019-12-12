@@ -7,7 +7,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import APIException
 from .models import Server, Camera, CameraGroup, NotificationCamera, Quadrator, Camera2Quadrator, Storage
 from theorema.m2mhelper import M2MHelperSerializer
-from theorema.orgs.models import OcularUser
+from theorema.orgs.models import OcularUser, Organization
 from rest_framework.response import Response
 from rest_framework import status
 from datetime import datetime
@@ -186,10 +186,15 @@ class CameraSerializer(M2MHelperSerializer):
         if worker_response['status']:
             raise APIException(code=400, detail={'message': worker_response['message']})
 
+        if isinstance(validated_data['organization'], int):
+            org = Organization.objects.get(id=validated_data['organization'])
+        else:
+            org = validated_data['organization']
+
         if isinstance(validated_data['camera_group'], int):
             validated_data['camera_group'] = CameraGroup.objects.get(id=int(validated_data['camera_group']))
         else:
-            camera_group = CameraGroup(name=validated_data['camera_group'], organization=validated_data['organization'])
+            camera_group = CameraGroup(name=validated_data['camera_group'], organization=org)
             camera_group.save()
             validated_data['camera_group'] = camera_group
 
