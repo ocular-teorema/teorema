@@ -157,15 +157,18 @@ class CameraSerializer(M2MHelperSerializer):
             if not camera.uid:
                 camera.uid = 'cam' + str(camera.id) + camera.add_time
                 camera.save()
-            data_server = Server.objects.get(id=validated_data['server'])
+            if isinstance(validated_data['server'], int):
+                data_server = Server.objects.get(id=validated_data['server'])
+            else:
+                data_server = validated_data['server']
             if data_server.address != camera.server.address:
                 worker_data = {'id': camera.id, 'type': 'cam', 'add_time': camera.add_time}
                 # worker_data = {'id': camera.id, 'type': 'cam'}
                 raw_response = requests.delete('http://{}:5005'.format(camera.server.address), json=worker_data)
             worker_data = {k:v for k,v in validated_data.items()}
-            worker_data['ws_video_url'] = 'ws://%s:%s' % (validated_data['server'].address, camera.port+50)
+            worker_data['ws_video_url'] = 'ws://%s:%s' % (data_server.address, camera.port+50)
             # worker_data['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (validated_data['server'].address, str(camera.id))
-            worker_data['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (validated_data['server'].address, str(camera.id) + camera.add_time)
+            worker_data['rtmp_video_url'] = 'rtmp://%s:1935/vasrc/cam%s' % (data_server.address, str(camera.id) + camera.add_time)
             worker_data.pop('server')
             worker_data.pop('camera_group')
             worker_data.pop('organization')
@@ -174,7 +177,7 @@ class CameraSerializer(M2MHelperSerializer):
             worker_data['id'] = camera.id
             worker_data['port'] = camera.port
             worker_data['add_time'] = camera.add_time
-            raw_response = requests.patch('http://{}:5005'.format(validated_data['server'].address), json=worker_data)
+            raw_response = requests.patch('http://{}:5005'.format(data_server.address), json=worker_data)
             worker_response = json.loads(raw_response.content.decode())
 
 

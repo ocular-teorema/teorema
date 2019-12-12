@@ -130,7 +130,7 @@ class SchedulesAddMessage(ScheduleQueueEndpoint):
             schedule_type=schedule_type,
             weekdays=days,
             start_timestamp=start_timestamp,
-            stop_itmestamp=stop_timestamp,
+            stop_timestamp=stop_timestamp,
             start_daytime=start_time,
             stop_daytime=stop_time
         )
