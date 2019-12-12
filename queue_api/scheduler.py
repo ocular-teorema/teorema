@@ -72,30 +72,30 @@ class ScheduleQueueEndpoint(QueueEndpoint):
             return True
 
         if schedule_type == 'weekdays':
-            if 'days' not in actual:
+            if 'days' not in actual or not actual['days']:
                 message = RequiredParamError('days', self.uuid, self.response_message_type)
                 print(message, flush=True)
                 self.send_error_response(message)
                 return True
 
         if schedule_type == 'timestamp':
-            if 'start_timestamp' not in actual:
+            if 'start_timestamp' not in actual or not actual['start_timestamp']:
                 message = RequiredParamError('start_timestamp', self.uuid, self.response_message_type)
                 print(message, flush=True)
                 self.send_error_response(message)
                 return True
-            if 'stop_timestamp' not in actual:
+            if 'stop_timestamp' not in actual or not actual['stop_timestamp']:
                 message = RequiredParamError('stop_timestamp', self.uuid, self.response_message_type)
                 print(message, flush=True)
                 self.send_error_response(message)
                 return True
 
         if schedule_type == 'time_period':
-            if 'start_time' not in actual:
+            if 'start_time' not in actual or not actual['start_time']:
                 message = RequiredParamError('start_time', self.uuid, self.response_message_type)
                 print(message, flush=True)
                 self.send_error_response(message)
-            if 'stop_time' not in actual:
+            if 'stop_time' not in actual or not actual['stop_time']:
                 message = RequiredParamError('stop_time', self.uuid, self.response_message_type)
                 print(message, flush=True)
                 self.send_error_response(message)
