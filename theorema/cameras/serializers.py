@@ -157,7 +157,8 @@ class CameraSerializer(M2MHelperSerializer):
             if not camera.uid:
                 camera.uid = 'cam' + str(camera.id) + camera.add_time
                 camera.save()
-            if validated_data['server'].address != camera.server.address:
+            data_server = Server.objects.get(id=validated_data['server'])
+            if data_server.address != camera.server.address:
                 worker_data = {'id': camera.id, 'type': 'cam', 'add_time': camera.add_time}
                 # worker_data = {'id': camera.id, 'type': 'cam'}
                 raw_response = requests.delete('http://{}:5005'.format(camera.server.address), json=worker_data)
@@ -238,7 +239,6 @@ class CameraSerializer(M2MHelperSerializer):
         else:
             res.pop('camera_group')
         from_queue_api = res['from_queue_api'] if 'from_queue_api' in res else False
-        print('is from queue_api', from_queue_api, flush=True)
         try:
             if not from_queue_api:
                 if not self.context['request'].user.is_staff and not self.context['request'].user.is_organization_admin:

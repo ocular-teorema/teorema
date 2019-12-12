@@ -116,17 +116,21 @@ class SchedulesAddMessage(ScheduleQueueEndpoint):
             return
 
         schedule_type = params['schedule_type']
-        days = str(params['days'])[1:-1] if 'days' in params else None
-        start_timestamp = params['start_timestamp'] if 'start_timestamp' in params else None
-        stop_itmestamp = params['stop_timestamp'] if 'stop_timestamp' in params else None
-        start_time = params['start_time'] if 'start_time' in params else None
-        stop_time = params['stop_time'] if 'stop_time' in params else None
+        days = start_timestamp = stop_timestamp = start_time = stop_time = None
+        if schedule_type == 'weekdays':
+            days = str(params['days'])[1:-1] if 'days' in params else None
+        elif schedule_type == 'timestamp':
+            start_timestamp = params['start_timestamp'] if 'start_timestamp' in params else None
+            stop_timestamp = params['stop_timestamp'] if 'stop_timestamp' in params else None
+        elif schedule_type == 'time_period':
+            start_time = params['start_time'] if 'start_time' in params else None
+            stop_time = params['stop_time'] if 'stop_time' in params else None
 
         schedule = CameraSchedule(
             schedule_type=schedule_type,
             weekdays=days,
             start_timestamp=start_timestamp,
-            stop_itmestamp=stop_itmestamp,
+            stop_itmestamp=stop_timestamp,
             start_time=start_time,
             stop_time=stop_time
         )
