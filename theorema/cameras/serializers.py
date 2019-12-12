@@ -83,7 +83,7 @@ class CameraSerializer(M2MHelperSerializer):
                 'camera_group', 'organization', 'port', 'notify_email',
                 'notify_phone', 'notify_events', 'notify_time_start',
                 'notify_time_stop', 'notify_alert_level', 'notify_send_email',
-                'notify_send_sms', 'indefinitely', 'archive_path'
+                'notify_send_sms', 'indefinitely', 'archive_path', 'from_queue_api'
         )
         extra_kwargs = {
             'port': {'read_only': True}
@@ -238,6 +238,7 @@ class CameraSerializer(M2MHelperSerializer):
         else:
             res.pop('camera_group')
         from_queue_api = res['from_queue_api'] if 'from_queue_api' in res else False
+        print('is from queue_api', from_queue_api, flush=True)
         try:
             if not from_queue_api:
                 if not self.context['request'].user.is_staff and not self.context['request'].user.is_organization_admin:
