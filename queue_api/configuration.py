@@ -60,7 +60,7 @@ class ConfigExportMessage(ConfigurationQueueEndpoint):
                         status = 'DISABLED'
 
                     camera_data = {
-                        'id': camera.id,
+                        'id': camera.uid,
                         'name': camera.name,
                         'address_primary': camera.address,
                         'address_secondary': None,
