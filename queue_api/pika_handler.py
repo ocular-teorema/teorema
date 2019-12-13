@@ -231,14 +231,14 @@ class PikaHandler(threading.Thread):
     def config_import(self, message):
         print('config export request, flush=True')
 
-        config_export_msg = ConfigImportMessage()
+        config_export_msg = ConfigImportMessage(self.scheduler)
         config_export_msg.handle_request(message)
         print('message ok', flush=True)
 
     def reset(self, message):
         print('reset message request', flush=True)
 
-        reset_msg = ConfigurationResetMessage()
+        reset_msg = ConfigurationResetMessage(self.scheduler)
         reset_msg.handle_request(message)
         print('message ok', flush=True)
 

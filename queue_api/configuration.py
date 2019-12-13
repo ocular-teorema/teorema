@@ -13,7 +13,10 @@ from theorema.cameras.serializers import CameraSerializer
 
 
 class ConfigurationQueueEndpoint(QueueEndpoint):
-    pass
+
+    def __init__(self, scheduler=None):
+        super().__init__()
+        self.scheduler = scheduler
 
 
 class ConfigExportMessage(ConfigurationQueueEndpoint):
@@ -140,7 +143,7 @@ class ConfigExportMessage(ConfigurationQueueEndpoint):
         self.send_data_response(response_data)
 
 
-class ConfigImportMessage(QueueEndpoint):
+class ConfigImportMessage(ConfigurationQueueEndpoint):
     request_required_params = [
         'organizations'
     ]
@@ -200,6 +203,26 @@ class ConfigImportMessage(QueueEndpoint):
                     imported_storage.save()
                     storage_id_map[storage.id] = imported_storage.id
 
+                schedules = server_dict['schedules']
+                for schedule in schedules:
+                    schedule_type = schedule['schedule_type']
+                    days = str(schedule['days'])[1:-1] if 'days' in schedule else None
+                    start_timestamp = schedule['start_timestamp'] if 'start_timestamp' in schedule else None
+                    stop_itmestamp = schedule['stop_timestamp'] if 'stop_timestamp' in schedule else None
+                    start_time = schedule['start_time'] if 'start_time' in schedule else None
+                    stop_time = schedule['stop_time'] if 'stop_time' in schedule else None
+
+                    schedule = CameraSchedule(
+                        schedule_type=schedule_type,
+                        weekdays=days,
+                        start_timestamp=start_timestamp,
+                        stop_itmestamp=stop_itmestamp,
+                        start_time=start_time,
+                        stop_time=stop_time
+                    )
+
+                    schedule.save()
+
                 cameras = server_dict['cameras']
                 for camera in cameras:
 
@@ -245,27 +268,6 @@ class ConfigImportMessage(QueueEndpoint):
                         self.send_error_response(msg)
                         return
 
-                schedules = server_dict['schedules']
-                for schedule in schedules:
-
-                    schedule_type = schedule['schedule_type']
-                    days = str(schedule['days'])[1:-1] if 'days' in schedule else None
-                    start_timestamp = schedule['start_timestamp'] if 'start_timestamp' in schedule else None
-                    stop_itmestamp = schedule['stop_timestamp'] if 'stop_timestamp' in schedule else None
-                    start_time = schedule['start_time'] if 'start_time' in schedule else None
-                    stop_time = schedule['stop_time'] if 'stop_time' in schedule else None
-
-                    schedule = CameraSchedule(
-                        schedule_type=schedule_type,
-                        weekdays=days,
-                        start_timestamp=start_timestamp,
-                        stop_itmestamp=stop_itmestamp,
-                        start_time=start_time,
-                        stop_time=stop_time
-                    )
-
-                    schedule.save()
-
         self.send_success_response()
 
 
@@ -310,6 +312,12 @@ class ConfigurationResetMessage(ConfigurationQueueEndpoint):
                 msg = RequestParamValidationError(worker_response['message'])
                 self.send_error_response(msg)
                 return
+
+            if camera.schedule_job_start and camera.schedule_job_stop:
+                self.scheduler.delete_schedule(
+                    start_job_id=str(camera.schedule_job_start),
+                    stop_job_id=str(camera.schedule_job_stop)
+                )
 
             camera.delete()
 
