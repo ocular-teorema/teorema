@@ -84,8 +84,8 @@ class Camera(models.Model):
     from_queue_api = models.BooleanField(default=False)
     storage = models.ForeignKey(Storage, on_delete=models.SET_NULL, null=True)
     schedule = models.ForeignKey(CameraSchedule, null=True, default=None)
-    schedule_job_start = models.CharField(max_length=50, null=True, default=None)
-    schedule_job_stop = models.CharField(max_length=50, null=True, default=None)
+    schedule_job_start = models.CharField(max_length=150, null=True, default=None)
+    schedule_job_stop = models.CharField(max_length=150, null=True, default=None)
     uid = models.CharField(max_length=50, default='')
 
 

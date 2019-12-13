@@ -121,8 +121,9 @@ class CameraAddMessages(CameraQueueEndpoint):
                 else:
                     pass
 
-                camera.schedule_job_start = start_job
-                camera.schedule_job_start = stop_job
+                camera.schedule_job_start = start_job.id
+                camera.schedule_job_stop = stop_job.id
+                camera.schedule_id = schedule.id
                 camera.save()
 
         else:
@@ -186,23 +187,49 @@ class CameraUpdateMessages(CameraQueueEndpoint):
                 camera.storage = storage
 
         schedule = None
-        if 'schedule_id' in params and params['schedule_id']:
-            schedule_id = params['schedule_id']
-            if schedule_id:
-                try:
-                    schedule = CameraSchedule.objects.get(id=schedule_id)
-                except ObjectDoesNotExist:
-                    error = RequestParamValidationError('schedule with id {id} not found'.format(id=schedule_id))
-                    print(error, flush=True)
-                    self.send_error_response(error)
-                    return
+        if 'schedule_id' in params:
+            if params['schedule_id']:
+                schedule_id = params['schedule_id']
+                if schedule_id:
+                    try:
+                        schedule = CameraSchedule.objects.get(id=schedule_id)
+                    except ObjectDoesNotExist:
+                        error = RequestParamValidationError('schedule with id {id} not found'.format(id=schedule_id))
+                        print(error, flush=True)
+                        self.send_error_response(error)
+                        return
+            elif params['schedule_id'] is None:
+                if camera.schedule_job_start and camera.schedule_job_stop:
+                    self.scheduler.delete_schedule(
+                        start_job_id=str(camera.schedule_job_start),
+                        stop_job_id=str(camera.schedule_job_stop)
+                    )
 
+                    camera.schedule_job_start = None
+                    camera.schedule_job_stop = None
+
+                    camera.save()
+
+        start_job = None
+        stop_job = None
         if schedule:
+            # delete previous schedule
+            if camera.schedule_job_start and camera.schedule_job_stop:
+                self.scheduler.delete_schedule(
+                    start_job_id=str(camera.schedule_job_start),
+                    stop_job_id=str(camera.schedule_job_stop)
+                )
+
+                camera.schedule_job_start = None
+                camera.schedule_job_stop = None
+
             if schedule.schedule_type == 'weekdays':
                 start_job, stop_job = self.scheduler.add_weekdays_schedule(
                     camera=camera,
                     days=[int(day) for day in schedule.weekdays.split(', ')]
                 )
+                print('start job', start_job, flush=True)
+                print('stop_job', stop_job, flush=True)
             elif schedule.schedule_type == 'timestamp':
                 start_job, stop_job = self.scheduler.add_timestamp_schedule(
                     camera=camera,
@@ -215,17 +242,11 @@ class CameraUpdateMessages(CameraQueueEndpoint):
                     start_time=schedule.start_time,
                     stop_time=schedule.stop_time
                 )
-            else:
-                self.scheduler.delete_schedule(
-                    start_job_id=int(camera.schedule_job_start),
-                    stop_job_id=int(camera.schedule_job_stop)
-                )
-
-                start_job = stop_job = None
 
             camera.schedule_job_start = start_job.id
-            camera.schedule_job_start = stop_job.id
-            camera.save()
+            camera.schedule_job_stop = stop_job.id
+
+        camera.save()
 
         camera_repr['name'] = name
         camera_repr['address'] = address_primary
@@ -295,9 +316,6 @@ class CameraListMessages(QueueEndpoint):
                 'enabled': cam.is_active
                 })
 
-        print(self.uuid, flush=True)
-        print(camera_list, flush=True)
-
         self.send_data_response(camera_list)
         return
 
@@ -353,8 +371,6 @@ class CameraDeleteMessages(CameraQueueEndpoint):
 
         print('params', params, flush=True)
 
-        self.response_topic = self.response_topic.format(cam_id=params['camera_id'])
-
         camera = Camera.objects.filter(uid=params['camera_id']).first()
 
         if not camera:
@@ -389,6 +405,12 @@ class CameraDeleteMessages(CameraQueueEndpoint):
                 msg = RequestParamValidationError(worker_response['message'])
                 self.send_error_response(msg)
                 return
+
+            if camera.schedule_job_start and camera.schedule_job_stop:
+                self.scheduler.delete_schedule(
+                    start_job_id=str(camera.schedule_job_start),
+                    stop_job_id=str(camera.schedule_job_stop)
+                )
 
             camera.delete()
 
