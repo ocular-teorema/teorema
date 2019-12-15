@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Ocular API 1.2.0 documentation</title>
+  <title>Ocular API 1.2.1 documentation</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="css/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/atom-one-dark.min.css" />
@@ -23,7 +23,7 @@
 <div class="sidebar-panel fixed pin-t pin-l pin-b w-64 bg-grey-lighter font-sans pt-8 pr-4 pb-4 pl-4">
   <div class="sidebar-panel__content">
     
-    <h1 class="text-2xl font-thin">Ocular API 1.2.0</h1>
+    <h1 class="text-2xl font-thin">Ocular API 1.2.1</h1>
     
     <ul class="text-sm mt-10 list-reset mt-2">
       <li class="mb-3">
@@ -792,7 +792,7 @@
     <div class="content-panel flex-1 leading-loose z-10">
       <div class="center-block p-8">
   <a name="introduction"></a>
-  <h1>Ocular API 1.2.0</h1>
+  <h1>Ocular API 1.2.1</h1>
   <div class="leading-normal mb-4">
     
     
@@ -802,12 +802,38 @@
   </div>
 
   <div class="markdown">
-    <h2>AsyncAPI specification for Ocular project</h2>
-<h1>Notes:</h1>
+    <h3>AsyncAPI specification for Ocular project</h3>
+<h2>Notes:</h2>
 <ul>
 <li>All messages from subsribe channels must be sended with exchange &quot;{server_name}&quot; and empty routing_key.</li>
 <li>All messages from publish channels will be sended to exchange &quot;driver&quot; and empty routing_key.</li>
 </ul>
+<h2>Usage and installation</h2>
+<p>In order to run queue api in container, RabbitMQ installation is needed.</p>
+<h1>RabbitMQ installation</h1>
+<p>Fastest and easy way to install RabbitMQ is to run Docker container on the same host.
+Ocular container have predefined settings for queue, so you just need to start RabbitMQ container with Ocular default variables.
+This command will specify this default settings and will be running RabbitMQ container in daemon mode:</p>
+<p><code>sudo docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 -e RABBITMQ_DEFAULT_VHOST=/ocular -e RABBITMQ_DEFAULT_USER=ocular -e RABBITMQ_DEFAULT_PASS=mC2QX0J7sx7i -d rabbitmq:3-management</code></p>
+<h1>Setting ocular server and exchange</h1>
+<p>Because of Docker limitations, containers cannot access network interfaces of host.
+By default, when Ocular container started with command:<code>docker-compose up -d</code>, it will not be connected to queue automatically.
+Ocular container have special command that can setup server IP-address and MAC-address. In order to set these addresses,
+this command can be used:</p>
+<p><code>docker-compose exec ocular docker_setorgs</code></p>
+<p>It will prompt to type some parameters:</p>
+<ul>
+<li>Organization name (can be skipped, default will be set as <code>Ocular</code>)</li>
+<li>External IP-address (can be skipped, default will be set as <code>0.0.0.0</code>)</li>
+<li>Local IP-address (can be skipped, default will be set as <code>0.0.0.0</code>)</li>
+<li>Hardware MAC-address - this parameter is required.</li>
+</ul>
+<p>If this setup done right, you will see message: <code>Settings saved</code>.</p>
+<h1>Testing connection to queue</h1>
+<p>After running RabbitMQ container and setting MAC-address to Ocular container, you can test connection.
+It can be done with command:</p>
+<p><code>docker-compose exec ocular docker_test_queue</code></p>
+<p>This command will send status command to Ocular and will receive produced message.</p>
 
   </div>
 </div>

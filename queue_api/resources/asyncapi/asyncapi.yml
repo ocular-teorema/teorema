@@ -1,13 +1,51 @@
 asyncapi: 2.0.0
 info:
   title: Ocular API
-  version: '1.2.0'
+  version: '1.2.1'
   description: |
-    ## AsyncAPI specification for Ocular project
+    ### AsyncAPI specification for Ocular project
 
-    # Notes:
+    ## Notes:
     * All messages from subsribe channels must be sended with exchange "{server_name}" and empty routing_key.
     * All messages from publish channels will be sended to exchange "driver" and empty routing_key.
+
+    ## Usage and installation
+    In order to run queue api in container, RabbitMQ installation is needed.
+
+    # RabbitMQ installation
+    Fastest and easy way to install RabbitMQ is to run Docker container on the same host.
+    Ocular container have predefined settings for queue, so you just need to start RabbitMQ container with Ocular default variables.
+    This command will specify this default settings and will be running RabbitMQ container in daemon mode:
+
+    `sudo docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 -e RABBITMQ_DEFAULT_VHOST=/ocular -e RABBITMQ_DEFAULT_USER=ocular -e RABBITMQ_DEFAULT_PASS=mC2QX0J7sx7i -d rabbitmq:3-management`
+
+    # Setting ocular server and exchange
+    Because of Docker limitations, containers cannot access network interfaces of host.
+    By default, when Ocular container started with command:`docker-compose up -d`, it will not be connected to queue automatically.
+    Ocular container have special command that can setup server IP-address and MAC-address. In order to set these addresses,
+    this command can be used:
+
+    `docker-compose exec ocular docker_setorgs`
+
+    It will prompt to type some parameters:
+    * Organization name (can be skipped, default will be set as `Ocular`)
+    * External IP-address (can be skipped, default will be set as `0.0.0.0`)
+    * Local IP-address (can be skipped, default will be set as `0.0.0.0`)
+    * Hardware MAC-address - this parameter is required.
+
+    If this setup done right, you will see message: `Settings saved`.
+
+
+    # Testing connection to queue
+    After running RabbitMQ container and setting MAC-address to Ocular container, you can test connection.
+    It can be done with command:
+
+    `docker-compose exec ocular docker_test_queue`
+
+    This command will send status command to Ocular and will receive produced message.
+
+
+
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
