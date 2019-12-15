@@ -28,7 +28,7 @@ class Command(BaseCommand):
         channel.queue_bind(exchange=exchange, queue=queue_name, routing_key='')
 
         def callback(ch, method, properties, body):
-            print(" [*] Received message body: %r" % json.loads(body))
+            print(" [*] Received message body: %r" % json.loads(body.decode('utf-8')))
             channel.stop_consuming()
 
 
