@@ -13,14 +13,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         org_name = input("Name of organization (default - Ocular): ")
-        if not org_name:
+        if org_name == "":
             org_name = DEFAULT_ORG_NAME
 
         address = input('Specify IP address (default = 0.0.0.0): ')
-        if not address:
+        if address == "":
             address = DEFAULT_ADDRESS
         local_address = input('Specify local IP address (default = 0.0.0.0): ')
-        if not local_address:
+        if local_address == "":
             local_address = DEFAULT_ADDRESS
 
         server_id = input("Specify MAC-address (required): ")
