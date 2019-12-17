@@ -200,7 +200,7 @@ class PikaHandler(threading.Thread):
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
-    def camera_ptz_zoom(self, message):
+    def cameras_ptz_zoom(self, message):
         print('zoom control request', flush=True)
 
         cameras_request = ZoomControlMessage()
