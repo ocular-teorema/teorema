@@ -49,10 +49,27 @@ class PtzControlQueueEndpoint(QueueEndpoint):
 
         print('move ...', flush=True)
 
+        if (move_request.Position.PanTilt.x + x_coord) >= 1:
+            move_request.Position.PanTilt.x = 0.99
+        elif (move_request.Position.PanTilt.x + x_coord) <= -1:
+            move_request.Position.PanTilt.x = -0.99
+        else:
+            move_request.Position.PanTilt.x += x_coord
 
-        move_request.Position.PanTilt.x += x_coord
-        move_request.Position.PanTilt.y += y_coord
-        move_request.Position.Zoom.x += zoom
+        if (move_request.Position.PanTilt.y + y_coord) >= 1:
+            move_request.Position.PanTilt.y = 0.99
+        elif (move_request.Position.PanTilt.y + y_coord) <= -1:
+            move_request.Position.PanTilt.y = -0.99
+        else:
+            move_request.Position.PanTilt.y += y_coord
+
+        if (move_request.Position.Zoom.x + zoom) >= 1:
+            move_request.Position.Zoom.x = 0.99
+        elif (move_request.Position.Zoom.x + zoom) <= 0:
+            move_request.Position.Zoom.x = 0.01
+        else:
+            move_request.Position.Zoom.x += zoom
+
 
         print('move_request', move_request, type(move_request), flush=True)
 
@@ -63,6 +80,14 @@ class PtzControlQueueEndpoint(QueueEndpoint):
         ptz.Stop({'ProfileToken': move_request.ProfileToken})
         move_request.Position = ptz.GetStatus({'ProfileToken': media_profile.token}).Position
         print('new position', move_request.Position, flush=True)
+
+        response_position = {
+            'pan': move_request.Position.PanTilt.x,
+            'tilt': move_request.Position.PanTilt.y,
+            'zoom': move_request.Position.Zoom.x
+        }
+
+        return response_position
 
 
 
@@ -90,7 +115,7 @@ class PanControlMessage(PtzControlQueueEndpoint):
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
             try:
-                self.move(float(params['data']['step']), 0, 0, camera.address)
+                position = self.move(float(params['data']['step']), 0, 0, camera.address)
             except:
                 print('some error', flush=True)
                 error = RequestParamValidationError('camera with id {id} can not move'.format(id=params['camera_id']))
@@ -101,7 +126,7 @@ class PanControlMessage(PtzControlQueueEndpoint):
             self.send_error_response(error)
             return
 
-        self.send_success_response()
+        self.send_data_response(position)
         return {'message sent'}
 
 
@@ -128,7 +153,7 @@ class TiltControlMessage(PtzControlQueueEndpoint):
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
             try:
-                self.move(0, float(params['data']['step']), 0, camera.address)
+                position = self.move(0, float(params['data']['step']), 0, camera.address)
             except:
                 print('some error', flush=True)
                 error = RequestParamValidationError('camera with id {id} can not move'.format(id=params['camera_id']))
@@ -139,7 +164,7 @@ class TiltControlMessage(PtzControlQueueEndpoint):
             self.send_error_response(error)
             return
 
-        self.send_success_response()
+        self.send_data_response(position)
         return {'message sent'}
 
 
@@ -166,7 +191,7 @@ class ZoomControlMessage(PtzControlQueueEndpoint):
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
             try:
-                self.move(0, 0, float(params['data']['step']), camera.address)
+                position = self.move(0, 0, float(params['data']['step']), camera.address)
             except:
                 print('some error', flush=True)
                 error = RequestParamValidationError('camera with id {id} can not move'.format(id=params['camera_id']))
@@ -177,5 +202,5 @@ class ZoomControlMessage(PtzControlQueueEndpoint):
             self.send_error_response(error)
             return
 
-        self.send_success_response()
+        self.send_data_response(position)
         return {'message sent'}
