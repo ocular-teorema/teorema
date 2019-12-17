@@ -49,12 +49,13 @@ class PtzControlQueueEndpoint(QueueEndpoint):
 
         print('move ...', flush=True)
 
-        if (move_request.Position.PanTilt.x + x_coord) >= 1:
-            move_request.Position.PanTilt.x = 0.99
-        elif (move_request.Position.PanTilt.x + x_coord) <= -1:
-            move_request.Position.PanTilt.x = -0.99
+
+        if (move_request.Position.PanTilt.x + x_coord) % 2 > 1:
+            move_request.Position.PanTilt.x = (move_request.Position.PanTilt.x + x_coord) % 2 - 2
         else:
-            move_request.Position.PanTilt.x += x_coord
+            move_request.Position.PanTilt.x = (move_request.Position.PanTilt.x + x_coord) % 2
+        # else:
+        #     move_request.Position.PanTilt.x += x_coord
 
         if (move_request.Position.PanTilt.y + y_coord) >= 1:
             move_request.Position.PanTilt.y = 0.99
