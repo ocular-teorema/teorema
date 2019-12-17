@@ -3,7 +3,7 @@ from onvif import ONVIFCamera
 import time
 from queue_api.messages import RequestParamValidationError
 from theorema.cameras.models import Camera
-
+import zeep
 from onvif import ONVIFCamera, ONVIFService
 
 def zeep_pythonvalue(self, xmlvalue):
