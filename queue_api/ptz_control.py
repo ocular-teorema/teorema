@@ -23,7 +23,7 @@ class PtzControlQueueEndpoint(QueueEndpoint):
             # mycam = ONVIFCamera(ip, port, user, password)
         except:
             port = 80
-        mycam = ONVIFCamera(ip, port, user, password)
+        mycam = ONVIFCamera(ip, port, user, password, no_cache=True)
 
         # Create media service object
         media = mycam.create_media_service()
