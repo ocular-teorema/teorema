@@ -10,11 +10,8 @@ def zeep_pythonvalue(self, xmlvalue):
     return xmlvalue
 
 
-class PtzControlQueueEndpoint(QueueEndpoint):
-
-    def move(self, x_coord, y_coord, zoom, address):
-        print(address, flush=True)
-        zeep.xsd.simple.AnySimpleType.pythonvalue = zeep_pythonvalue
+def address_parse(address):
+    if '@' in address:
         user = address.split('@')[0].split('/')[-1].split(':')[0]
         password = address.split('@')[0].split('/')[-1].split(':')[1]
         ip = address.split('@')[1].split('/')[0].split(':')[0]
@@ -23,7 +20,25 @@ class PtzControlQueueEndpoint(QueueEndpoint):
             # mycam = ONVIFCamera(ip, port, user, password)
         except:
             port = 80
-        mycam = ONVIFCamera(ip, port, user, password, no_cache=True)
+    else:
+        ip = address.split('/')[2].split(':')[0]
+        try:
+            port = address.split('/')[2].split(':')[1]
+        except:
+            port = 80
+        user = address.split('/')[-1].split('&')[0].split('=')[-1]
+        password = address.split('/')[-1].split('&')[1].split('=')[-1]
+
+    return ip, port, user, password
+
+
+class PtzControlQueueEndpoint(QueueEndpoint):
+
+    def move(self, x_coord, y_coord, zoom, address):
+        print(address, flush=True)
+        zeep.xsd.simple.AnySimpleType.pythonvalue = zeep_pythonvalue
+
+        mycam = ONVIFCamera(*address_parse(address), no_cache=True)
 
         # Create media service object
         media = mycam.create_media_service()
