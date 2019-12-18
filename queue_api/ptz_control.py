@@ -134,9 +134,12 @@ class PanControlMessage(PtzControlQueueEndpoint):
         if camera:
             try:
                 position = self.move(float(params['data']['step']), 0, 0, camera.address)
-            except:
+            except Exception as e:
                 print('some error', flush=True)
-                error = RequestParamValidationError('camera with id {id} can not move'.format(id=params['camera_id']))
+                print('Exception on camera:', e, flush=True)
+                error = RequestParamValidationError('camera with id {id} can not move, cause: {exception}'
+                                                    .format(id=params['camera_id'], exception=e)
+                                                    )
                 self.send_error_response(error)
                 return
         else:
@@ -172,9 +175,12 @@ class TiltControlMessage(PtzControlQueueEndpoint):
         if camera:
             try:
                 position = self.move(0, float(params['data']['step']), 0, camera.address)
-            except:
+            except Exception as e:
                 print('some error', flush=True)
-                error = RequestParamValidationError('camera with id {id} can not move'.format(id=params['camera_id']))
+                print('Exception on camera:', e, flush=True)
+                error = RequestParamValidationError('camera with id {id} can not move, cause: {exception}'
+                                                    .format(id=params['camera_id'], exception=e)
+                                                    )
                 self.send_error_response(error)
                 return
         else:
@@ -210,9 +216,12 @@ class ZoomControlMessage(PtzControlQueueEndpoint):
         if camera:
             try:
                 position = self.move(0, 0, float(params['data']['step']), camera.address)
-            except:
+            except Exception as e:
                 print('some error', flush=True)
-                error = RequestParamValidationError('camera with id {id} can not move'.format(id=params['camera_id']))
+                print('Exception on camera:', e, flush=True)
+                error = RequestParamValidationError('camera with id {id} can not move, cause: {exception}'
+                                                    .format(id=params['camera_id'], exception=e)
+                                                    )
                 self.send_error_response(error)
                 return
         else:
