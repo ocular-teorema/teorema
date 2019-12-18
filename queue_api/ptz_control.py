@@ -28,6 +28,8 @@ def address_parse(address):
             port = 80
         user = address.split('/')[-1].split('&')[0].split('=')[-1]
         password = address.split('/')[-1].split('&')[1].split('=')[-1]
+    if password == '':
+        password = user
 
     return ip, port, user, password
 
