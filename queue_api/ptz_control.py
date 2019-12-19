@@ -94,7 +94,7 @@ class PtzControlQueueEndpoint(QueueEndpoint):
 
         ptz.AbsoluteMove(move_request)
 
-        time.sleep(3)
+        time.sleep(1)
         ptz.Stop({'ProfileToken': move_request.ProfileToken})
         move_request.Position = ptz.GetStatus({'ProfileToken': media_profile.token}).Position
         print('new position', move_request.Position, flush=True)
