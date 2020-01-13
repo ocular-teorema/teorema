@@ -381,6 +381,29 @@ class DatabaseEventsData(Resource):
         return list
 
 
+def check_confidence(low, medium, high):
+    confidence_db = ' and confidence '
+
+    if conf_low:
+        if conf_medium:
+            if not conf_high:
+                confidence_db += '< 80 '
+            else:
+                confidence_db = ''
+        else:
+            confidence_db += '< 50 ' if not conf_high else 'not between 50 and 79 '
+    else:
+        if conf_medium:
+            confidence_db += 'between 50 and 79 ' if not conf_high else '>= 59'
+        else:
+            if conf_high:
+                confidence_db += '>= 80 '
+            else:
+                return False
+
+    return confidence_db
+
+
 class ArchiveEvents(Resource):
     def get(self):
         parser = reqparse.RequestParser()
@@ -419,24 +442,10 @@ class ArchiveEvents(Resource):
         types_db = ' and type in ({})'.format(event_types)
         reacts_db = ' and reaction in ({})'.format(reactions)
 
-        confidence_db = ' and confidence '
+        confidence_db = check_confidence(conf_low, conf_medium, conf_high)
 
-        if conf_low:
-            if conf_medium:
-                if not conf_high:
-                    confidence_db += '< 80 '
-                else:
-                    confidence_db = ''
-            else:
-                confidence_db += '< 50 ' if not conf_high else 'not between 50 and 79 '
-        else:
-            if conf_medium:
-                confidence_db += 'between 50 and 79 ' if not conf_high else '>= 59'
-            else:
-                if conf_high:
-                    confidence_db += '>= 80 '
-                else:
-                    return {'status': 1, 'message': 'at least one confidence level must be passed'}
+        if not confidence_db:
+            return {'status': 1, 'message': 'at least one confidence level must be passed'}
 
         db_query_str = ("select id,cam,archive_file1,archive_file2,start_timestamp,end_timestamp,type,confidence,reaction,date,file_offset_sec from events where {cam}"
                         .format(cam=cameras_database) + ' and  start_timestamp >=' + str(start_time) + ' and ' + 'end_timestamp <=' + str(end_time)
