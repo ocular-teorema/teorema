@@ -394,7 +394,7 @@ def check_confidence(low, medium, high):
             confidence_db += '< 50 ' if not conf_high else 'not between 50 and 79 '
     else:
         if conf_medium:
-            confidence_db += 'between 50 and 79 ' if not conf_high else '>= 59'
+            confidence_db += 'between 50 and 79 ' if not conf_high else '>= 50'
         else:
             if conf_high:
                 confidence_db += '>= 80 '

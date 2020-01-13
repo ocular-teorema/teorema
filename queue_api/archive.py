@@ -144,12 +144,20 @@ class ArchiveEventsMessage(ArchiveQueueEndpoint):
             else:
                 reactions_db = ' and reaction in ({})'.format(reactions)
 
+        skip_value = data['skip'] if 'skip' in data else ''
+        if skip_value != '':
+            skip_value = ' offset {skip_value}'.format(skip_value=skip_value)
+
+        limit_value = data['limit'] if 'limit' in data else ''
+        if limit_value != '':
+            limit_value = ' limit {limit_value}'.format(limit_value=limit_value)
+
         db_query_str = (
             "select id,cam,archive_file1,archive_file2,start_timestamp,end_timestamp,type,confidence,reaction,date,file_offset_sec from events where {cam}"
             .format(cam=camera_query) + ' and  start_timestamp >=' + str(start_timestamp) + ' and '
             + 'end_timestamp <=' + str(end_timestamp) + confidence_db + types_db + reactions_db +
-            'order by start_timestamp desc offset {offset_int} limit {limit_int};'
-            .format(offset_int=skip, limit_int=limit))
+            'order by start_timestamp desc {offset} limit {limit};'
+            .format(offset=skip_value, limit=limit_value))
 
         cur.execute(db_query_str)
         rows = cur.fetchall()

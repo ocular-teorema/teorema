@@ -313,6 +313,30 @@ components:
       description: Unique identifier for send-receive actions
       examples:
         - '31b9448f-9ea3-429f-a04d-23c7c7ac77d3'
+    event_type:
+      type: integer
+      description: type of event
+      examples:
+        - 1
+        - 2
+        - 4
+        - 8
+    event_confidence:
+      type: integer
+      minimum: 0
+      maximum: 100
+      description: confidence of event
+      examples:
+        - 55
+        - 89
+        - 94
+    event_reaction:
+      type: integer
+      description: reaction of event
+      enum:
+        - -1
+        - 1
+        - 2
     command_base:
       type: string
       description: identifier for command to execute
