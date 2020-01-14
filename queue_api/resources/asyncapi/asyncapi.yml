@@ -171,7 +171,11 @@ channels:
   /ocular_driver/config/import:
     $ref: 'ref/configuration.yml#/channels/config_import_response'
   
-  /ocular/{server_name}/archive/archive/video:
+  /ocular/{server_name}/archive/video:
+    $ref: 'ref/archive.yml#/channels/archive_video_request'
+  /ocular_driver/archive/video:
+    $ref: 'ref/archive.yml#/channels/archive_video_response'
+  /ocular_driver/archive/events:
     $ref: 'ref/archive.yml#/channels/archive_video_request'
   /ocular_driver/archive/archive/video:
     $ref: 'ref/archive.yml#/channels/archive_video_response'
