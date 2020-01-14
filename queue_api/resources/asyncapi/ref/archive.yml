@@ -108,4 +108,124 @@ channels:
                         examples:
                           - "303306385"
 
+  archive_events_response:
+    publish:
+      description: Receive messages with events from archive
+      operationId: archive_events_response
+      message:
+        name: archive_events
+        title: Message with events from archive
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - uuid
+            - type
+            - data
+          properties:
+            uuid:
+              $ref: 'base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'archive_video'
+            data:
+              type: object
+              description: Message with array of saved events
+              properties:
+                videos:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: id of object saved in database
+                        examples:
+                          - 7809
+                          - 7810
+                      camera:
+                        $ref: 'base_types.yml#/components/schemas/camera_id'
+                      start_timestamp:
+                        type: integer
+                        description: start time of event
+                        examples:
+                          - "1572273590"
+                      stop_timestamp:
+                        type: integer
+                        description: end time of event
+                        examples:
+                          - "1572273591"
+                      event_type:
+                        $ref: 'base_types.yml#/components/schemas/event_type'
+                      confidence:
+                        $ref: 'base_types.yml#/components/schemas/event_confidence'
+                      reaction:
+                        $ref: 'base_types.yml#/components/schemas/event_reaction'
+
+
+  archive_events_request:
+    subscribe:
+      description: Send messages with request to get events from archive
+      operationId: archive_events
+      message:
+        name: archive_events
+        title: Message with request to fetch events from archive
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - uuid
+            - type
+            - data
+          properties:
+            uuid:
+              $ref: 'base_types.yml#/components/schemas/uuid'
+            type:
+              type: string
+              const: 'archive_events'
+            data:
+              type: object
+              description: Message to request events from archive
+              required:
+                - start_timestamp
+                - stop_timestamp
+                - cameras
+              properties:
+                start_timestamp:
+                  type: integer
+                  description: start time of search
+                  examples:
+                    - "1572273590"
+                stop_timestamp:
+                  type: integer
+                  description: stop time of search
+                  examples:
+                    - "1572273591"
+                cameras:
+                  type: array
+                  description: Array of cameras id to search
+                  items:
+                    $ref: 'base_types.yml#/components/schemas/camera_id'
+                confidence_low:
+                  type: boolean
+                  description: Include events with low confidence (< 50)
+                confidence_medium:
+                  type: boolean
+                  description: Include events with medium confidence (>= 50, < 80)
+                confidence_high:
+                  type: boolean
+                  description: Include events with high confidence (>= 80)
+                skip:
+                  type: integer
+                  description: Skip first N items in query
+                  minimum: 0
+                  examples:
+                    - 100
+                limit:
+                  type: integer
+                  description: Linit array of received query
+                  minimum: 0
+                  examples:
+                    - 500
+
 

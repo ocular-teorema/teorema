@@ -17,7 +17,7 @@ from queue_api.storages import StorageListMessage, StorageDeleteMessage, Storage
 from queue_api.cameras import CameraAddMessages, CameraListMessages, CameraSetRecordingMessages, CameraDeleteMessages, CameraUpdateMessages
 from queue_api.scheduler import SchedulesAddMessage, ScheduleListMessage, SchedulesDeleteMessage, SchedulesUpdateMessage
 from queue_api.common import pika_setup_connection, base_send_in_queue, get_server_name
-# from queue_api.ptz_control import PanControlMessage, TiltControlMessage, ZoomControlMessage
+from queue_api.archive import VideosGetMessage, ArchiveEventsMessage
 from queue_api.ptz_control import AbsoluteMoveMessage, ContinuousMoveMessage, RelativeMoveMessage, StopMoveMessage
 from queue_api.archive import VideosGetMessage
 from queue_api.events import EventsSendMessage
@@ -240,6 +240,13 @@ class PikaHandler(threading.Thread):
         print('archive video request', flush=True)
 
         cameras_request = VideosGetMessage()
+        cameras_request.handle_request(message)
+        print('message ok', flush=True)
+
+    def archive_events(self, message):
+        print('archive video request', flush=True)
+
+        cameras_request = ArchiveEventsMessage()
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 

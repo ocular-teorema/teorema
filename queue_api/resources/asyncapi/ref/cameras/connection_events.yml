@@ -76,26 +76,8 @@ channels:
                   examples:
                     - "1572273591"
                 event_type:
-                  type: integer
-                  description: type of event
-                  examples:
-                    - 1
-                    - 2
-                    - 4
-                    - 8
+                  $ref: '../base_types.yml#/components/schemas/event_type'
                 confidence:
-                  type: integer
-                  minimum: 0
-                  maximum: 100
-                  description: confidence of event
-                  examples:
-                    - 55
-                    - 89
-                    - 94
+                  $ref: '../base_types.yml#/components/schemas/event_confidence'
                 reaction:
-                  type: integer
-                  description: reaction of event
-                  enum:
-                    - -1
-                    - 1
-                    - 2
+                  $ref: '../base_types.yml#/components/schemas/event_reaction'
