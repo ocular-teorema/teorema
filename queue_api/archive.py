@@ -1,10 +1,32 @@
-from queue_api.common import QueueEndpoint
-from queue_api.messages import RequestParamValidationError
 import requests
-from theorema.cameras.models import Server
-from admin_theorema.listener import check_confidence
 import json
 
+from theorema.cameras.models import Server
+
+from queue_api.common import QueueEndpoint
+from queue_api.messages import RequestParamValidationError
+
+def check_confidence(conf_low, conf_medium, conf_high):
+    confidence_db = ' and confidence '
+
+    if conf_low:
+        if conf_medium:
+            if not conf_high:
+                confidence_db += '< 80 '
+            else:
+                confidence_db = ''
+        else:
+            confidence_db += '< 50 ' if not conf_high else 'not between 50 and 79 '
+    else:
+        if conf_medium:
+            confidence_db += 'between 50 and 79 ' if not conf_high else '>= 50'
+        else:
+            if conf_high:
+                confidence_db += '>= 80 '
+            else:
+                return False
+
+    return confidence_db
 
 class ArchiveQueueEndpoint(QueueEndpoint):
 

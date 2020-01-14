@@ -381,7 +381,7 @@ class DatabaseEventsData(Resource):
         return list
 
 
-def check_confidence(low, medium, high):
+def check_confidence(conf_low, conf_medium, conf_high):
     confidence_db = ' and confidence '
 
     if conf_low:
