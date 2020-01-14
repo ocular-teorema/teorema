@@ -1,10 +1,10 @@
 from queue_api.common import QueueEndpoint
-from onvif import ONVIFCamera
 import time
 from queue_api.messages import RequestParamValidationError
 from theorema.cameras.models import Camera
 import zeep
 from onvif import ONVIFCamera, ONVIFService
+import datetime
 
 def zeep_pythonvalue(self, xmlvalue):
     return xmlvalue
@@ -158,6 +158,9 @@ class ContinuousMoveMessage(PtzControlQueueEndpoint):
                 move_request.Velocity.PanTilt.x = params['data']['speed']['pan']
                 move_request.Velocity.PanTilt.y = params['data']['speed']['tilt']
                 move_request.Velocity.Zoom.x = params['data']['speed']['zoom']
+                if 'timeout' in params['data']:
+                    if params['data']['timeout'] is not None:
+                        move_request.Timeout = datetime.timedelta(0, int(params['data']['timeout']))
 
                 print('move request', move_request, flush=True)
 
