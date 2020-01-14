@@ -208,6 +208,7 @@ class RelativeMoveMessage(PtzControlQueueEndpoint):
                 move_request = ptz.create_type('AbsoluteMove')
                 move_request.ProfileToken = media_profile.token
                 move_request.Position = ptz.GetStatus({'ProfileToken': media_profile.token}).Position
+                move_request.Speed = media_profile.PTZConfiguration.DefaultPTZSpeed
 
                 print('current position', move_request, flush=True)
 
