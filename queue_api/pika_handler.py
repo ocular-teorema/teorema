@@ -17,7 +17,8 @@ from queue_api.storages import StorageListMessage, StorageDeleteMessage, Storage
 from queue_api.cameras import CameraAddMessages, CameraListMessages, CameraSetRecordingMessages, CameraDeleteMessages, CameraUpdateMessages
 from queue_api.scheduler import SchedulesAddMessage, ScheduleListMessage, SchedulesDeleteMessage, SchedulesUpdateMessage
 from queue_api.common import pika_setup_connection, base_send_in_queue, get_server_name
-from queue_api.ptz_control import PanControlMessage, TiltControlMessage, ZoomControlMessage
+# from queue_api.ptz_control import PanControlMessage, TiltControlMessage, ZoomControlMessage
+from queue_api.ptz_control import AbsoluteMoveMessage, ContinuousMoveMessage, RelativeMoveMessage, StopMoveMessage
 from queue_api.archive import VideosGetMessage
 from queue_api.events import EventsSendMessage
 from queue_api.configuration import ConfigExportMessage, ConfigImportMessage, ConfigurationResetMessage
@@ -186,24 +187,52 @@ class PikaHandler(threading.Thread):
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
-    def cameras_ptz_move_horizontal(self, message):
-        print('horizontal control request', flush=True)
+    # def cameras_ptz_move_horizontal(self, message):
+    #     print('horizontal control request', flush=True)
+    #
+    #     cameras_request = PanControlMessage()
+    #     cameras_request.handle_request(message)
+    #     print('message ok', flush=True)
+    #
+    # def cameras_ptz_move_vertical(self, message):
+    #     print('vertical control request', flush=True)
+    #
+    #     cameras_request = TiltControlMessage()
+    #     cameras_request.handle_request(message)
+    #     print('message ok', flush=True)
+    #
+    # def cameras_ptz_zoom(self, message):
+    #     print('zoom control request', flush=True)
+    #
+    #     cameras_request = ZoomControlMessage()
+    #     cameras_request.handle_request(message)
+    #     print('message ok', flush=True)
 
-        cameras_request = PanControlMessage()
+    def cameras_ptz_absolute_move(self, message):
+        print('absolute move request', flush=True)
+
+        cameras_request = AbsoluteMoveMessage()
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
-    def cameras_ptz_move_vertical(self, message):
-        print('vertical control request', flush=True)
+    def cameras_ptz_continuous_move(self, message):
+        print('continuous request', flush=True)
 
-        cameras_request = TiltControlMessage()
+        cameras_request = ContinuousMoveMessage()
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
-    def cameras_ptz_zoom(self, message):
-        print('zoom control request', flush=True)
+    def cameras_ptz_relative_move(self, message):
+        print('relative move request', flush=True)
 
-        cameras_request = ZoomControlMessage()
+        cameras_request = RelativeMoveMessage()
+        cameras_request.handle_request(message)
+        print('message ok', flush=True)
+
+    def cameras_ptz_stop_move(self, message):
+        print('stop move request', flush=True)
+
+        cameras_request = StopMoveMessage()
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
