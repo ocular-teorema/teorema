@@ -27,19 +27,18 @@ from queue_api.messages import InvalidMessageStructureError, InvalidMessageTypeE
 from queue_api.settings import *
 
 
-class PikaHandler(threading.Thread):
+class PikaThread(threading.Thread):
 
-    def __init__(self):
+    def __init__(self, thread_name):
         super().__init__()
 
+        self.worker_name = thread_name.upper()
         self.server_name = get_server_name()
         self.response_exchange = 'driver'
         print('server name (exchange): {name}'.format(name=self.server_name), flush=True)
         print('server response exchange: {name}'.format(name=self.response_exchange), flush=True)
 
         self.scheduler = CameraScheduler()
-        self.scheduler.start()
-        print('scheduler started', flush=True)
 
     def run(self):
         print('starting receiver', flush=True)
@@ -47,6 +46,7 @@ class PikaHandler(threading.Thread):
         channel = connection.channel()
 
         channel.exchange_declare(exchange=self.server_name, exchange_type=RABBITMQ_EXCHANGE_TYPE_OCULAR, durable=False, auto_delete=False)
+        channel.basic_qos(prefetch_count=1)
         result = channel.queue_declare('')
 
         queue_name = result.method.queue
@@ -55,12 +55,14 @@ class PikaHandler(threading.Thread):
         channel.basic_consume(
             queue=queue_name,
             on_message_callback=self.callback,
-            # auto_ack=True
+            auto_ack=False
         )
 
-        print('receiver started', flush=True)
+        print(self.worker_name+ 'receiver started', flush=True)
         channel.start_consuming()
+
         self.scheduler.start()
+        print(self.worker_name + 'scheduler started', flush=True)
 
 
     def verify_message(self, message):
@@ -319,8 +321,25 @@ class PikaHandler(threading.Thread):
         print('message ok', flush=True)
 
 
+class PikaFactory:
+
+    def __init__(self):
+        self.threads_count = 1
+
+    def set_threads(self, count):
+        self.threads_count = count
+
+    def run(self):
+        for i in range(self.threads_count):
+            pika_thread = PikaThread(thread_name='Receiver-Thread-{}'.format(i))
+            pika_thread.setDaemon(False)
+            pika_thread.start()
+
+
 if __name__ == '__main__':
 
     logging.getLogger('pika').setLevel(logging.WARNING)
-    receiver = PikaHandler()
-    receiver.start()
+    receiver = PikaThread()
+    receiver_factory = PikaFactory()
+    receiver_factory.set_threads(4)
+    receiver_factory.run()
