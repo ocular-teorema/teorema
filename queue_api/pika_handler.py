@@ -339,7 +339,6 @@ class PikaFactory:
 if __name__ == '__main__':
 
     logging.getLogger('pika').setLevel(logging.WARNING)
-    receiver = PikaThread()
     receiver_factory = PikaFactory()
     receiver_factory.set_threads(4)
     receiver_factory.run()
