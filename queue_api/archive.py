@@ -101,8 +101,8 @@ class ArchiveEventsMessage(ArchiveQueueEndpoint):
         'cameras'
     ]
 
-    response_topic = '/archive/video'
-    response_message_type = 'archive_video'
+    response_topic = '/archive/events'
+    response_message_type = 'archive_events'
 
     def handle_request(self, params):
         print('message received', flush=True)

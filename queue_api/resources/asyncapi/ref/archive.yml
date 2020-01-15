@@ -127,7 +127,7 @@ channels:
               $ref: 'base_types.yml#/components/schemas/uuid'
             type:
               type: string
-              const: 'archive_video'
+              const: 'archive_events'
             data:
               type: object
               description: Message with array of saved events

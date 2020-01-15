@@ -1,7 +1,7 @@
 asyncapi: 2.0.0
 info:
   title: Ocular API
-  version: '1.2.1'
+  version: '1.2.2'
   description: |
     ### AsyncAPI specification for Ocular project
 
@@ -175,9 +175,9 @@ channels:
     $ref: 'ref/archive.yml#/channels/archive_video_request'
   /ocular_driver/archive/video:
     $ref: 'ref/archive.yml#/channels/archive_video_response'
-  /ocular_driver/archive/events:
+  /ocular/{server_name}/archive/events:
     $ref: 'ref/archive.yml#/channels/archive_video_request'
-  /ocular_driver/archive/archive/video:
+  /ocular_driver/archive/events:
     $ref: 'ref/archive.yml#/channels/archive_video_response'
 
 components:
