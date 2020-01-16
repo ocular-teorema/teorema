@@ -1,5 +1,6 @@
 import requests
 import json
+import psycopg2
 
 from theorema.cameras.models import Server
 
@@ -30,14 +31,24 @@ def check_confidence(conf_low, conf_medium, conf_high):
 
 class ArchiveQueueEndpoint(QueueEndpoint):
 
-    def prepare_camera_query(self, column, data):
+    def prepare_camera_query(self, column, data, no_prepend_cam=False):
         camera_list = data['cameras']
-        camera_list_query = []
-        for camera in camera_list:
-            camera = camera[3:]
-            camera_list_query.append(camera)
-        camera_query = ','.join(camera_list_query)
-        cameras_database = '{column}.cam in '.format(column=column) + '({})'.format(', '.join(camera_query))
+        # camera_list_query = []
+        # for camera in camera_list:
+        #    camera = camera[3:]
+        #     camera_list_query.append(camera)
+        # camera_query = ','.join(camera_list_query)
+
+        cameras = []
+        for x in range(len(camera_list)):
+            if no_prepend_cam:
+                cameras.append("'cam{}'".format(camera_list[x]))
+            else:
+                cameras.append("'{}'".format(camera_list[x]))
+
+#        cameras_database = 'events.cam in ' + '({})'.format(', '.join(cameras))
+
+        cameras_database = '{column}.cam in '.format(column=column) + '({})'.format(', '.join(cameras))
         return cameras_database
 
 
@@ -62,7 +73,13 @@ class VideosGetMessage(ArchiveQueueEndpoint):
         if self.check_request_params(params['data']):
             return
 
-        camera_query = self.prepare_camera_query('records', data)
+        camera_list = data['cameras']
+        camera_list_query = []
+        for camera in camera_list:
+            camera = camera[3:]
+            camera_list_query.append(camera)
+
+        camera_query = ','.join(camera_list_query)
 
         startTs = int(data['start_timestamp']) if int(data['start_timestamp']) % 600 == 0 else int(data['start_timestamp']) - 600
         endTs = int(data['stop_timestamp']) if int(data['stop_timestamp']) % 600 == 0 else int(data['stop_timestamp']) + 600
@@ -115,7 +132,7 @@ class ArchiveEventsMessage(ArchiveQueueEndpoint):
         if self.check_request_params(data):
             return
 
-        camera_query = self.prepare_camera_query('events', data)
+        camera_query = self.prepare_camera_query('events', data, True)
 
         start_timestamp = int(data['start_timestamp']) if int(data['start_timestamp']) % 600 == 0 else int(
             data['start_timestamp']) - 600
@@ -176,10 +193,13 @@ class ArchiveEventsMessage(ArchiveQueueEndpoint):
 
         db_query_str = (
             "select id,cam,archive_file1,archive_file2,start_timestamp,end_timestamp,type,confidence,reaction,date,file_offset_sec from events where {cam}"
-            .format(cam=camera_query) + ' and  start_timestamp >=' + str(start_timestamp) + ' and '
-            + 'end_timestamp <=' + str(end_timestamp) + confidence_db + types_db + reactions_db +
-            'order by start_timestamp desc {offset} limit {limit};'
+            .format(cam=camera_query) + ' and  start_timestamp >=' + str(start_timestamp * 1000) + ' and '
+            + 'end_timestamp <=' + str(end_timestamp * 1000) + confidence_db + types_db + reactions_db +
+            ' order by start_timestamp desc {offset} {limit};'
             .format(offset=skip_value, limit=limit_value))
+
+        conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
+        cur = conn.cursor()
 
         cur.execute(db_query_str)
         rows = cur.fetchall()
