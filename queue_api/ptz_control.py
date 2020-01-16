@@ -5,39 +5,65 @@ from theorema.cameras.models import Camera
 import zeep
 from onvif import ONVIFCamera, ONVIFService
 import datetime
+import re
 
 def zeep_pythonvalue(self, xmlvalue):
     return xmlvalue
 
 
-def address_parse(address):
-    if '@' in address:
-        user = address.split('@')[0].split('/')[-1].split(':')[0]
-        password = address.split('@')[0].split('/')[-1].split(':')[1]
-        ip = address.split('@')[1].split('/')[0].split(':')[0]
-        try:
-            port = address.split('@')[1].split('/')[0].split(':')[1]
-        except:
-            port = 80
+# def address_parse(address):
+#     if '@' in address:
+#         user = address.split('@')[0].split('/')[-1].split(':')[0]
+#         password = address.split('@')[0].split('/')[-1].split(':')[1]
+#         ip = address.split('@')[1].split('/')[0].split(':')[0]
+#         try:
+#             port = address.split('@')[1].split('/')[0].split(':')[1]
+#         except:
+#             port = 80
+#     else:
+#         ip = address.split('/')[2].split(':')[0]
+#         try:
+#             port = address.split('/')[2].split(':')[1]
+#         except:
+#             port = 80
+#         port = 8899
+#         user = address.split('/')[-1].split('&')[0].split('=')[-1]
+#         password = address.split('/')[-1].split('&')[1].split('=')[-1]
+#
+#     return ip, port, user, password
+
+
+def address_parse(camera):
+    address = camera.address
+    ip = re.findall(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', address)[0]
+    port = camera.onvif_port
+
+    if camera.onvif_username:
+        user = camera.onvif_username
     else:
-        ip = address.split('/')[2].split(':')[0]
-        try:
-            port = address.split('/')[2].split(':')[1]
-        except:
-            port = 80
-        port = 8899
-        user = address.split('/')[-1].split('&')[0].split('=')[-1]
-        password = address.split('/')[-1].split('&')[1].split('=')[-1]
+        if '@' in address:
+            user = address.split('@')[0].split('/')[-1].split(':')[0]
+        else:
+            user = re.findall(r'user=(.*?)&', address)[0]
+
+    if camera.onvif_password:
+        password = camera.onvif_password
+    else:
+        if '@' in address:
+            password = address.split('@')[0].split('/')[-1].split(':')[1]
+        else:
+            password = re.findall(r'password=(.*?)&', address)[0]
+
 
     return ip, port, user, password
 
 
 class PtzControlQueueEndpoint(QueueEndpoint):
-    def camera_initialization(self, address):
-        print('address', address, flush=True)
+    def camera_initialization(self, camera):
+        print('address', camera.address, flush=True)
         zeep.xsd.simple.AnySimpleType.pythonvalue = zeep_pythonvalue
 
-        mycam = ONVIFCamera(*address_parse(address), no_cache=True)
+        mycam = ONVIFCamera(*address_parse(camera), no_cache=True)
 
         # Create media service object
         media = mycam.create_media_service()
@@ -76,7 +102,7 @@ class AbsoluteMoveMessage(PtzControlQueueEndpoint):
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
             try:
-                ptz, media_profile = self.camera_initialization(address=camera.address)
+                ptz, media_profile = self.camera_initialization(camera)
 
                 move_request = ptz.create_type('AbsoluteMove')
                 move_request.ProfileToken = media_profile.token
@@ -147,7 +173,7 @@ class ContinuousMoveMessage(PtzControlQueueEndpoint):
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
             try:
-                ptz, media_profile = self.camera_initialization(address=camera.address)
+                ptz, media_profile = self.camera_initialization(camera)
 
                 move_request = ptz.create_type('ContinuousMove')
                 move_request.ProfileToken = media_profile.token
@@ -203,7 +229,7 @@ class RelativeMoveMessage(PtzControlQueueEndpoint):
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
             try:
-                ptz, media_profile = self.camera_initialization(address=camera.address)
+                ptz, media_profile = self.camera_initialization(camera)
 
                 move_request = ptz.create_type('AbsoluteMove')
                 move_request.ProfileToken = media_profile.token
@@ -281,7 +307,7 @@ class StopMoveMessage(PtzControlQueueEndpoint):
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
             try:
-                ptz, media_profile = self.camera_initialization(address=camera.address)
+                ptz, media_profile = self.camera_initialization(camera)
 
                 ptz.Stop({'ProfileToken': media_profile.token})
 

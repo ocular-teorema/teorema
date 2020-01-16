@@ -87,6 +87,9 @@ class Camera(models.Model):
     schedule_job_start = models.CharField(max_length=150, null=True, default=None)
     schedule_job_stop = models.CharField(max_length=150, null=True, default=None)
     uid = models.CharField(max_length=50, default='')
+    onvif_port = models.IntegerField()
+    onvif_username = models.CharField(max_length=50, null=True)
+    onvif_password = models.CharField(max_length=50, null=True)
 
 
 class Camera2CameraGroup(models.Model):

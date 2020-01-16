@@ -7,8 +7,9 @@ from theorema.cameras.models import Camera, Server, Storage, CameraSchedule
 from theorema.users.models import CamSet
 
 from queue_api.common import QueueEndpoint, get_supervisor_processes
-from queue_api.messages import RequestParamValidationError, ConfigImportOrgsCountError, ConfigImportServerCountError,\
-    ConfigImportServerMacError, ConfigImportServerNameError, ConfigImportInvalidPathError, ConfigImportCameraStorageInvalidError
+from queue_api.messages import RequestParamValidationError, ConfigImportOrgsCountError, ConfigImportServerCountError, \
+    ConfigImportServerMacError, ConfigImportServerNameError, ConfigImportInvalidPathError, \
+    ConfigImportCameraStorageInvalidError
 from theorema.cameras.serializers import CameraSerializer
 
 
@@ -71,6 +72,11 @@ class ConfigExportMessage(ConfigurationQueueEndpoint):
                         'stream_address': stream_address,
                         'status': status,
                         'enabled': camera.is_active,
+                        'onvif_settings': {
+                            'port': camera.onvif_port,
+                            'username': camera.onvif_username,
+                            'password': camera.onvif_password
+                        }
                     }
 
                     camera_list.append(camera_data)
@@ -251,7 +257,12 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
                         'indefinitely': storage_indefinitely,
                         'compress_level': compress_level,
                         'archive_path': storage.path,
-                        'from_queue_api': True
+                        'from_queue_api': True,
+                        'onvif_port': camera['onvif_settings']['port'],
+                        'onvif_username': camera['onvif_settings']['username'] if 'username' in camera[
+                            'onvif_settings'] else None,
+                        'onvif_password': camera['onvif_settings']['password'] if 'password' in camera[
+                            'onvif_settings'] else None
                     }
 
                     camera_serializer = CameraSerializer(data=serializer_params)
@@ -272,7 +283,6 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
 
 
 class ConfigurationResetMessage(ConfigurationQueueEndpoint):
-
     response_message_type = 'reset_response'
 
     def handle_request(self, params):

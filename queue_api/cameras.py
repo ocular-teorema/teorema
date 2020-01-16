@@ -23,7 +23,6 @@ class CameraQueueEndpoint(QueueEndpoint):
 
 
 class CameraAddMessages(CameraQueueEndpoint):
-
     response_message_type = 'cameras_add_response'
 
     request_required_params = [
@@ -44,6 +43,9 @@ class CameraAddMessages(CameraQueueEndpoint):
         address_primary = params['address_primary']
         analysis_type = params['analysis_type']
         storage_days = params['storage_days']
+        onvif_port = params['onvif_settings']['port']
+        onvif_username = params['onvif_settings']['username'] if 'username' in params['onvif_settings'] else None
+        onvif_password = params['onvif_settings']['password'] if 'password' in params['onvif_settings'] else None
 
         # for backward compatibility
         storage_indefinitely = True if storage_days == 1000 else False
@@ -87,7 +89,10 @@ class CameraAddMessages(CameraQueueEndpoint):
             'indefinitely': storage_indefinitely,
             'compress_level': compress_level,
             'archive_path': storage.path,
-            'from_queue_api': True
+            'from_queue_api': True,
+            'onvif_port': onvif_port,
+            'onvif_username': onvif_username,
+            'onvif_password': onvif_password
             # 'storage'
         }
 
@@ -138,7 +143,6 @@ class CameraAddMessages(CameraQueueEndpoint):
 
 
 class CameraUpdateMessages(CameraQueueEndpoint):
-
     response_message_type = 'cameras_update_response'
 
     def handle_request(self, message):
@@ -165,6 +169,14 @@ class CameraUpdateMessages(CameraQueueEndpoint):
         name = params['name'] if 'name' in params else camera_repr['name']
         address_primary = params['address_primary'] if 'address_primary' in params else camera_repr['address']
         analysis_type = params['analysis_type'] if 'analysis_type' in params else camera_repr['analysis']
+        if 'onvif_settings' in params:
+            onvif_port = params['onvif_settings']['port'] if 'port' in params['onvif_settings'] else camera_repr['onvif_port']
+            onvif_username = params['onvif_settings']['username'] if 'username' in params['onvif_settings'] else camera_repr['onvif_username']
+            onvif_password = params['onvif_settings']['password'] if 'password' in params['onvif_settings'] else camera_repr['onvif_password']
+        else:
+            onvif_port = camera_repr['onvif_port']
+            onvif_username = camera_repr['onvif_username']
+            onvif_password = camera_repr['onvif_password']
 
         if 'storage_days' in params:
             storage_days = params['storage_days']
@@ -254,20 +266,22 @@ class CameraUpdateMessages(CameraQueueEndpoint):
         camera_repr['storage_life'] = storage_days
         camera_repr['indefinitely'] = storage_indefinitely
         camera_repr['camera_group'] = self.default_camera_group
+        camera_repr['onvif_port'] = onvif_port
+        camera_repr['onvif_username'] = onvif_username
+        camera_repr['onvif_password'] = onvif_password
 
         CameraSerializer().update(camera, camera_repr)
 
-#            errors = camera_serializer.errors
-#            msg = RequestParamValidationError('Validation error: "err"'.format(err=errors))
-#            print(msg, flush=True)
-#            self.send_error_response(msg)
-#            return
+        #            errors = camera_serializer.errors
+        #            msg = RequestParamValidationError('Validation error: "err"'.format(err=errors))
+        #            print(msg, flush=True)
+        #            self.send_error_response(msg)
+        #            return
 
         self.send_success_response()
 
 
 class CameraListMessages(QueueEndpoint):
-
     response_message_type = 'cameras_list_response'
 
     def handle_request(self, params):
@@ -305,7 +319,7 @@ class CameraListMessages(QueueEndpoint):
                 'id': cam.uid,
                 'name': cam.name,
                 'address_primary': cam.address,
-                #'address_secondary': cam.address_secondary,
+                # 'address_secondary': cam.address_secondary,
                 'address_secondary': None,
                 'storage_id': cam.storage.id if cam.storage is not None else None,
                 'schedule_id': cam.schedule.id if cam.schedule is not None else None,
@@ -313,15 +327,19 @@ class CameraListMessages(QueueEndpoint):
                 'analysis_type': cam.analysis,
                 'stream_address': stream_address,
                 'status': status,
-                'enabled': cam.is_active
-                })
+                'enabled': cam.is_active,
+                'onvif_settings': {
+                    'port': cam.onvif_port,
+                    'username': cam.onvif_username,
+                    'password': cam.onvif_password
+                }
+            })
 
         self.send_data_response(camera_list)
         return
 
 
 class CameraSetRecordingMessages(CameraQueueEndpoint):
-
     response_message_type = 'cameras_set_recording_response'
 
     request_required_params = [
@@ -362,7 +380,6 @@ class CameraSetRecordingMessages(CameraQueueEndpoint):
 
 
 class CameraDeleteMessages(CameraQueueEndpoint):
-
     response_message_type = 'cameras_delete_response'
 
     def handle_request(self, params):
@@ -421,7 +438,6 @@ class CameraDeleteMessages(CameraQueueEndpoint):
 
 
 def set_camera_recording(camera, recording):
-
     if not camera.from_queue_api:
         camera.from_queue_api = True
         camera.save()
@@ -440,4 +456,3 @@ def enable_camera(camera):
 def disable_camera(camera):
     set_camera_recording(camera, False)
     return True
-
