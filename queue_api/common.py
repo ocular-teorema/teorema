@@ -80,14 +80,14 @@ def base_send_in_queue(exchange, message):
     connection.close()
 
 
-def pika_setup_connection():
+def pika_setup_connection(heartbeat=None):
     connection = pika.BlockingConnection(pika.ConnectionParameters(
         # 'localhost',
         host=RABBITMQ_HOST,
         port=RABBITMQ_PORT,
         virtual_host=RABBITMQ_VHOST,
         credentials=pika.PlainCredentials(RABBITMQ_CREDENTIALS['user'], RABBITMQ_CREDENTIALS['password']),
-        # heartbeat_interval=heartbeat
+        heartbeat=heartbeat
     ))
     return connection
 

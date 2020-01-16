@@ -4,6 +4,8 @@ import os
 import sys
 import traceback
 import threading
+import functools
+import time
 import logging
 import json
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -26,8 +28,15 @@ from queue_api.scheduler import CameraScheduler
 from queue_api.messages import InvalidMessageStructureError, InvalidMessageTypeError
 from queue_api.settings import *
 
+LOG_FORMAT = ('%(levelname) -10s %(asctime)s %(name) -30s %(funcName) '
+              '-35s %(lineno) -5d: %(message)s')
+LOGGER = logging.getLogger(__name__)
 
-class PikaThread(threading.Thread):
+logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
+
+
+#class PikaThread(threading.Thread):
+class PikaMaster:
 
     def __init__(self, thread_name):
         super().__init__()
@@ -39,31 +48,67 @@ class PikaThread(threading.Thread):
         print('server response exchange: {name}'.format(name=self.response_exchange), flush=True)
 
         self.scheduler = CameraScheduler()
+        self.scheduler.start()
+        print('scheduler started'.format(self.worker_name), flush=True)
 
     def run(self):
         print('starting receiver', flush=True)
-        connection = pika_setup_connection()
+        connection = pika_setup_connection(heartbeat=5)
         channel = connection.channel()
 
-        channel.exchange_declare(exchange=self.server_name, exchange_type=RABBITMQ_EXCHANGE_TYPE_OCULAR, durable=False, auto_delete=False)
-        channel.basic_qos(prefetch_count=1)
-        result = channel.queue_declare('')
+        channel.exchange_declare(exchange=self.server_name, exchange_type=RABBITMQ_EXCHANGE_TYPE_OCULAR,
+                                 passive=False, durable=False, auto_delete=False)
+
+        result = channel.queue_declare(queue='', auto_delete=True)
 
         queue_name = result.method.queue
         channel.queue_bind(exchange=self.server_name, queue=queue_name, routing_key='')
+        channel.basic_qos(prefetch_count=4)
 
+        threads = []
+        threaded_callback = functools.partial(self.callback, args=(connection, threads))
         channel.basic_consume(
             queue=queue_name,
-            on_message_callback=self.callback,
-            auto_ack=False
+            on_message_callback=threaded_callback,
+            # auto_ack=False
         )
 
         print('{}: receiver started'.format(self.worker_name), flush=True)
         channel.start_consuming()
 
-        self.scheduler.start()
-        print('{}: scheduler started'.format(self.worker_name), flush=True)
+    def callback(self, ch, method_frame, _header_frame, body, args):
+        (conn, thrds) = args
+        delivery_tag = method_frame.delivery_tag
+        print(('threads: ', thrds), flush=True)
+        t = threading.Thread(target=self.worker, args=(conn, ch, delivery_tag, body))
+        t.start()
+        thrds.append(t)
 
+    def worker(self, conn, ch, delivery_tag, body):
+        thread_id = threading.get_ident()
+        LOGGER.info('Thread id: %s Delivery tag: %s Message body: %s', thread_id,
+                    delivery_tag, body)
+        try:
+            message = json.loads(body.decode())
+            if not self.verify_message(message):
+                LOGGER.info('3')
+                return
+            message_type = message['type']
+            LOGGER.info(json.loads(body.decode())['type'])
+            getattr(self, message_type, self.unknown_handler)(message)
+
+        except Exception as e:
+            print('\n'.join(traceback.format_exception(*sys.exc_info())),
+                  flush=True)
+
+        cb = functools.partial(self.ack_message, ch, delivery_tag)
+        conn.add_callback_threadsafe(cb)
+
+    def ack_message(self, ch, delivery_tag):
+        if ch.is_open:
+            ch.basic_ack(delivery_tag)
+        else:
+            pass
 
     def verify_message(self, message):
         if 'uuid' and 'type' not in message:
@@ -82,22 +127,6 @@ class PikaThread(threading.Thread):
             return False
         else:
             return True
-
-    def callback(self, ch, method, properties, body):
-        print('received', body, properties, method, flush=True)
-        try:
-            message = json.loads(body.decode())
-            if not self.verify_message(message):
-                return
-            message_type = message['type']
-
-            getattr(self, message_type, self.unknown_handler)(message)
-
-        except Exception as e:
-            print('\n'.join(traceback.format_exception(*sys.exc_info())),
-                  flush=True)
-        else:
-            ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def unknown_handler(self, message):
         print('unknown message', message, flush=True)
@@ -127,6 +156,16 @@ class PikaThread(threading.Thread):
 
     def status(self, message):
         print('status request message received', flush=True)
+
+        status_request = StatusMessages()
+        status_request.handle_request(message)
+        print('message ok', flush=True)
+
+    def status_timed(self, message):
+        print('status request message received', flush=True)
+        print('sleeping 30s', flush=True)
+        time.sleep(30)
+        print('awooken', flush=True)
 
         status_request = StatusMessages()
         status_request.handle_request(message)
@@ -300,24 +339,8 @@ class PikaThread(threading.Thread):
         print('message ok', flush=True)
 
 
-class PikaFactory:
-
-    def __init__(self):
-        self.threads_count = 1
-
-    def set_threads(self, count):
-        self.threads_count = count
-
-    def run(self):
-        for i in range(self.threads_count):
-            pika_thread = PikaThread(thread_name='Receiver-Thread-{}'.format(i+1))
-            pika_thread.setDaemon(False)
-            pika_thread.start()
-
-
 if __name__ == '__main__':
 
     logging.getLogger('pika').setLevel(logging.WARNING)
-    receiver_factory = PikaFactory()
-    receiver_factory.set_threads(1)
-    receiver_factory.run()
+    receiver = PikaMaster('abc')
+    receiver.run()
