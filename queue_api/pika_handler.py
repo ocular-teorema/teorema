@@ -58,11 +58,11 @@ class PikaThread(threading.Thread):
             auto_ack=False
         )
 
-        print(self.worker_name+ 'receiver started', flush=True)
+        print('{}: receiver started'.format(self.worker_name), flush=True)
         channel.start_consuming()
 
         self.scheduler.start()
-        print(self.worker_name + 'scheduler started', flush=True)
+        print('{}: scheduler started'.format(self.worker_name), flush=True)
 
 
     def verify_message(self, message):
@@ -310,7 +310,7 @@ class PikaFactory:
 
     def run(self):
         for i in range(self.threads_count):
-            pika_thread = PikaThread(thread_name='Receiver-Thread-{}'.format(i))
+            pika_thread = PikaThread(thread_name='Receiver-Thread-{}'.format(i+1))
             pika_thread.setDaemon(False)
             pika_thread.start()
 
@@ -319,5 +319,5 @@ if __name__ == '__main__':
 
     logging.getLogger('pika').setLevel(logging.WARNING)
     receiver_factory = PikaFactory()
-    receiver_factory.set_threads(4)
+    receiver_factory.set_threads(1)
     receiver_factory.run()

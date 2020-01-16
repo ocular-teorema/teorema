@@ -444,7 +444,7 @@ class ArchiveEvents(Resource):
 
         confidence_db = check_confidence(conf_low, conf_medium, conf_high)
 
-        if not confidence_db:
+        if confidence_db is False:
             return {'status': 1, 'message': 'at least one confidence level must be passed'}
 
         db_query_str = ("select id,cam,archive_file1,archive_file2,start_timestamp,end_timestamp,type,confidence,reaction,date,file_offset_sec from events where {cam}"
