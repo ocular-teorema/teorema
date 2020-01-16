@@ -27,7 +27,8 @@ class CameraAddMessages(CameraQueueEndpoint):
 
     request_required_params = [
         'name', 'address_primary',
-        'analysis_type', 'storage_days'
+        'analysis_type', 'storage_days',
+        'onvif_settings'
     ]
 
     def handle_request(self, message):
