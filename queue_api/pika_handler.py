@@ -189,27 +189,6 @@ class PikaThread(threading.Thread):
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
-    # def cameras_ptz_move_horizontal(self, message):
-    #     print('horizontal control request', flush=True)
-    #
-    #     cameras_request = PanControlMessage()
-    #     cameras_request.handle_request(message)
-    #     print('message ok', flush=True)
-    #
-    # def cameras_ptz_move_vertical(self, message):
-    #     print('vertical control request', flush=True)
-    #
-    #     cameras_request = TiltControlMessage()
-    #     cameras_request.handle_request(message)
-    #     print('message ok', flush=True)
-    #
-    # def cameras_ptz_zoom(self, message):
-    #     print('zoom control request', flush=True)
-    #
-    #     cameras_request = ZoomControlMessage()
-    #     cameras_request.handle_request(message)
-    #     print('message ok', flush=True)
-
     def cameras_ptz_absolute_move(self, message):
         print('absolute move request', flush=True)
 
