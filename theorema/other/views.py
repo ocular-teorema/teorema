@@ -1,21 +1,27 @@
+import os
 import requests
 import json
 from django.shortcuts import render_to_response
 from django.middleware import csrf
 from django.http import JsonResponse
 from theorema.cameras.models import Server
+from theorema.settings import BASE_DIR
+
 
 def index(request):
     csrf_token = csrf.get_token(request)
     return render_to_response('index.html', {'csrf_token': csrf_token, 'request': request})
 
+
 def login(request):
     csrf_token = csrf.get_token(request)
     return render_to_response('login.html', {'csrf_token': csrf_token, 'request': request})
 
+
 def video(request):
     csrf_token = csrf.get_token(request)
     return render_to_response('video.html', {'csrf_token': csrf_token, 'request': request})
+
 
 def stat(request):
     server = Server.objects.get(id=request.GET['server'])
