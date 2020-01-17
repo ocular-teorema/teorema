@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Ocular API 1.2.1 documentation</title>
+  <title>Ocular API 1.2.2 documentation</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="css/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/atom-one-dark.min.css" />
@@ -23,7 +23,7 @@
 <div class="sidebar-panel fixed pin-t pin-l pin-b w-64 bg-grey-lighter font-sans pt-8 pr-4 pb-4 pl-4">
   <div class="sidebar-panel__content">
     
-    <h1 class="text-2xl font-thin">Ocular API 1.2.1</h1>
+    <h1 class="text-2xl font-thin">Ocular API 1.2.2</h1>
     
     <ul class="text-sm mt-10 list-reset mt-2">
       <li class="mb-3">
@@ -787,13 +787,13 @@
         
         
         <a class="js-menu-item flex break-words no-underline text-grey-darkest mt-8 sm:mt-8 md:mt-3"
-          href="#operation-subscribe-/ocular_driver/archive/events">
+          href="#operation-subscribe-/ocular/{server_name}/archive/events">
           <span class="bg-green-dark font-bold no-underline text-white uppercase p-1 mr-2 rounded"
             style="height: 21px;font-size: 11px;" title="Subscribe">Sub</span>
           
           <div style="display:inline-block;">
             
-<span class="string-chunk" style="padding-top: 2px;">/ocular_driver</span><span class="string-chunk" style="padding-top: 2px;">/archive</span><span class="string-chunk" style="padding-top: 2px;">/events</span>
+<span class="string-chunk" style="padding-top: 2px;">/ocular</span><span class="string-chunk" style="padding-top: 2px;">/</span><span class="string-chunk" style="padding-top: 2px;">{server_name</span><span class="string-chunk" style="padding-top: 2px;">}</span><span class="string-chunk" style="padding-top: 2px;">/archive</span><span class="string-chunk" style="padding-top: 2px;">/events</span>
 
           </div>
           
@@ -805,13 +805,13 @@
       <li>
         
         <a class="js-menu-item flex break-words no-underline text-grey-darkest mt-8 sm:mt-8 md:mt-3"
-          href="#operation-publish-/ocular_driver/archive/archive/video">
+          href="#operation-publish-/ocular_driver/archive/events">
           <span class="bg-blue-dark font-bold h-6 no-underline text-white uppercase p-1 mr-2 rounded"
             style="height: 21px;font-size: 11px;" title="Publish">Pub</span>
           
           <div style="display:inline-block;">
             
-<span class="string-chunk" style="padding-top: 2px;">/ocular_driver</span><span class="string-chunk" style="padding-top: 2px;">/archive</span><span class="string-chunk" style="padding-top: 2px;">/archive</span><span class="string-chunk" style="padding-top: 2px;">/video</span>
+<span class="string-chunk" style="padding-top: 2px;">/ocular_driver</span><span class="string-chunk" style="padding-top: 2px;">/archive</span><span class="string-chunk" style="padding-top: 2px;">/events</span>
 
           </div>
           
@@ -830,7 +830,7 @@
     <div class="content-panel flex-1 leading-loose z-10">
       <div class="center-block p-8">
   <a name="introduction"></a>
-  <h1>Ocular API 1.2.1</h1>
+  <h1>Ocular API 1.2.2</h1>
   <div class="leading-normal mb-4">
     
     
@@ -38442,7 +38442,7 @@ integer
     
       
 
-<a name="operation-subscribe-/ocular_driver/archive/events"></a>
+<a name="operation-subscribe-/ocular/{server_name}/archive/events"></a>
 <div class="center-block p-8">
   <div class="operation pt-8 pb-8">
     <h3 class="font-mono text-base">
@@ -38451,7 +38451,7 @@ integer
       <span class="font-mono border border-green-dark text-green-dark uppercase p-1 rounded" title="Subscribe">Sub</span>
       
       
-<span class="string-chunk" >/ocular_driver</span><span class="string-chunk" >/archive</span><span class="string-chunk" >/events</span>
+<span class="string-chunk" >/ocular</span><span class="string-chunk" >/</span><span class="string-chunk" >{server_name</span><span class="string-chunk" >}</span><span class="string-chunk" >/archive</span><span class="string-chunk" >/events</span>
 
     </h3>
 
@@ -39180,7 +39180,7 @@ integer
     
       
 
-<a name="operation-publish-/ocular_driver/archive/archive/video"></a>
+<a name="operation-publish-/ocular_driver/archive/events"></a>
 <div class="center-block p-8">
   <div class="operation pt-8 pb-8">
     <h3 class="font-mono text-base">
@@ -39189,7 +39189,7 @@ integer
       
       
       
-<span class="string-chunk" >/ocular_driver</span><span class="string-chunk" >/archive</span><span class="string-chunk" >/archive</span><span class="string-chunk" >/video</span>
+<span class="string-chunk" >/ocular_driver</span><span class="string-chunk" >/archive</span><span class="string-chunk" >/events</span>
 
     </h3>
 
