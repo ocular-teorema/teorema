@@ -13,12 +13,12 @@ from settings import *
 import sys
 sys.path.append(os.path.abspath(".."))
 
-from queue_api.pika_handler import PikaThread
+from queue_api.pika_handler import PikaMaster
 
 config = configparser.ConfigParser()
 config.read(SUPERVISOR_CAMERAS_CONF)
 raw_cams =[{'id': str(k[len('program:cam'):]), 'directory': v['directory']} for k,v in config.items() if k.startswith('program:cam')]
-event_message = PikaThread(thread_name='Event-Publisher-Thread')
+event_message = PikaMaster(thread_name='Event-Publisher-Thread')
 
 cams = []
 for c in raw_cams:
