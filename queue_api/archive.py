@@ -7,6 +7,7 @@ from theorema.cameras.models import Server
 from queue_api.common import QueueEndpoint
 from queue_api.messages import RequestParamValidationError
 
+
 def check_confidence(conf_low, conf_medium, conf_high):
     confidence_db = ' and confidence '
 
@@ -29,6 +30,7 @@ def check_confidence(conf_low, conf_medium, conf_high):
 
     return confidence_db
 
+
 class ArchiveQueueEndpoint(QueueEndpoint):
 
     def prepare_camera_query(self, column, data, no_prepend_cam=False):
@@ -46,7 +48,7 @@ class ArchiveQueueEndpoint(QueueEndpoint):
             else:
                 cameras.append("'{}'".format(camera_list[x]))
 
-#        cameras_database = 'events.cam in ' + '({})'.format(', '.join(cameras))
+        #        cameras_database = 'events.cam in ' + '({})'.format(', '.join(cameras))
 
         cameras_database = '{column}.cam in '.format(column=column) + '({})'.format(', '.join(cameras))
         return cameras_database
@@ -81,8 +83,10 @@ class VideosGetMessage(ArchiveQueueEndpoint):
 
         camera_query = ','.join(camera_list_query)
 
-        startTs = int(data['start_timestamp']) if int(data['start_timestamp']) % 600 == 0 else int(data['start_timestamp']) - 600
-        endTs = int(data['stop_timestamp']) if int(data['stop_timestamp']) % 600 == 0 else int(data['stop_timestamp']) + 600
+        startTs = int(data['start_timestamp']) if int(data['start_timestamp']) % 600 == 0 else int(
+            data['start_timestamp']) - 600
+        endTs = int(data['stop_timestamp']) if int(data['stop_timestamp']) % 600 == 0 else int(
+            data['stop_timestamp']) + 600
 
         query_params = {
             'startTs': startTs * 1000,
@@ -132,12 +136,10 @@ class ArchiveEventsMessage(ArchiveQueueEndpoint):
         if self.check_request_params(data):
             return
 
-        camera_query = self.prepare_camera_query('events', data, True)
+        camera_query = self.prepare_camera_query('events', data)
 
-        start_timestamp = int(data['start_timestamp']) if int(data['start_timestamp']) % 600 == 0 else int(
-            data['start_timestamp']) - 600
-        end_timestamp = int(data['stop_timestamp']) if int(data['stop_timestamp']) % 600 == 0 else int(
-            data['stop_timestamp']) + 600
+        start_timestamp = int(data['start_timestamp'])
+        end_timestamp = int(data['stop_timestamp'])
 
         conf_low = False
         conf_medium = False
@@ -192,11 +194,11 @@ class ArchiveEventsMessage(ArchiveQueueEndpoint):
             limit_value = ' limit {limit_value}'.format(limit_value=limit_value)
 
         db_query_str = (
-            "select id,cam,archive_file1,archive_file2,start_timestamp,end_timestamp,type,confidence,reaction,date,file_offset_sec from events where {cam}"
-            .format(cam=camera_query) + ' and  start_timestamp >=' + str(start_timestamp * 1000) + ' and '
-            + 'end_timestamp <=' + str(end_timestamp * 1000) + confidence_db + types_db + reactions_db +
-            ' order by start_timestamp desc {offset} {limit};'
-            .format(offset=skip_value, limit=limit_value))
+                "select id,cam,archive_file1,archive_file2,start_timestamp,end_timestamp,type,confidence,reaction,date,file_offset_sec from events where {cam}"
+                .format(cam=camera_query) + ' and  start_timestamp >=' + str(start_timestamp * 1000) + ' and '
+                + 'end_timestamp <=' + str(end_timestamp * 1000) + confidence_db + types_db + reactions_db +
+                ' order by start_timestamp desc {offset} {limit};'
+                .format(offset=skip_value, limit=limit_value))
 
         conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
         cur = conn.cursor()
