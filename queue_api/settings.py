@@ -1,13 +1,13 @@
 
 RABBITMQ_HOST = '10.10.110.1'
 RABBITMQ_PORT = 5672
-RABBITMQ_VHOST = '/ocular'
+RABBITMQ_VHOST = '/svideo2'
 RABBITMQ_EXCHANGE_TYPE_OCULAR = "direct"
 RABBITMQ_EXCHANGE_TYPE_DRIVER = "direct"
 RABBITMQ_RESPONSE_EXCHANGE = "driver"
 
 RABBITMQ_CREDENTIALS = {
-    'user': 'ocular',
+    'user': 'svideo2',
     'password': 'mC2QX0J7sx7i'
 }
 

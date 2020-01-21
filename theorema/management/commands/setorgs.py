@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from theorema.orgs.models import Organization
 from theorema.cameras.models import Server, Storage
 
-DEFAULT_ORG_NAME = 'Ocular'
+DEFAULT_ORG_NAME = 'STALT'
 DEFAULT_ADDRESS = '0.0.0.0'
 DEFAULT_STORAGE_NAME = 'default'
 DEFAULT_STORAGE_PATH = '/home_VideoArchive'
