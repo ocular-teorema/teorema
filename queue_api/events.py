@@ -19,6 +19,8 @@ class EventsSendMessage(EventQueueEndpoint):
         end_of_dict = params['data'].decode().index('}')
         data = json.loads(params['data'].decode()[:end_of_dict + 1])
 
+        is_finished = data['isFinished'] if 'isFinished' in data else False
+
         message = {
             'type': self.response_message_type,
             'camera_id': data['archiveStartHint'].split('/')[1],
@@ -28,7 +30,8 @@ class EventsSendMessage(EventQueueEndpoint):
                 'event_end_timestamp': data['end_timestamp'],
                 'event_type': data['type'],
                 'confidence': data['confidence'],
-                'reaction': data['reaction']
+                'reaction': data['reaction'],
+                'is_finished': is_finished
             }
         }
 

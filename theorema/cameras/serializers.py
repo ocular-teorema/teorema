@@ -200,7 +200,7 @@ class CameraSerializer(M2MHelperSerializer):
             camera_group = None
         else:
             camera_group_exist = CameraGroup.objects.filter(
-                name=validated_data['camera_group'],
+                name=validated_data['camera_group']['name'],
                 organization=validated_data['organization'])
             if camera_group_exist:
                 validated_data['camera_group'] = camera_group_exist.first()

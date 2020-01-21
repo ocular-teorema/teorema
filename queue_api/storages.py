@@ -1,5 +1,5 @@
 from queue_api.common import QueueEndpoint
-from theorema.cameras.serializers import StorageSerializer, Storage
+from theorema.cameras.serializers import StorageSerializer, Storage, CameraSerializer, Camera
 
 from queue_api.messages import RequestParamValidationError, RequiredParamError
 import json
@@ -20,7 +20,7 @@ class StorageAddMessages(StorageQueueEndpoint):
     def handle_request(self, params):
         print('message received', flush=True)
         self.uuid = params['uuid']
-        checking_params = params['data']
+        checking_params = params['data']['storage']
 
         if self.check_request_params(checking_params):
             return
@@ -99,7 +99,7 @@ class StorageUpdateMessage(StorageQueueEndpoint):
     def handle_request(self, params):
         print('message received', flush=True)
         self.uuid = params['uuid']
-        checking_params = params['data']
+        checking_params = params['data']['storage']
 
         if self.check_request_params(checking_params):
             return
@@ -112,9 +112,16 @@ class StorageUpdateMessage(StorageQueueEndpoint):
         storage = Storage.objects.filter(id=params['storage_id']).first()
         if storage:
             serializer = StorageSerializer(data=serializer_params)
-            if serializer.is_valid():
+            if serializer_params['name'] and serializer_params['path']:
                 storage.name = serializer_params['name']
                 storage.path = serializer_params['path']
+                storage.save()
+                for camera in Camera.objects.filter(storage=storage):
+                    camera.from_queue_api = True
+                    camera.save()
+                    camera_repr = CameraSerializer().to_representation(camera)
+                    camera_repr['archive_path'] = storage.path
+                    CameraSerializer().update(camera, camera_repr)
             else:
                 errors = serializer.errors
                 msg = RequestParamValidationError('Validation error: "err"'.format(err=errors))
