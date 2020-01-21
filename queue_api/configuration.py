@@ -21,6 +21,8 @@ class ConfigurationQueueEndpoint(QueueEndpoint):
 
 
 class ConfigExportMessage(ConfigurationQueueEndpoint):
+    response_message_type = 'config_export'
+
     def handle_request(self, message):
         print('configuration export message received')
         self.send_response(message)
@@ -85,7 +87,7 @@ class ConfigExportMessage(ConfigurationQueueEndpoint):
                 storage_list = []
                 for storage in storages:
                     storage_data = {
-                        'id': storage.name,
+                        'id': storage.id,
                         'name': storage.name,
                         'path': storage.path
                     }
@@ -153,6 +155,7 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
     request_required_params = [
         'organizations'
     ]
+    response_message_type = 'config_import'
 
     def handle_request(self, message):
 
