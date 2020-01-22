@@ -7,6 +7,7 @@ from onvif import ONVIFCamera, ONVIFService
 import datetime
 import re
 
+
 def zeep_pythonvalue(self, xmlvalue):
     return xmlvalue
 
@@ -54,7 +55,6 @@ def address_parse(camera):
         else:
             password = re.findall(r'password=(.*?)&', address)[0]
 
-
     return ip, port, user, password
 
 
@@ -79,6 +79,9 @@ class PtzControlQueueEndpoint(QueueEndpoint):
         request.ConfigurationToken = media_profile.PTZConfiguration.token
 
         return ptz, media_profile
+
+    def default_handle(self, handle_request):
+
 
 
 class AbsoluteMoveMessage(PtzControlQueueEndpoint):
@@ -129,7 +132,6 @@ class AbsoluteMoveMessage(PtzControlQueueEndpoint):
                 move_request.Position = ptz.GetStatus({'ProfileToken': media_profile.token}).Position
                 print('new position', move_request, flush=True)
 
-
                 position = {
                     'pan': move_request.Position.PanTilt.x,
                     'tilt': move_request.Position.PanTilt.y,
@@ -151,6 +153,7 @@ class AbsoluteMoveMessage(PtzControlQueueEndpoint):
 
         self.send_data_response(position)
         return {'message sent'}
+
 
 class ContinuousMoveMessage(PtzControlQueueEndpoint):
     request_required_params = [
@@ -208,6 +211,7 @@ class ContinuousMoveMessage(PtzControlQueueEndpoint):
         self.send_success_response()
         return {'message sent'}
 
+
 class RelativeMoveMessage(PtzControlQueueEndpoint):
     request_required_params = [
         'pan',
@@ -239,9 +243,11 @@ class RelativeMoveMessage(PtzControlQueueEndpoint):
                 print('current position', move_request, flush=True)
 
                 if (move_request.Position.PanTilt.x + params['data']['position']['pan']) % 2 > 1:
-                    move_request.Position.PanTilt.x = (move_request.Position.PanTilt.x + params['data']['position']['pan']) % 2 - 2
+                    move_request.Position.PanTilt.x = (move_request.Position.PanTilt.x + params['data']['position'][
+                        'pan']) % 2 - 2
                 else:
-                    move_request.Position.PanTilt.x = (move_request.Position.PanTilt.x + params['data']['position']['pan']) % 2
+                    move_request.Position.PanTilt.x = (move_request.Position.PanTilt.x + params['data']['position'][
+                        'pan']) % 2
 
                 if (move_request.Position.PanTilt.y + params['data']['position']['tilt']) >= 1:
                     move_request.Position.PanTilt.y = 0.99
@@ -294,6 +300,7 @@ class RelativeMoveMessage(PtzControlQueueEndpoint):
         self.send_data_response(position)
         return {'message sent'}
 
+
 class StopMoveMessage(PtzControlQueueEndpoint):
     response_topic = '/cameras/{cam_id}/ptz_control'
     response_message_type = 'cameras_ptz_stop_move'
@@ -336,3 +343,241 @@ class StopMoveMessage(PtzControlQueueEndpoint):
         self.send_data_response(position)
         return {'message sent'}
 
+
+class SetHomeMessage(PtzControlQueueEndpoint):
+    response_topic = '/cameras/{cam_id}/ptz_control'
+    response_message_type = 'cameras_ptz_set_home'
+
+    def handle_request(self, params):
+        print('message received', flush=True)
+        self.uuid = params['uuid']
+        print('request uid', self.uuid, flush=True)
+        print('params', params['data'], flush=True)
+
+        camera = Camera.objects.filter(uid=params['camera_id']).first()
+        if camera:
+            try:
+                ptz, media_profile = self.camera_initialization(camera)
+
+                ptz.SetHomePosition({'ProfileToken': media_profile.token})
+
+            except Exception as e:
+                print('some error', flush=True)
+                print('Exception on camera:', e, flush=True)
+                error = RequestParamValidationError('camera with id {id} can not set home position, cause: {exception}'
+                                                    .format(id=params['camera_id'], exception=e)
+                                                    )
+                self.send_error_response(error)
+                return
+        else:
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
+            self.send_error_response(error)
+            return
+
+        self.send_success_response()
+        return {'message sent'}
+
+
+class SetPresetMessage(PtzControlQueueEndpoint):
+    response_topic = '/cameras/{cam_id}/ptz_control'
+    response_message_type = 'cameras_ptz_set_preset'
+
+    def handle_request(self, params):
+        print('message received', flush=True)
+        self.uuid = params['uuid']
+        print('request uid', self.uuid, flush=True)
+        print('params', params['data'], flush=True)
+
+        camera = Camera.objects.filter(uid=params['camera_id']).first()
+        if camera:
+            try:
+                ptz, media_profile = self.camera_initialization(camera)
+
+                set_preset_request = ptz.create_type('SetPreset')
+                set_preset_request.ProfileToken = media_profile.token
+                set_preset_request.PresetName = params['data']['preset_name'] if 'preset_name' in params[
+                    'data'] else None
+                set_preset_request.PresetToken = params['data']['preset_token'] if 'preset_token' in params[
+                    'data'] else None
+
+                preset_response = ptz.SetPreset(set_preset_request)
+
+                message = {'preset_token': preset_response.PresetToken}
+
+
+            except Exception as e:
+                print('some error', flush=True)
+                print('Exception on camera:', e, flush=True)
+                error = RequestParamValidationError('camera with id {id} can not set preset, cause: {exception}'
+                                                    .format(id=params['camera_id'], exception=e)
+                                                    )
+                self.send_error_response(error)
+                return
+        else:
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
+            self.send_error_response(error)
+            return
+
+        self.send_data_response(message)
+        return {'message sent'}
+
+
+class GotoHomeMessage(PtzControlQueueEndpoint):
+    response_topic = '/cameras/{cam_id}/ptz_control'
+    response_message_type = 'cameras_ptz_goto_home'
+
+    def handle_request(self, params):
+        print('message received', flush=True)
+        self.uuid = params['uuid']
+        print('request uid', self.uuid, flush=True)
+        print('params', params['data'], flush=True)
+
+        camera = Camera.objects.filter(uid=params['camera_id']).first()
+        if camera:
+            try:
+                ptz, media_profile = self.camera_initialization(camera)
+
+                move_request = ptz.create_type('GotoHomePosition')
+                move_request.ProfileToken = media_profile.token
+                move_request.Speed = media_profile.PTZConfiguration.DefaultPTZSpeed
+
+                if 'speed' in params['data']:
+                    if params['data']['speed'] is not None:
+                        move_request.Speed.PanTilt.x = params['data']['speed']['pan']
+                        move_request.Speed.PanTilt.y = params['data']['speed']['tilt']
+                        move_request.Speed.Zoom.x = params['data']['speed']['zoom']
+
+                print('move request', move_request, flush=True)
+
+                ptz.GotoHomePosition(move_request)
+                time.sleep(3)
+                ptz.Stop({'ProfileToken': move_request.ProfileToken})
+
+                home_position = ptz.GetStatus({'ProfileToken': media_profile.token}).Position
+                print('new position', home_position, flush=True)
+
+                position = {
+                    'pan': home_position.PanTilt.x,
+                    'tilt': home_position.PanTilt.y,
+                    'zoom': home_position.Zoom.x
+                }
+
+            except Exception as e:
+                print('some error', flush=True)
+                print('Exception on camera:', e, flush=True)
+                error = RequestParamValidationError('camera with id {id} can not move, cause: {exception}'
+                                                    .format(id=params['camera_id'], exception=e)
+                                                    )
+                self.send_error_response(error)
+                return
+        else:
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
+            self.send_error_response(error)
+            return
+
+        self.send_data_response(position)
+        return {'message sent'}
+
+
+class GotoPresetMessage(PtzControlQueueEndpoint):
+    response_topic = '/cameras/{cam_id}/ptz_control'
+    response_message_type = 'cameras_ptz_goto_preset'
+
+    def handle_request(self, params):
+        print('message received', flush=True)
+        self.uuid = params['uuid']
+        print('request uid', self.uuid, flush=True)
+        print('params', params['data'], flush=True)
+
+        camera = Camera.objects.filter(uid=params['camera_id']).first()
+        if camera:
+            try:
+                ptz, media_profile = self.camera_initialization(camera)
+
+                move_request = ptz.create_type('GotoPreset')
+                move_request.ProfileToken = media_profile.token
+                move_request.PresetToken = params['data']['preset_token']
+                move_request.Speed = media_profile.PTZConfiguration.DefaultPTZSpeed
+
+                if 'speed' in params['data']:
+                    if params['data']['speed'] is not None:
+                        move_request.Speed.PanTilt.x = params['data']['speed']['pan']
+                        move_request.Speed.PanTilt.y = params['data']['speed']['tilt']
+                        move_request.Speed.Zoom.x = params['data']['speed']['zoom']
+
+                print('move request', move_request, flush=True)
+
+                ptz.GotoPreset(move_request)
+                time.sleep(3)
+                ptz.Stop({'ProfileToken': move_request.ProfileToken})
+
+                preset_position = ptz.GetStatus({'ProfileToken': media_profile.token}).Position
+                print('new position', preset_position, flush=True)
+
+                position = {
+                    'pan': preset_position.PanTilt.x,
+                    'tilt': preset_position.PanTilt.y,
+                    'zoom': preset_position.Zoom.x
+                }
+
+            except Exception as e:
+                print('some error', flush=True)
+                print('Exception on camera:', e, flush=True)
+                error = RequestParamValidationError('camera with id {id} can not move, cause: {exception}'
+                                                    .format(id=params['camera_id'], exception=e)
+                                                    )
+                self.send_error_response(error)
+                return
+        else:
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
+            self.send_error_response(error)
+            return
+
+        self.send_data_response(position)
+        return {'message sent'}
+
+
+class GetPresetsMessage(PtzControlQueueEndpoint):
+    response_topic = '/cameras/{cam_id}/ptz_control'
+    response_message_type = 'cameras_ptz_get_presets'
+
+    def handle_request(self, params):
+        print('message received', flush=True)
+        self.uuid = params['uuid']
+        print('request uid', self.uuid, flush=True)
+        print('params', params['data'], flush=True)
+
+        camera = Camera.objects.filter(uid=params['camera_id']).first()
+        if camera:
+            try:
+                ptz, media_profile = self.camera_initialization(camera)
+
+                presets_response = ptz.GetPresets({'ProfileToken': media_profile.token})
+
+                message = []
+                for preset in presets_response:
+                    message.append({
+                        'preset_token': preset.token,
+                        'preset_name': preset.Name,
+                        'preset_position': {
+                            'pan': preset.PTZPosition.PanTilt.x,
+                            'tilt': preset.PTZPosition.PanTilt.y,
+                            'zoom': preset.PTZPosition.Zoom.x
+                        } if preset.PTZPosition is not None else None
+                    })
+
+            except Exception as e:
+                print('some error', flush=True)
+                print('Exception on camera:', e, flush=True)
+                error = RequestParamValidationError('camera with id {id} can not move, cause: {exception}'
+                                                    .format(id=params['camera_id'], exception=e)
+                                                    )
+                self.send_error_response(error)
+                return
+        else:
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
+            self.send_error_response(error)
+            return
+
+        self.send_data_response(message)
+        return {'message sent'}
