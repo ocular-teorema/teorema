@@ -3,6 +3,7 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.postgres.fields import JSONField
 from theorema.orgs.models import Organization
+import datetime
 
 SERVER_TYPES = [
     ('full', 'full'),
@@ -93,6 +94,9 @@ class Quadrator(models.Model):
     port = models.IntegerField()
     organization = models.ForeignKey(Organization)
     server = models.ForeignKey(Server)
+    last_ping_time = models.IntegerField(default=datetime.datetime.now().timestamp())
+    is_active = models.BooleanField(default=True)
+
 
 class Camera2Quadrator(models.Model):
     camera = models.ForeignKey(Camera)

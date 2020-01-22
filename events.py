@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import datetime
 
 from twisted.internet import reactor, protocol, defer, task, defer
 from twisted.python import log
@@ -62,6 +63,19 @@ class WSP(WebSocketServerProtocol):
             if server_address in worker_servers:
                 worker_servers[server_address].transport.write(payload)
                 print('reaction sent to worker server', flush=True)
+        if 'quad_id' in message:
+            quad = Quadrator.objects.filter(id=message['quad_id']).first()
+            if quad:
+                if not quad.is_active:
+                    not_started = os.system('supervisorctl start quad' + str(quad.id))
+                    if not_started:
+                        print(not_started, flush=True)
+                        print('quad' + str(quad.id), 'did not start', flush=True)
+                    else:
+                        quad.is_active = True
+                        print('quad' + str(quad.id), 'started', flush=True)
+                quad.last_ping_time = datetime.datetime.now().timestamp()
+                quad.save()
         return
 
     def doPing(self):
