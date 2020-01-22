@@ -12,28 +12,6 @@ def zeep_pythonvalue(self, xmlvalue):
     return xmlvalue
 
 
-# def address_parse(address):
-#     if '@' in address:
-#         user = address.split('@')[0].split('/')[-1].split(':')[0]
-#         password = address.split('@')[0].split('/')[-1].split(':')[1]
-#         ip = address.split('@')[1].split('/')[0].split(':')[0]
-#         try:
-#             port = address.split('@')[1].split('/')[0].split(':')[1]
-#         except:
-#             port = 80
-#     else:
-#         ip = address.split('/')[2].split(':')[0]
-#         try:
-#             port = address.split('/')[2].split(':')[1]
-#         except:
-#             port = 80
-#         port = 8899
-#         user = address.split('/')[-1].split('&')[0].split('=')[-1]
-#         password = address.split('/')[-1].split('&')[1].split('=')[-1]
-#
-#     return ip, port, user, password
-
-
 def address_parse(camera):
     address = camera.address
     ip = re.findall(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', address)[0]
@@ -74,13 +52,7 @@ class PtzControlQueueEndpoint(QueueEndpoint):
         # Get target profile
         media_profile = media.GetProfiles()[0]
 
-        # Get PTZ configuration options for getting continuous move range
-        request = ptz.create_type('GetConfigurationOptions')
-        request.ConfigurationToken = media_profile.PTZConfiguration.token
-
         return ptz, media_profile
-
-    def default_handle(self, handle_request):
 
 
 
