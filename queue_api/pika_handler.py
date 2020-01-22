@@ -8,19 +8,23 @@ import functools
 import time
 import logging
 import json
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'theorema.settings')
 import django
+
 django.setup()
 
 from queue_api.status import StatusMessages
 from queue_api.storages import StorageListMessage, StorageDeleteMessage, StorageAddMessages, StorageUpdateMessage
-from queue_api.cameras import CameraAddMessages, CameraListMessages, CameraSetRecordingMessages, CameraDeleteMessages, CameraUpdateMessages
+from queue_api.cameras import CameraAddMessages, CameraListMessages, CameraSetRecordingMessages, CameraDeleteMessages, \
+    CameraUpdateMessages
 from queue_api.scheduler import SchedulesAddMessage, ScheduleListMessage, SchedulesDeleteMessage, SchedulesUpdateMessage
 from queue_api.common import pika_setup_connection, base_send_in_queue, get_server_name
 from queue_api.archive import VideosGetMessage, ArchiveEventsMessage
-from queue_api.ptz_control import AbsoluteMoveMessage, ContinuousMoveMessage, RelativeMoveMessage, StopMoveMessage
+from queue_api.ptz_control import AbsoluteMoveMessage, ContinuousMoveMessage, RelativeMoveMessage, StopMoveMessage, \
+    SetHomeMessage, SetPresetMessage, GotoHomeMessage, GotoPresetMessage, GetPresetsMessage
 from queue_api.archive import VideosGetMessage
 from queue_api.events import EventsSendMessage
 from queue_api.configuration import ConfigExportMessage, ConfigImportMessage, ConfigurationResetMessage
@@ -35,7 +39,7 @@ LOGGER = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
 
 
-#class PikaThread(threading.Thread):
+# class PikaThread(threading.Thread):
 class PikaMaster:
 
     def __init__(self, thread_name):
@@ -256,6 +260,41 @@ class PikaMaster:
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
+    def cameras_ptz_set_home(self, message):
+        print('set home request', flush=True)
+
+        cameras_request = SetHomeMessage()
+        cameras_request.handle_request(message)
+        print('message ok', flush=True)
+
+    def cameras_ptz_set_preset(self, message):
+        print('set preset request', flush=True)
+
+        cameras_request = SetPresetMessage()
+        cameras_request.handle_request(message)
+        print('message ok', flush=True)
+
+    def cameras_ptz_goto_home(self, message):
+        print('goto home request', flush=True)
+
+        cameras_request = GotoHomeMessage()
+        cameras_request.handle_request(message)
+        print('message ok', flush=True)
+
+    def cameras_ptz_goto_preset(self, message):
+        print('goto preset request', flush=True)
+
+        cameras_request = GotoPresetMessage()
+        cameras_request.handle_request(message)
+        print('message ok', flush=True)
+
+    def cameras_ptz_get_presets(self, message):
+        print('get presets request', flush=True)
+
+        cameras_request = GetPresetsMessage()
+        cameras_request.handle_request(message)
+        print('message ok', flush=True)
+
     def archive_video(self, message):
         print('archive video request', flush=True)
 
@@ -340,7 +379,6 @@ class PikaMaster:
 
 
 if __name__ == '__main__':
-
     logging.getLogger('pika').setLevel(logging.WARNING)
     receiver = PikaMaster('abc')
     receiver.run()
