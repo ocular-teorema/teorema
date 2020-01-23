@@ -76,6 +76,13 @@ class WSP(WebSocketServerProtocol):
                         print('quad' + str(quad.id), 'started', flush=True)
                 quad.last_ping_time = datetime.datetime.now().timestamp()
                 quad.save()
+            try:
+                for c in factory.connections_list:
+                    print('sending pong', flush=True)
+                    c.sendMessage(payload, False)
+                    print('sent pong', flush=True)
+            except:
+                print('fail in pong', flush=True)
         return
 
     def doPing(self):
