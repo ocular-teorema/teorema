@@ -68,12 +68,12 @@ class WSP(WebSocketServerProtocol):
             if quad:
                 if not quad.is_active:
                     not_started = os.system('supervisorctl start quad' + str(quad.id))
-                    if not_started:
-                        print(not_started, flush=True)
-                        print('quad' + str(quad.id), 'did not start', flush=True)
-                    else:
-                        quad.is_active = True
-                        print('quad' + str(quad.id), 'started', flush=True)
+                    # if not_started:
+                    #     print(not_started, flush=True)
+                    #     print('quad' + str(quad.id), 'did not start', flush=True)
+                    # else:
+                    quad.is_active = True
+                    print('quad' + str(quad.id), 'started', flush=True)
                 quad.last_ping_time = datetime.datetime.now().timestamp()
                 quad.save()
             # try:
