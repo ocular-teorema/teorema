@@ -58,7 +58,7 @@ class ConfigExportMessage(ConfigurationQueueEndpoint):
                     status = None
 
                     try:
-                        status = supervisor_cameras[camera.uid]
+                        status = supervisor_cameras[camera.uid]['status']
                     except KeyError:
                         status = 'DISABLED'
 
