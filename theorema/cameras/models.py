@@ -60,6 +60,7 @@ CameraResolutions = [
 class Camera(models.Model):
     name = models.CharField(max_length=256)
     address = models.CharField(max_length=400)
+    address_secondary = models.CharField(max_length=400, null=True, default=None)
     fps = models.SmallIntegerField(default=10) # deprecated
     analysis = models.SmallIntegerField(choices=CameraAnalysisTypes, default=1)
     resolution = models.SmallIntegerField(choices=CameraResolutions, default=1) # deprecated

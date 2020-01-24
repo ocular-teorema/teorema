@@ -42,6 +42,7 @@ class CameraAddMessages(CameraQueueEndpoint):
 
         name = params['name']
         address_primary = params['address_primary']
+        address_secondary = params['address_secondary'] if 'address_secondary' in params else None
         analysis_type = params['analysis_type']
         storage_days = params['storage_days']
         onvif_port = params['onvif_settings']['port']
@@ -85,6 +86,7 @@ class CameraAddMessages(CameraQueueEndpoint):
             'server': self.default_serv.id,
             'camera_group': self.default_camera_group,
             'address': address_primary,
+            'address_secondary': address_secondary,
             'analysis': analysis_type,
             'storage_life': storage_days,
             'indefinitely': storage_indefinitely,
@@ -140,7 +142,7 @@ class CameraAddMessages(CameraQueueEndpoint):
             self.send_error_response(msg)
             return
 
-        self.send_success_response()
+        self.send_data_response({'camera_id': camera.uid, 'success': True})
 
 
 class CameraUpdateMessages(CameraQueueEndpoint):
@@ -169,6 +171,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
 
         name = params['name'] if 'name' in params else camera_repr['name']
         address_primary = params['address_primary'] if 'address_primary' in params else camera_repr['address']
+        address_secondary = params['address_secondary'] if 'address_secondary' in params else camera_repr['address_secondary']
         analysis_type = params['analysis_type'] if 'analysis_type' in params else camera_repr['analysis']
         if 'onvif_settings' in params:
             onvif_port = params['onvif_settings']['port'] if 'port' in params['onvif_settings'] else camera_repr['onvif_port']
@@ -263,6 +266,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
 
         camera_repr['name'] = name
         camera_repr['address'] = address_primary
+        camera_repr['address_secondary'] = address_secondary
         camera_repr['analysis_type'] = analysis_type
         camera_repr['storage_life'] = storage_days
         camera_repr['indefinitely'] = storage_indefinitely
@@ -279,7 +283,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
         #            self.send_error_response(msg)
         #            return
 
-        self.send_success_response()
+        self.send_data_response({'camera_id': camera.uid, 'success': True})
 
 
 class CameraListMessages(QueueEndpoint):
@@ -321,7 +325,7 @@ class CameraListMessages(QueueEndpoint):
                 'name': cam.name,
                 'address_primary': cam.address,
                 # 'address_secondary': cam.address_secondary,
-                'address_secondary': None,
+                'address_secondary': cam.address_secondary,
                 'storage_id': cam.storage.id if cam.storage is not None else None,
                 'schedule_id': cam.schedule.id if cam.schedule is not None else None,
                 'storage_days': cam.storage_life,
@@ -430,12 +434,13 @@ class CameraDeleteMessages(CameraQueueEndpoint):
                     stop_job_id=str(camera.schedule_job_stop)
                 )
 
+            camera_id = camera.uid
             camera.delete()
 
             if camera_group_to_delete:
                 camera_group_to_delete.delete()
 
-        self.send_success_response()
+        self.send_data_response({'camera_id': camera_id, 'success': True})
 
 
 def set_camera_recording(camera, recording):
