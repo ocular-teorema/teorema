@@ -195,7 +195,7 @@ class ScheduleListMessage(ScheduleQueueEndpoint):
         for schedule in schedules_time:
             schedule_data = {
                 'id': schedule.id,
-                'start_times': schedule.start_daytime,
+                'start_time': schedule.start_daytime,
                 'stop_time': schedule.stop_daytime
             }
             schedule_time_list.append(schedule_data)
