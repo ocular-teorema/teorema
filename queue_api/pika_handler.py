@@ -235,64 +235,127 @@ class PikaMaster:
     def cameras_ptz_absolute_move(self, message):
         print('absolute move request', flush=True)
 
-        cameras_request = AbsoluteMoveMessage()
-        cameras_request.handle_request(message)
+        move_instance = getattr(self, 'AbsoluteMoveMessage', None)
+        if not move_instance:
+            cameras_request = AbsoluteMoveMessage()
+            self.AbsoluteMoveMessage = cameras_request
+            cameras_request.handle_request(message)
+        else:
+            print('move instance already exist', flush=True)
+            move_instance.handle_request(message)
+
         print('message ok', flush=True)
 
     def cameras_ptz_continuous_move(self, message):
         print('continuous request', flush=True)
 
-        cameras_request = ContinuousMoveMessage()
-        cameras_request.handle_request(message)
+        move_instance = getattr(self, 'ContinuousMoveMessage', None)
+        if not move_instance:
+            cameras_request = ContinuousMoveMessage()
+            self.ContinuousMoveMessage = cameras_request
+            cameras_request.handle_request(message)
+        else:
+            print('move instance already exist', flush=True)
+            move_instance.handle_request(message)
+
         print('message ok', flush=True)
 
     def cameras_ptz_relative_move(self, message):
         print('relative move request', flush=True)
 
-        cameras_request = RelativeMoveMessage()
-        cameras_request.handle_request(message)
+        move_instance = getattr(self, 'RelativeMoveMessage', None)
+        if not move_instance:
+            cameras_request = RelativeMoveMessage()
+            self.RelativeMoveMessage = cameras_request
+            cameras_request.handle_request(message)
+        else:
+            print('move instance already exist', flush=True)
+            move_instance.handle_request(message)
+
         print('message ok', flush=True)
 
     def cameras_ptz_stop_move(self, message):
         print('stop move request', flush=True)
 
-        cameras_request = StopMoveMessage()
-        cameras_request.handle_request(message)
+        move_instance = getattr(self, 'StopMoveMessage', None)
+        if not move_instance:
+            cameras_request = StopMoveMessage()
+            self.StopMoveMessage = cameras_request
+            cameras_request.handle_request(message)
+        else:
+            print('move instance already exist', flush=True)
+            move_instance.handle_request(message)
+
         print('message ok', flush=True)
 
     def cameras_ptz_set_home(self, message):
         print('set home request', flush=True)
 
-        cameras_request = SetHomeMessage()
-        cameras_request.handle_request(message)
+        move_instance = getattr(self, 'SetHomeMessage', None)
+        if not move_instance:
+            cameras_request = SetHomeMessage()
+            self.SetHomeMessage = cameras_request
+            cameras_request.handle_request(message)
+        else:
+            print('move instance already exist', flush=True)
+            move_instance.handle_request(message)
+
         print('message ok', flush=True)
 
     def cameras_ptz_set_preset(self, message):
         print('set preset request', flush=True)
 
-        cameras_request = SetPresetMessage()
-        cameras_request.handle_request(message)
+        move_instance = getattr(self, 'SetPresetMessage', None)
+        if not move_instance:
+            cameras_request = SetPresetMessage()
+            self.SetPresetMessage = cameras_request
+            cameras_request.handle_request(message)
+        else:
+            print('move instance already exist', flush=True)
+            move_instance.handle_request(message)
+
         print('message ok', flush=True)
 
     def cameras_ptz_goto_home(self, message):
         print('goto home request', flush=True)
 
-        cameras_request = GotoHomeMessage()
-        cameras_request.handle_request(message)
+        move_instance = getattr(self, 'GotoHomeMessage', None)
+        if not move_instance:
+            cameras_request = GotoHomeMessage()
+            self.GotoHomeMessage = cameras_request
+            cameras_request.handle_request(message)
+        else:
+            print('move instance already exist', flush=True)
+            move_instance.handle_request(message)
+
         print('message ok', flush=True)
 
     def cameras_ptz_goto_preset(self, message):
         print('goto preset request', flush=True)
 
-        cameras_request = GotoPresetMessage()
-        cameras_request.handle_request(message)
+        move_instance = getattr(self, 'GotoPresetMessage', None)
+        if not move_instance:
+            cameras_request = GotoPresetMessage()
+            self.GotoPresetMessage = cameras_request
+            cameras_request.handle_request(message)
+        else:
+            print('move instance already exist', flush=True)
+            move_instance.handle_request(message)
+
         print('message ok', flush=True)
 
     def cameras_ptz_get_presets(self, message):
         print('get presets request', flush=True)
 
-        cameras_request = GetPresetsMessage()
-        cameras_request.handle_request(message)
+        move_instance = getattr(self, 'GetPresetsMessage', None)
+        if not move_instance:
+            cameras_request = GetPresetsMessage()
+            self.GetPresetsMessage = cameras_request
+            cameras_request.handle_request(message)
+        else:
+            print('move instance already exist', flush=True)
+            move_instance.handle_request(message)
+
         print('message ok', flush=True)
 
     def archive_video(self, message):

@@ -41,20 +41,27 @@ def address_parse(camera):
 class PtzControlQueueEndpoint(QueueEndpoint):
     def camera_initialization(self, camera):
         print('address', camera.address, flush=True)
-        zeep.xsd.simple.AnySimpleType.pythonvalue = zeep_pythonvalue
 
-        mycam = ONVIFCamera(*address_parse(camera), no_cache=True)
+        cam_profile = getattr(self, 'cam' + str(camera.id), None)
+        if not cam_profile:
+            zeep.xsd.simple.AnySimpleType.pythonvalue = zeep_pythonvalue
 
-        # Create media service object
-        media = mycam.create_media_service()
+            mycam = ONVIFCamera(*address_parse(camera), no_cache=True)
 
-        # Create ptz service object
-        ptz = mycam.create_ptz_service()
+            # Create media service object
+            media = mycam.create_media_service()
 
-        # Get target profile
-        media_profile = media.GetProfiles()[0]
+            # Create ptz service object
+            ptz = mycam.create_ptz_service()
 
-        return ptz, media_profile
+            # Get target profile
+            media_profile = media.GetProfiles()[0]
+            setattr(self, 'cam' + str(camera.id), {'ptz': ptz, 'media_profile': media_profile})
+
+            return ptz, media_profile
+        else:
+            print('configuration already exist', flush=True)
+            return cam_profile['ptz'], cam_profile['media_profile']
 
 
 
