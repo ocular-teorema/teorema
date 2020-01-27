@@ -104,7 +104,9 @@ def get_supervisor_processes():
         name = process['name']
 
         res = {
-            'status': process['statename']
+            'status': process['statename'],
+            'error_code': process['state'],
+            'error_message': process['spawnerr']
         }
 
         if 'cam' not in name:
