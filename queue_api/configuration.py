@@ -119,8 +119,8 @@ class ConfigExportMessage(ConfigurationQueueEndpoint):
                 for schedule in schedules_time:
                     schedule_data = {
                         'id': schedule.id,
-                        'start_timestamp': schedule.start_timestamp,
-                        'stop_timestamp': schedule.stop_timestamp
+                        'start_time': schedule.start_daytime,
+                        'stop_time': schedule.stop_daytime
                     }
                     schedule_time_list.append(schedule_data)
 

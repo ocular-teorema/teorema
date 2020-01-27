@@ -154,7 +154,7 @@ class SchedulesAddMessage(ScheduleQueueEndpoint):
         )
 
         schedule.save()
-        self.send_success_response()
+        self.send_data_response({'schedule_id': schedule.id, 'success': True})
 
 
 class ScheduleListMessage(ScheduleQueueEndpoint):
@@ -224,7 +224,7 @@ class SchedulesUpdateMessage(ScheduleQueueEndpoint):
 
         schedule_id = message['schedule_id']
         try:
-            schedule = CameraSchedule.objects.get(uid=schedule_id)
+            schedule = CameraSchedule.objects.get(id=schedule_id)
         except ObjectDoesNotExist:
             error = RequestParamValidationError('camera with id {id} not found'.format(id=schedule_id))
             print(error, flush=True)
@@ -256,7 +256,7 @@ class SchedulesDeleteMessage(ScheduleQueueEndpoint):
 
         schedule_id = params['schedule_id']
         try:
-            schedule = CameraSchedule.objects.get(uid=schedule_id)
+            schedule = CameraSchedule.objects.get(id=schedule_id)
         except ObjectDoesNotExist:
             error = RequestParamValidationError('camera with id {id} not found'.format(id=schedule_id))
             print(error, flush=True)
