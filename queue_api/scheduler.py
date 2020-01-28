@@ -226,7 +226,7 @@ class SchedulesUpdateMessage(ScheduleQueueEndpoint):
         try:
             schedule = CameraSchedule.objects.get(id=schedule_id)
         except ObjectDoesNotExist:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=schedule_id))
+            error = RequestParamValidationError('schedule with id {id} not found'.format(id=schedule_id))
             print(error, flush=True)
             self.send_error_response(error)
             return
@@ -235,13 +235,23 @@ class SchedulesUpdateMessage(ScheduleQueueEndpoint):
         schedule.schedule_type = schedule_type
 
         if schedule_type == 'weekdays':
-            schedule.days = str(params['days']) if 'days' in params else schedule.days
+            schedule.weekdays = str(params['days']) if 'days' in params else schedule.days
+            schedule.start_timestamp = None
+            schedule.stop_timestamp = None
+            schedule.start_daytime = None
+            schedule.stop_timestamp = None
         elif schedule_type == 'timestamp':
             schedule.start_timestamp = params['start_timestamp'] if 'start_time in params' else schedule.start_timestamp
             schedule.stop_timestamp = params['stop_timestamp'] if 'stop_timestamp' in params else schedule.stop_timestamp
+            schedule.weekdays = None
+            schedule.start_daytime =None
+            schedule.stop_daytime = None
         elif schedule_type == 'time_period':
             schedule.start_daytime = params['start_time'] if 'start_time' in params else schedule.start_daytime
             schedule.stop_daytime = params['stop_time'] if 'stop_time' in params else schedule.stop_daytime
+            schedule.weekdays = None
+            schedule.start_timestamp = None
+            schedule.stop_timestamp = None
 
         schedule.save()
         self.send_success_response()
