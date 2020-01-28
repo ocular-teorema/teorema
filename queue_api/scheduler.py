@@ -235,7 +235,7 @@ class SchedulesUpdateMessage(ScheduleQueueEndpoint):
         schedule.schedule_type = schedule_type
 
         if schedule_type == 'weekdays':
-            schedule.weekdays = str(params['days'])[1:-1] if 'days' in params else schedule.days
+            schedule.weekdays = str(params['days'])[1:-1] if 'days' in params else schedule.weekdays
             schedule.start_timestamp = None
             schedule.stop_timestamp = None
             schedule.start_daytime = None
