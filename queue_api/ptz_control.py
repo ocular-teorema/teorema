@@ -383,7 +383,7 @@ class SetPresetMessage(PtzControlQueueEndpoint):
 
                 preset_response = ptz.SetPreset(set_preset_request)
 
-                message = {'preset_token': preset_response.PresetToken}
+                message = {'preset_token': preset_response}
 
 
             except Exception as e:
