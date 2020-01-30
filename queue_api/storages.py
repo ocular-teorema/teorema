@@ -40,7 +40,7 @@ class StorageAddMessages(StorageQueueEndpoint):
             self.send_error_response(msg)
             return
 
-        self.send_success_response()
+        self.send_data_response({'storage_id': storage.id, 'success': True})
 
 
 class StorageDeleteMessage(StorageQueueEndpoint):
