@@ -48,6 +48,7 @@ class CameraAddMessages(CameraQueueEndpoint):
         onvif_port = params['onvif_settings']['port']
         onvif_username = params['onvif_settings']['username'] if 'username' in params['onvif_settings'] else None
         onvif_password = params['onvif_settings']['password'] if 'password' in params['onvif_settings'] else None
+        enabled = params['enabled'] if 'enabled' in params else True
 
         # for backward compatibility
         storage_indefinitely = True if storage_days == 1000 else False
@@ -134,6 +135,9 @@ class CameraAddMessages(CameraQueueEndpoint):
                 camera.schedule_id = schedule.id
                 camera.save()
 
+            if not enabled:
+                disable_camera(camera)
+
         else:
             errors = camera_serializer.errors
             error_str = 'Validation error: "err"'.format(err=errors)
@@ -173,6 +177,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
         address_primary = params['address_primary'] if 'address_primary' in params else camera_repr['address']
         address_secondary = params['address_secondary'] if 'address_secondary' in params else camera_repr['address_secondary']
         analysis_type = params['analysis_type'] if 'analysis_type' in params else camera_repr['analysis']
+        enabled = params['enabled'] if 'enabled' in params else camera_repr['is_active']
         if 'onvif_settings' in params:
             onvif_port = params['onvif_settings']['port'] if 'port' in params['onvif_settings'] else camera_repr['onvif_port']
             onvif_username = params['onvif_settings']['username'] if 'username' in params['onvif_settings'] else camera_repr['onvif_username']
@@ -274,6 +279,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
         camera_repr['onvif_port'] = onvif_port
         camera_repr['onvif_username'] = onvif_username
         camera_repr['onvif_password'] = onvif_password
+        camera_repr['is_active'] = enabled
 
         CameraSerializer().update(camera, camera_repr)
 
