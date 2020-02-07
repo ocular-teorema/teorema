@@ -8,13 +8,19 @@ import functools
 import time
 import logging
 import json
+<<<<<<< HEAD
 
+=======
+import inspect
+>>>>>>> mixed async queue
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'theorema.settings')
 import django
 
 django.setup()
+
+from theorema.cameras.models import Camera
 
 from queue_api.status import StatusMessages
 from queue_api.storages import StorageListMessage, StorageDeleteMessage, StorageAddMessages, StorageUpdateMessage
@@ -38,11 +44,36 @@ LOGGER = logging.getLogger(__name__)
 
 logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
 
+INBUILT_CLASS_METHODS = ['__init__', '__repr__', '_bootstrap', '_bootstrap_inner', '_delete', '_reset_internal_locks',
+                         '_set_ident', '_set_tstate_lock', '_stop', '_wait_for_tstate_lock', 'getName', 'isAlive',
+                         'isDaemon', 'is_alive', 'join', 'reset', 'run', 'setDaemon', 'setName', 'start']
 
-# class PikaThread(threading.Thread):
+
 class PikaMaster:
 
-    def __init__(self, thread_name):
+    def __init__(self):
+        self.camera_list = self.get_camera_list()
+        self.prefetch_count = 4
+
+        print('Total cameras: {}'.format(len(self.camera_list)), flush=True)
+        print('Prefetching in async: {}'.format(self.prefetch_count), flush=True)
+        print('Number of threads: {}'.format(len(self.camera_list) + self.prefetch_count), flush=True)
+
+    def get_camera_list(self):
+        return Camera.objects.values_list('uid', flat=True)
+
+    def start(self):
+        for cam in self.camera_list:
+            synchronous_thread = PikaThread(cam, False)
+            synchronous_thread.run()
+
+        async_thread = PikaThread('common', True, 4)
+        async_thread.run()
+
+
+class PikaThread(threading.Thread):
+
+    def __init__(self, thread_name, async_thread=False, prefetch_count=None):
         super().__init__()
 
         self.worker_name = thread_name.upper()
@@ -54,6 +85,29 @@ class PikaMaster:
         self.scheduler = CameraScheduler()
         self.scheduler.start()
         print('scheduler started'.format(self.worker_name), flush=True)
+
+        if async_thread:
+            self.async_thread = True
+            self.callback = self.asynchronous_callback
+            self.prefetch_count = prefetch_count
+            self.ptz_cam = thread_name
+        else:
+            self.async_thread = False
+            self.callback = self.synchronous_callback
+
+    def get_all_commands(self):
+        members = inspect.getmembers(self, predicate=inspect.ismethod)
+        synchronous = []
+        asynchronous = []
+        for x in members:
+            name = x[0]
+            if 'cameras_ptz' in name:
+                synchronous.append(name)
+            else:
+                if name not in INBUILT_CLASS_METHODS:
+                    asynchronous.append(name)
+
+        return {'synchronous': synchronous, 'asynchronous': asynchronous}
 
     def run(self):
         print('starting receiver', flush=True)
@@ -67,28 +121,49 @@ class PikaMaster:
 
         queue_name = result.method.queue
         channel.queue_bind(exchange=self.server_name, queue=queue_name, routing_key='')
-        channel.basic_qos(prefetch_count=4)
+        if self.async_thread:
+            channel.basic_qos(prefetch_count=self.prefetch_count)
 
-        threads = []
-        threaded_callback = functools.partial(self.callback, args=(connection, threads))
+            threads = []
+            base_callback = functools.partial(self.callback, args=(connection, threads))
+        else:
+            base_callback = self.callback
+
         channel.basic_consume(
             queue=queue_name,
-            on_message_callback=threaded_callback,
-            # auto_ack=False
+            on_message_callback=base_callback
+            # on_message_callback=threaded_callback,
         )
 
         print('{}: receiver started'.format(self.worker_name), flush=True)
         channel.start_consuming()
 
-    def callback(self, ch, method_frame, _header_frame, body, args):
+    def synchronous_callback(self, ch, method, properties, body):
+        print('received', body, properties, method, flush=True)
+        try:
+            message = json.loads(body.decode())
+            if not self.verify_message(message):
+                return
+            message_type = message['type']
+            if message_type in self.get_all_commands()['synchronous']:
+                getattr(self, message_type, self.unknown_handler)(message)
+            else:
+                pass
+
+        except Exception as e:
+            print('\n'.join(traceback.format_exception(*sys.exc_info())), flush=True)
+        else:
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+
+    def asynchronous_callback(self, ch, method_frame, _header_frame, body, args):
         (conn, thrds) = args
         delivery_tag = method_frame.delivery_tag
         print(('threads: ', thrds), flush=True)
-        t = threading.Thread(target=self.worker, args=(conn, ch, delivery_tag, body))
+        t = threading.Thread(target=self.asynchronous_worker, args=(conn, ch, delivery_tag, body))
         t.start()
         thrds.append(t)
 
-    def worker(self, conn, ch, delivery_tag, body):
+    def asynchronous_worker(self, conn, ch, delivery_tag, body):
         thread_id = threading.get_ident()
         LOGGER.info('Thread id: %s Delivery tag: %s Message body: %s', thread_id,
                     delivery_tag, body)
@@ -99,16 +174,23 @@ class PikaMaster:
                 return
             message_type = message['type']
             LOGGER.info(json.loads(body.decode())['type'])
-            getattr(self, message_type, self.unknown_handler)(message)
+            if message_type in self.get_all_commands()['synchronous']:
+                print('Received PTZ control message on cam:', message['camera_id'], flush=True)
+                if ('camera_id' in message) and (message['camera_id'] == self.ptz_cam):
+                    getattr(self, message_type, self.unknown_handler)(message)
+                else:
+                    pass
+            else:
+                pass
 
         except Exception as e:
             print('\n'.join(traceback.format_exception(*sys.exc_info())),
                   flush=True)
 
-        cb = functools.partial(self.ack_message, ch, delivery_tag)
+        cb = functools.partial(self.asynchronous_ack_message, ch, delivery_tag)
         conn.add_callback_threadsafe(cb)
 
-    def ack_message(self, ch, delivery_tag):
+    def asynchronous_ack_message(self, ch, delivery_tag):
         if ch.is_open:
             ch.basic_ack(delivery_tag)
         else:
@@ -443,5 +525,5 @@ class PikaMaster:
 
 if __name__ == '__main__':
     logging.getLogger('pika').setLevel(logging.WARNING)
-    receiver = PikaMaster('abc')
-    receiver.run()
+    handler = PikaMaster()
+    handler.start()
