@@ -62,10 +62,10 @@ class PikaMaster:
     def start(self):
         for cam in self.camera_list:
             synchronous_thread = PikaThread(cam, False)
-            synchronous_thread.run()
+            synchronous_thread.start()
 
         async_thread = PikaThread('common', True, 4)
-        async_thread.run()
+        async_thread.start()
 
 
 class PikaThread(threading.Thread):
@@ -83,12 +83,12 @@ class PikaThread(threading.Thread):
         self.scheduler.start()
         print('scheduler started'.format(self.worker_name), flush=True)
 
-        if async_thread:
+        if async_thread is True:
             self.async_thread = True
             self.callback = self.asynchronous_callback
             self.prefetch_count = prefetch_count
-            self.ptz_cam = thread_name
         else:
+            self.ptz_cam = thread_name
             self.async_thread = False
             self.callback = self.synchronous_callback
 
@@ -136,15 +136,21 @@ class PikaThread(threading.Thread):
         channel.start_consuming()
 
     def synchronous_callback(self, ch, method, properties, body):
-        print('received', body, properties, method, flush=True)
+        # print('received', body, properties, method, flush=True)
         try:
             message = json.loads(body.decode())
             if not self.verify_message(message):
                 return
             message_type = message['type']
             if message_type in self.get_all_commands()['synchronous']:
-                getattr(self, message_type, self.unknown_handler)(message)
+                if ('camera_id' in message) and (message['camera_id'] == self.ptz_cam):
+                    print('Received PTZ control message on cam:', message['camera_id'], flush=True)
+                    getattr(self, message_type, self.unknown_handler)(message)
+                else:
+                    # print('skipping command on another thread', flush=True)
+                    pass
             else:
+                # print('skipping asynchronous command', flush=True)
                 pass
 
         except Exception as e:
@@ -162,22 +168,21 @@ class PikaThread(threading.Thread):
 
     def asynchronous_worker(self, conn, ch, delivery_tag, body):
         thread_id = threading.get_ident()
-        LOGGER.info('Thread id: %s Delivery tag: %s Message body: %s', thread_id,
-                    delivery_tag, body)
+
         try:
             message = json.loads(body.decode())
             if not self.verify_message(message):
                 LOGGER.info('3')
                 return
             message_type = message['type']
-            LOGGER.info(json.loads(body.decode())['type'])
-            if message_type in self.get_all_commands()['synchronous']:
-                print('Received PTZ control message on cam:', message['camera_id'], flush=True)
-                if ('camera_id' in message) and (message['camera_id'] == self.ptz_cam):
-                    getattr(self, message_type, self.unknown_handler)(message)
-                else:
-                    pass
+
+            if message_type in self.get_all_commands()['asynchronous']:
+                LOGGER.info('Thread id: %s Delivery tag: %s Message body: %s', thread_id,
+                            delivery_tag, body)
+                LOGGER.info(json.loads(body.decode())['type'])
+                getattr(self, message_type, self.unknown_handler)(message)
             else:
+                # print('skipping synchronous command', flush=True)
                 pass
 
         except Exception as e:
@@ -309,6 +314,16 @@ class PikaThread(threading.Thread):
 
         cameras_request = CameraDeleteMessages(self.scheduler)
         cameras_request.handle_request(message)
+        print('message ok', flush=True)
+
+    def cameras_ptz_timed(self, message):
+        print('ptz timed request message received', flush=True)
+        print('sleeping 30s', flush=True)
+        time.sleep(30)
+        print('awooken', flush=True)
+
+        status_request = StatusMessages()
+        status_request.handle_request(message)
         print('message ok', flush=True)
 
     def cameras_ptz_absolute_move(self, message):
