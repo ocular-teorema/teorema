@@ -8,11 +8,8 @@ import functools
 import time
 import logging
 import json
-<<<<<<< HEAD
-
-=======
 import inspect
->>>>>>> mixed async queue
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'theorema.settings')
