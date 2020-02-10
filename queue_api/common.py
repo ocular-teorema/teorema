@@ -63,6 +63,12 @@ class QueueEndpoint:
         message.response_type = self.response_message_type
         return base_send_in_queue(self.response_exchange, str(message))
 
+    def try_log_params(self, data):
+        try:
+            print('params', data, flush=True)
+        except UnicodeEncodeError as err:
+            print(str(err), flush=True)
+
 
 def base_send_in_queue(exchange, message):
     connection = pika_setup_connection()
@@ -133,3 +139,5 @@ def get_default_cgroup():
     else:
         cgroup = cgroup.id
     return cgroup
+
+

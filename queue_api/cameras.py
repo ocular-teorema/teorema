@@ -35,7 +35,7 @@ class CameraAddMessages(CameraQueueEndpoint):
         print('message received', flush=True)
         self.uuid = message['uuid']
         params = message['data']
-        print('params', params, flush=True)
+        self.try_log_params(params)
 
         if self.check_request_params(params):
             return
@@ -171,7 +171,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
             return
 
         params = message['data']
-        print('params', params, flush=True)
+        self.try_log_params(params)
 
         name = params['name'] if 'name' in params else camera_repr['name']
         address_primary = params['address_primary'] if 'address_primary' in params else camera_repr['address']

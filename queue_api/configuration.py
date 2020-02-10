@@ -162,7 +162,7 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
         self.uuid = message['uuid']
 
         data = message['data']
-        print('params', data, flush=True)
+        self.try_log_params(data)
 
         if self.check_request_params(data):
             return
