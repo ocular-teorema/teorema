@@ -147,7 +147,7 @@ class ConfigExportMessage(ConfigurationQueueEndpoint):
 
             response_data['organizations'].append(org_data)
 
-        print('export data', response_data, flush=True)
+        # print('export data', response_data, flush=True)
         self.send_data_response(response_data)
 
 

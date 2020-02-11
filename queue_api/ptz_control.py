@@ -78,7 +78,7 @@ class AbsoluteMoveMessage(PtzControlQueueEndpoint):
         print('message received', flush=True)
         self.uuid = params['uuid']
         print('request uid', self.uuid, flush=True)
-        print('params', params['data'], flush=True)
+        self.try_log_params(params['data'])
 
         if self.check_request_params(params['data']['position']):
             return
@@ -149,7 +149,7 @@ class ContinuousMoveMessage(PtzControlQueueEndpoint):
         print('message received', flush=True)
         self.uuid = params['uuid']
         print('request uid', self.uuid, flush=True)
-        print('params', params['data'], flush=True)
+        self.try_log_params(params['data'])
 
         if self.check_request_params(params['data']['speed']):
             return
@@ -206,7 +206,7 @@ class RelativeMoveMessage(PtzControlQueueEndpoint):
         print('message received', flush=True)
         self.uuid = params['uuid']
         print('request uid', self.uuid, flush=True)
-        print('params', params['data'], flush=True)
+        self.try_log_params(params['data'])
 
         if self.check_request_params(params['data']['position']):
             return
@@ -290,7 +290,7 @@ class StopMoveMessage(PtzControlQueueEndpoint):
         print('message received', flush=True)
         self.uuid = params['uuid']
         print('request uid', self.uuid, flush=True)
-        print('params', params['data'], flush=True)
+        self.try_log_params(params['data'])
 
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
@@ -333,7 +333,7 @@ class SetHomeMessage(PtzControlQueueEndpoint):
         print('message received', flush=True)
         self.uuid = params['uuid']
         print('request uid', self.uuid, flush=True)
-        print('params', params['data'], flush=True)
+        self.try_log_params(params['data'])
 
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
@@ -367,7 +367,7 @@ class SetPresetMessage(PtzControlQueueEndpoint):
         print('message received', flush=True)
         self.uuid = params['uuid']
         print('request uid', self.uuid, flush=True)
-        print('params', params['data'], flush=True)
+        self.try_log_params(params['data'])
 
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
@@ -411,7 +411,7 @@ class GotoHomeMessage(PtzControlQueueEndpoint):
         print('message received', flush=True)
         self.uuid = params['uuid']
         print('request uid', self.uuid, flush=True)
-        print('params', params['data'], flush=True)
+        self.try_log_params(params['data'])
 
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
@@ -468,7 +468,7 @@ class GotoPresetMessage(PtzControlQueueEndpoint):
         print('message received', flush=True)
         self.uuid = params['uuid']
         print('request uid', self.uuid, flush=True)
-        print('params', params['data'], flush=True)
+        self.try_log_params(params['data'])
 
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
@@ -526,7 +526,7 @@ class GetPresetsMessage(PtzControlQueueEndpoint):
         print('message received', flush=True)
         self.uuid = params['uuid']
         print('request uid', self.uuid, flush=True)
-        print('params', params['data'], flush=True)
+        self.try_log_params(params['data'])
 
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
