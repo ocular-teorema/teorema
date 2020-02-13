@@ -95,6 +95,11 @@ class ScheduleQueueEndpoint(QueueEndpoint):
                 print(message, flush=True)
                 self.send_error_response(message)
                 return True
+            if type(actual['days']) != list:
+                message = RequiredParamError('days', self.uuid, self.response_message_type)
+                print(message, flush=True)
+                self.send_error_response(message)
+                return True
 
         if schedule_type == 'timestamp':
             if 'start_timestamp' not in actual or not actual['start_timestamp']:
@@ -103,6 +108,11 @@ class ScheduleQueueEndpoint(QueueEndpoint):
                 self.send_error_response(message)
                 return True
             if 'stop_timestamp' not in actual or not actual['stop_timestamp']:
+                message = RequiredParamError('stop_timestamp', self.uuid, self.response_message_type)
+                print(message, flush=True)
+                self.send_error_response(message)
+                return True
+            if type(actual['stop_timestamp']) != str or type(actual['start_timestamp']) != str:
                 message = RequiredParamError('stop_timestamp', self.uuid, self.response_message_type)
                 print(message, flush=True)
                 self.send_error_response(message)
@@ -118,20 +128,37 @@ class ScheduleQueueEndpoint(QueueEndpoint):
                 print(message, flush=True)
                 self.send_error_response(message)
                 return True
+            if type(actual['stop_time']) != str or type(actual['start_time']) != str:
+                message = RequiredParamError('stop_timestamp', self.uuid, self.response_message_type)
+                print(message, flush=True)
+                self.send_error_response(message)
+                return True
 
 
 class SchedulesAddMessage(ScheduleQueueEndpoint):
     response_message_type = 'schedules_add_response'
 
+    schema = {
+        "type": "object",
+        "properties": {
+            "data": {"type": "object"}
+        },
+        "required": ["data"]
+    }
+
     def handle_request(self, message):
         print('message received', flush=True)
         self.uuid = message['uuid']
 
-        if self.check_schedule_request_params(message):
+        if self.check_request_params(message):
             return
 
         params = message['data']
         print('params', params, flush=True)
+
+        if self.check_schedule_request_params(params):
+            return
+
 
 
         schedule_type = params['schedule_type']
@@ -215,14 +242,26 @@ class SchedulesUpdateMessage(ScheduleQueueEndpoint):
 
     response_message_type = 'schedules_update_response'
 
+    schema = {
+        "type": "object",
+        "properties": {
+            "data": {"type": "object"}
+        },
+        "required": ["data"]
+    }
+
     def handle_request(self, message):
         print('message received', flush=True)
         self.uuid = message['uuid']
 
-        if self.check_schedule_request_params(message):
+        if self.check_request_params(message):
             return
 
         params = message['data']
+
+        if self.check_schedule_request_params(params):
+            return
+
 
         schedule_id = message['schedule_id']
         try:
