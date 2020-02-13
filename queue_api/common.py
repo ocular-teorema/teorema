@@ -3,6 +3,7 @@ import sys
 import os
 import uuid
 import pika
+import jsonschema
 
 
 from supervisor.xmlrpc import SupervisorTransport
@@ -22,6 +23,7 @@ class QueueEndpoint:
 
     uuid = None
     request_required_params = None
+    schema = None
     response_exchange = RABBITMQ_RESPONSE_EXCHANGE
     response_message_type = None
 
@@ -39,13 +41,13 @@ class QueueEndpoint:
         self.default_storage = Storage.objects.all().first()
 
     def check_request_params(self, actual):
-        actual_keys = actual.keys()
-        for param in self.request_required_params:
-            if param not in actual_keys:
-                message = RequiredParamError(param, self.uuid, self.response_message_type)
-                print(message, flush=True)
-                self.send_error_response(message)
-                return True
+        try:
+            jsonschema.validate(actual, self.schema)
+        except jsonschema.exceptions.ValidationError as err:
+            message = RequiredParamError(str(err), self.uuid, self.response_message_type)
+            self.send_error_response(message)
+            return True
+
 
     def send_data_response(self, data):
         message = QueueMessage(data=data)

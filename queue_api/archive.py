@@ -32,6 +32,28 @@ def check_confidence(conf_low, conf_medium, conf_high):
 
 
 class ArchiveQueueEndpoint(QueueEndpoint):
+    schema = {
+        "type": "object",
+        "properties": {
+            "data": {
+                "type": "object",
+                "properties": {
+                    "start_timestamp": {"type": "string"},
+                    "stop_timestamp": {"type": "string"},
+                    "cameras": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "skip": {"type": "number"},
+                    "limit": {"type": "number"}
+                },
+                "required": ["start_timestamp", "stop_timestamp", "cameras"]
+            }
+        },
+        "required": ["camera_id", "data"]
+    }
 
     def prepare_camera_query(self, column, data, no_prepend_cam=False):
         camera_list = data['cameras']
@@ -55,12 +77,6 @@ class ArchiveQueueEndpoint(QueueEndpoint):
 
 
 class VideosGetMessage(ArchiveQueueEndpoint):
-    request_required_params = [
-        'start_timestamp',
-        'stop_timestamp',
-        'cameras'
-    ]
-
     response_topic = '/archive/video'
     response_message_type = 'archive_video'
 
@@ -69,11 +85,11 @@ class VideosGetMessage(ArchiveQueueEndpoint):
         self.uuid = params['uuid']
         print('request uid', self.uuid, flush=True)
 
+        if self.check_request_params(params):
+            return
+
         data = params['data']
         print('params', data, flush=True)
-
-        if self.check_request_params(params['data']):
-            return
 
         camera_list = data['cameras']
         camera_list_query = []
@@ -116,12 +132,6 @@ class VideosGetMessage(ArchiveQueueEndpoint):
 
 
 class ArchiveEventsMessage(ArchiveQueueEndpoint):
-    request_required_params = [
-        'start_timestamp',
-        'stop_timestamp',
-        'cameras'
-    ]
-
     response_topic = '/archive/events'
     response_message_type = 'archive_events'
 
@@ -130,11 +140,12 @@ class ArchiveEventsMessage(ArchiveQueueEndpoint):
         self.uuid = params['uuid']
         print('request uid', self.uuid, flush=True)
 
+        if self.check_request_params(params):
+            return
+
         data = params['data']
         print('params', data, flush=True)
 
-        if self.check_request_params(data):
-            return
 
         camera_query = self.prepare_camera_query('events', data)
 

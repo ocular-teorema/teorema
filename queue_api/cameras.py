@@ -24,21 +24,51 @@ class CameraQueueEndpoint(QueueEndpoint):
 
 class CameraAddMessages(CameraQueueEndpoint):
     response_message_type = 'cameras_add_response'
-
-    request_required_params = [
-        'name', 'address_primary',
-        'analysis_type', 'storage_days',
-        'onvif_settings'
-    ]
+    schema = {
+        "type": "object",
+        "properties": {
+            "data": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "address_primary": {"type": "string"},
+                    "address_secondary": {"type": "string"},
+                    "analysis_type": {
+                        "type": "number",
+                        "enum": [1, 2, 3]
+                    },
+                    "storage_days": {
+                        "type": "number",
+                        "enum": [7, 14, 30, 1000]
+                    },
+                    "storage_id": {"type": "number"},
+                    "schedule_id": {"type": "number"},
+                    "enabled": {"type": "boolean"},
+                    "onvif_settings": {
+                        "type": "object",
+                        "properties": {
+                            "port": {"type": "number"},
+                            "username": {"type": "string"},
+                            "password": {"type": "string"}
+                        },
+                        "required": ["port"]
+                    }
+                },
+                "required": ["name", "address_primary", "analysis_type", "storage_days", "onvif_settings"]
+            }
+        },
+        "required": ["data"]
+    }
 
     def handle_request(self, message):
         print('message received', flush=True)
         self.uuid = message['uuid']
+
+        if self.check_request_params(message):
+            return
+
         params = message['data']
         self.try_log_params(params)
-
-        if self.check_request_params(params):
-            return
 
         name = params['name']
         address_primary = params['address_primary']
@@ -152,9 +182,47 @@ class CameraAddMessages(CameraQueueEndpoint):
 class CameraUpdateMessages(CameraQueueEndpoint):
     response_message_type = 'cameras_update_response'
 
+    schema = {
+        "type": "object",
+        "properties": {
+            "camera_id": {"type": "string"},
+            "data": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "address_primary": {"type": "string"},
+                    "address_secondary": {"type": "string"},
+                    "analysis_type": {
+                        "type": "number",
+                        "enum": [1, 2, 3]
+                    },
+                    "storage_days": {
+                        "type": "number",
+                        "enum": [7, 14, 30, 1000]
+                    },
+                    "storage_id": {"type": "number"},
+                    "schedule_id": {"type": "number"},
+                    "enabled": {"type": "boolean"},
+                    "onvif_settings": {
+                        "type": "object",
+                        "properties": {
+                            "port": {"type": "number"},
+                            "username": {"type": "string"},
+                            "password": {"type": "string"}
+                        },
+                    }
+                },
+            }
+        },
+        "required": ["camera_id", "data"]
+    }
+
     def handle_request(self, message):
         print('message received', flush=True)
         self.uuid = message['uuid']
+
+        if self.check_request_params(message):
+            return
 
         camera_id = message['camera_id']
 
@@ -353,17 +421,23 @@ class CameraListMessages(QueueEndpoint):
 class CameraSetRecordingMessages(CameraQueueEndpoint):
     response_message_type = 'cameras_set_recording_response'
 
-    request_required_params = [
-        'data'
-    ]
+    schema = {
+        "type": "object",
+        "properties": {
+            "camera_id": {"type": "string"},
+            "data": {"type": "boolean"}
+        },
+        "required": ["camera_id", "data"]
+    }
 
     def handle_request(self, params):
         print('preparing response', flush=True)
         self.uuid = params['uuid']
-        camera_id = params['camera_id']
 
         if self.check_request_params(params):
             return
+
+        camera_id = params['camera_id']
 
         try:
             camera = Camera.objects.get(uid=camera_id)
@@ -393,11 +467,24 @@ class CameraSetRecordingMessages(CameraQueueEndpoint):
 class CameraDeleteMessages(CameraQueueEndpoint):
     response_message_type = 'cameras_delete_response'
 
+    schema = {
+        "type": "object",
+        "properties": {
+            "camera_id": {"type": "string"},
+            "data": {"type": "object"}
+        },
+        "required": ["camera_id", "data"]
+    }
+
     def handle_request(self, params):
         print('preparing response', flush=True)
         self.uuid = params['uuid']
 
+        if self.check_request_params(params):
+            return
+
         print('params', params, flush=True)
+
 
         camera = Camera.objects.filter(uid=params['camera_id']).first()
 

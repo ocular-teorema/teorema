@@ -157,15 +157,116 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
     ]
     response_message_type = 'config_import'
 
+    schema = {
+        "type": "object",
+        "properties": {
+            "data": {
+                "type": "object",
+                "properties": {
+                    "organizations": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "servers": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "server_id": {"type": "string"},
+                                            "server_name": {"type": "string"},
+                                            "cameras": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "name": {"type": "string"},
+                                                        "address_primary": {"type": "string"},
+                                                        "address_secondary": {"type": "string"},
+                                                        "analysis_type": {
+                                                            "type": "number",
+                                                            "enum": [1, 2, 3]
+                                                        },
+                                                        "storage_days": {
+                                                            "type": "number",
+                                                            "enum": [7, 14, 30, 1000]
+                                                        },
+                                                        "storage_id": {"type": "number"},
+                                                        "schedule_id": {"type": "number"},
+                                                        "enabled": {"type": "boolean"},
+                                                        "onvif_settings": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "port": {"type": "number"},
+                                                                "username": {"type": "string"},
+                                                                "password": {"type": "string"}
+                                                            },
+                                                            "required": ["port"]
+                                                        }
+                                                    },
+                                                    "required": ["name", "address_primary", "analysis_type",
+                                                                 "storage_days", "onvif_settings"]
+                                                }
+                                            },
+                                            "storages": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "name": {"type": "string"},
+                                                        "path": {"type": "string"},
+                                                    },
+                                                    "required": ["name", "path"]
+                                                }
+                                            },
+                                            "schedules": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "schedule_type": {
+                                                            "type": "string",
+                                                            "enum": ["weekdays", "timestamp", "time_period"]
+                                                        },
+                                                        "days": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "number",
+                                                                "enum": [1, 2, 3, 4, 5, 6, 7]
+                                                            }
+                                                        },
+                                                        "start_timestamp": {"type": "string"},
+                                                        "stop_timestamp": {"type": "string"},
+                                                        "start_time": {"type": "string"},
+                                                        "stop_time": {"type": "string"}
+                                                    },
+                                                    "required": ["schedule_type"]
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "required": ["organizations"]
+            }
+        },
+        "required": ["data"]
+    }
+
     def handle_request(self, message):
 
         self.uuid = message['uuid']
 
+        if self.check_request_params(message):
+            return
+
         data = message['data']
         self.try_log_params(data)
 
-        if self.check_request_params(data):
-            return
 
         organizations = data['organizations']
         if len(organizations.keys()) > 1:

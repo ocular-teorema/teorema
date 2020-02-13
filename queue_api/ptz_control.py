@@ -66,13 +66,40 @@ class PtzControlQueueEndpoint(QueueEndpoint):
 
 
 class AbsoluteMoveMessage(PtzControlQueueEndpoint):
-    request_required_params = [
-        'pan',
-        'tilt',
-        'zoom'
-    ]
     response_topic = '/cameras/{cam_id}/ptz_control'
     response_message_type = 'cameras_ptz_absolute_move'
+
+    schema = {
+        "type": "object",
+        "properties": {
+            "camera_id": {"type": "string"},
+            "data": {
+                "type": "object",
+                "properties": {
+                    "position": {
+                        "type": "object",
+                        "properties": {
+                            "pan": {"type": "number"},
+                            "tilt": {"type": "number"},
+                            "zoom": {"type": "number"}
+                        },
+                        "required": ["pan", "tilt", "zoom"]
+                    },
+                    "speed": {
+                        "type": "object",
+                        "properties": {
+                            "pan": {"type": "number"},
+                            "tilt": {"type": "number"},
+                            "zoom": {"type": "number"}
+                        },
+                        "required": ["pan", "tilt", "zoom"]
+                    }
+                },
+                "required": ["position"]
+            }
+        },
+        "required": ["camera_id", "data"]
+    }
 
     def handle_request(self, params):
         print('message received', flush=True)
@@ -80,7 +107,7 @@ class AbsoluteMoveMessage(PtzControlQueueEndpoint):
         print('request uid', self.uuid, flush=True)
         self.try_log_params(params['data'])
 
-        if self.check_request_params(params['data']['position']):
+        if self.check_request_params(params):
             return
 
         camera = Camera.objects.filter(uid=params['camera_id']).first()
@@ -137,13 +164,32 @@ class AbsoluteMoveMessage(PtzControlQueueEndpoint):
 
 
 class ContinuousMoveMessage(PtzControlQueueEndpoint):
-    request_required_params = [
-        'pan',
-        'tilt',
-        'zoom'
-    ]
     response_topic = '/cameras/{cam_id}/ptz_control'
     response_message_type = 'cameras_ptz_continuous_move'
+
+    schema = {
+        "type": "object",
+        "properties": {
+            "camera_id": {"type": "string"},
+            "data": {
+                "type": "object",
+                "properties": {
+                    "speed": {
+                        "type": "object",
+                        "properties": {
+                            "pan": {"type": "number"},
+                            "tilt": {"type": "number"},
+                            "zoom": {"type": "number"}
+                        },
+                        "required": ["pan", "tilt", "zoom"]
+                    },
+                    "timeout": {"type": "number"}
+                },
+                "required": ["speed"]
+            }
+        },
+        "required": ["camera_id", "data"]
+    }
 
     def handle_request(self, params):
         print('message received', flush=True)
@@ -151,7 +197,7 @@ class ContinuousMoveMessage(PtzControlQueueEndpoint):
         print('request uid', self.uuid, flush=True)
         self.try_log_params(params['data'])
 
-        if self.check_request_params(params['data']['speed']):
+        if self.check_request_params(params):
             return
 
         camera = Camera.objects.filter(uid=params['camera_id']).first()
@@ -194,13 +240,40 @@ class ContinuousMoveMessage(PtzControlQueueEndpoint):
 
 
 class RelativeMoveMessage(PtzControlQueueEndpoint):
-    request_required_params = [
-        'pan',
-        'tilt',
-        'zoom'
-    ]
     response_topic = '/cameras/{cam_id}/ptz_control'
     response_message_type = 'cameras_ptz_relative_move'
+
+    schema = {
+        "type": "object",
+        "properties": {
+            "camera_id": {"type": "string"},
+            "data": {
+                "type": "object",
+                "properties": {
+                    "position": {
+                        "type": "object",
+                        "properties": {
+                            "pan": {"type": "number"},
+                            "tilt": {"type": "number"},
+                            "zoom": {"type": "number"}
+                        },
+                        "required": ["pan", "tilt", "zoom"]
+                    },
+                    "speed": {
+                        "type": "object",
+                        "properties": {
+                            "pan": {"type": "number"},
+                            "tilt": {"type": "number"},
+                            "zoom": {"type": "number"}
+                        },
+                        "required": ["pan", "tilt", "zoom"]
+                    }
+                },
+                "required": ["position"]
+            }
+        },
+        "required": ["camera_id", "data"]
+    }
 
     def handle_request(self, params):
         print('message received', flush=True)
@@ -208,7 +281,7 @@ class RelativeMoveMessage(PtzControlQueueEndpoint):
         print('request uid', self.uuid, flush=True)
         self.try_log_params(params['data'])
 
-        if self.check_request_params(params['data']['position']):
+        if self.check_request_params(params):
             return
 
         camera = Camera.objects.filter(uid=params['camera_id']).first()
@@ -286,11 +359,23 @@ class StopMoveMessage(PtzControlQueueEndpoint):
     response_topic = '/cameras/{cam_id}/ptz_control'
     response_message_type = 'cameras_ptz_stop_move'
 
+    schema = {
+        "type": "object",
+        "properties": {
+            "camera_id": {"type": "string"},
+            "data": {"type": "object"}
+        },
+        "required": ["camera_id", "object"]
+    }
+
     def handle_request(self, params):
         print('message received', flush=True)
         self.uuid = params['uuid']
         print('request uid', self.uuid, flush=True)
         self.try_log_params(params['data'])
+
+        if self.check_request_params(params):
+            return
 
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
@@ -329,11 +414,23 @@ class SetHomeMessage(PtzControlQueueEndpoint):
     response_topic = '/cameras/{cam_id}/ptz_control'
     response_message_type = 'cameras_ptz_set_home'
 
+    schema = {
+        "type": "object",
+        "properties": {
+            "camera_id": {"type": "string"},
+            "data": {"type": "object"}
+        },
+        "required": ["camera_id", "object"]
+    }
+
     def handle_request(self, params):
         print('message received', flush=True)
         self.uuid = params['uuid']
         print('request uid', self.uuid, flush=True)
         self.try_log_params(params['data'])
+
+        if self.check_request_params(params):
+            return
 
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
@@ -363,11 +460,29 @@ class SetPresetMessage(PtzControlQueueEndpoint):
     response_topic = '/cameras/{cam_id}/ptz_control'
     response_message_type = 'cameras_ptz_set_preset'
 
+    schema = {
+        "type": "object",
+        "properties": {
+            "camera_id": {"type": "string"},
+            "data": {
+                "type": "object",
+                "properties": {
+                    "preset_name": {"type": "string"},
+                    "preset_token": {"type": "number"}
+                },
+            }
+        },
+        "required": ["camera_id", "data"]
+    }
+
     def handle_request(self, params):
         print('message received', flush=True)
         self.uuid = params['uuid']
         print('request uid', self.uuid, flush=True)
         self.try_log_params(params['data'])
+
+        if self.check_request_params(params):
+            return
 
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
@@ -407,11 +522,36 @@ class GotoHomeMessage(PtzControlQueueEndpoint):
     response_topic = '/cameras/{cam_id}/ptz_control'
     response_message_type = 'cameras_ptz_goto_home'
 
+    schema = {
+        "type": "object",
+        "properties": {
+            "camera_id": {"type": "string"},
+            "data": {
+                "type": "object",
+                "properties": {
+                    "speed": {
+                        "type": "object",
+                        "properties": {
+                            "pan": {"type": "number"},
+                            "tilt": {"type": "number"},
+                            "zoom": {"type": "number"}
+                        },
+                        "required": ["pan", "tilt", "zoom"]
+                    }
+                },
+            }
+        },
+        "required": ["camera_id", "data"]
+    }
+
     def handle_request(self, params):
         print('message received', flush=True)
         self.uuid = params['uuid']
         print('request uid', self.uuid, flush=True)
         self.try_log_params(params['data'])
+
+        if self.check_request_params(params):
+            return
 
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
@@ -464,11 +604,38 @@ class GotoPresetMessage(PtzControlQueueEndpoint):
     response_topic = '/cameras/{cam_id}/ptz_control'
     response_message_type = 'cameras_ptz_goto_preset'
 
+    schema = {
+        "type": "object",
+        "properties": {
+            "camera_id": {"type": "string"},
+            "data": {
+                "type": "object",
+                "properties": {
+                    "speed": {
+                        "type": "object",
+                        "properties": {
+                            "pan": {"type": "number"},
+                            "tilt": {"type": "number"},
+                            "zoom": {"type": "number"}
+                        },
+                        "required": ["pan", "tilt", "zoom"]
+                    },
+                    "preset_token": {"type": "number"}
+                },
+                "required": ["preset_token"]
+            }
+        },
+        "required": ["camera_id", "data"]
+    }
+
     def handle_request(self, params):
         print('message received', flush=True)
         self.uuid = params['uuid']
         print('request uid', self.uuid, flush=True)
         self.try_log_params(params['data'])
+
+        if self.check_request_params(params):
+            return
 
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:
@@ -522,11 +689,23 @@ class GetPresetsMessage(PtzControlQueueEndpoint):
     response_topic = '/cameras/{cam_id}/ptz_control'
     response_message_type = 'cameras_ptz_get_presets'
 
+    schema = {
+        "type": "object",
+        "properties": {
+            "camera_id": {"type": "string"},
+            "data": {"type": "object"}
+        },
+        "required": ["camera_id", "object"]
+    }
+
     def handle_request(self, params):
         print('message received', flush=True)
         self.uuid = params['uuid']
         print('request uid', self.uuid, flush=True)
         self.try_log_params(params['data'])
+
+        if self.check_request_params(params):
+            return
 
         camera = Camera.objects.filter(uid=params['camera_id']).first()
         if camera:

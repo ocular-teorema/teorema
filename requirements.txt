@@ -78,3 +78,4 @@ wcwidth==0.1.7
 Werkzeug==0.14.1
 zeep==3.4.0
 zope.interface==4.5.0
+jsonschema==3.1.1

@@ -10,20 +10,37 @@ class StorageQueueEndpoint(QueueEndpoint):
 
 
 class StorageAddMessages(StorageQueueEndpoint):
-    request_required_params = [
-        'name',
-        'path'
-    ]
-
     response_message_type = 'storages_add_response'
+
+    schema = {
+        "type": "object",
+        "properties": {
+            "data": {
+                "type": "object",
+                "properties": {
+                    "storage": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "path": {"type": "string"},
+                        },
+                        "required": ["name", "path"]
+                    },
+                },
+                "required": ["storage"]
+            }
+        },
+        "required": ["data"]
+    }
 
     def handle_request(self, params):
         print('message received', flush=True)
         self.uuid = params['uuid']
-        checking_params = params['data']['storage']
 
-        if self.check_request_params(checking_params):
+        if self.check_request_params(params):
             return
+
+        checking_params = params['data']['storage']
 
         serializer_params = {
             'name': checking_params['name'],
@@ -44,15 +61,23 @@ class StorageAddMessages(StorageQueueEndpoint):
 
 
 class StorageDeleteMessage(StorageQueueEndpoint):
-
     response_message_type = 'storages_delete_response'
+
+    schema = {
+        "type": "object",
+        "properties": {
+            "storage_id": {"type": "number"},
+            "data": {"type": "object"}
+        },
+        "required": ["storage_id", "data"]
+    }
 
     def handle_request(self, params):
         print('message received', flush=True)
         self.uuid = params['uuid']
 
-        #if self.check_request_params(params):
-        #    return
+        if self.check_request_params(params):
+           return
 
         storage = Storage.objects.filter(id=params['storage_id']).first()
         if storage:
@@ -90,19 +115,38 @@ class StorageListMessage(StorageQueueEndpoint):
 
 
 class StorageUpdateMessage(StorageQueueEndpoint):
-    request_required_params = [
-        'name',
-        'path'
-    ]
     response_message_type = 'storages_update_response'
+
+    schema = {
+        "type": "object",
+        "properties": {
+            "storage_id": {"type": "number"},
+            "data": {
+                "type": "object",
+                "properties": {
+                    "storage": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "path": {"type": "string"},
+                        },
+                        "required": ["name", "path"]
+                    },
+                },
+                "required": ["storage"]
+            }
+        },
+        "required": ["storage_id", "data"]
+    }
 
     def handle_request(self, params):
         print('message received', flush=True)
         self.uuid = params['uuid']
-        checking_params = params['data']['storage']
 
-        if self.check_request_params(checking_params):
+        if self.check_request_params(params):
             return
+
+        checking_params = params['data']['storage']
 
         serializer_params = {
             'name': checking_params['name'],
