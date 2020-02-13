@@ -73,7 +73,7 @@ class CameraScheduler:
 
 class ScheduleQueueEndpoint(QueueEndpoint):
 
-    def check_request_params(self, actual):
+    def check_schedule_request_params(self, actual):
         actual_keys = actual.keys()
 
         if 'schedule_type' not in actual_keys:
@@ -123,39 +123,11 @@ class ScheduleQueueEndpoint(QueueEndpoint):
 class SchedulesAddMessage(ScheduleQueueEndpoint):
     response_message_type = 'schedules_add_response'
 
-    schema = {
-        "type": "object",
-        "properties": {
-            "data": {
-                "type": "object",
-                "properties": {
-                    "schedule_type": {
-                        "type": "string",
-                        "enum": ["weekdays", "timestamp", "time_period"]
-                    },
-                    "days": {
-                        "type": "array",
-                        "items": {
-                            "type": "number",
-                            "enum": [1, 2, 3, 4, 5, 6, 7]
-                        }
-                    },
-                    "start_timestamp": {"type": "string"},
-                    "stop_timestamp": {"type": "string"},
-                    "start_time": {"type": "string"},
-                    "stop_time": {"type": "string"}
-                },
-                "required": ["schedule_type"]
-            }
-        },
-        "required": ["data"]
-    }
-
     def handle_request(self, message):
         print('message received', flush=True)
         self.uuid = message['uuid']
 
-        if self.check_request_params(message):
+        if self.check_schedule_request_params(message):
             return
 
         params = message['data']
@@ -243,40 +215,11 @@ class SchedulesUpdateMessage(ScheduleQueueEndpoint):
 
     response_message_type = 'schedules_update_response'
 
-    schema = {
-        "type": "object",
-        "properties": {
-            "schedule_id": {"type": "number"},
-            "data": {
-                "type": "object",
-                "properties": {
-                    "schedule_type": {
-                        "type": "string",
-                        "enum": ["weekdays", "timestamp", "time_period"]
-                    },
-                    "days": {
-                        "type": "array",
-                        "items": {
-                            "type": "number",
-                            "enum": [1, 2, 3, 4, 5, 6, 7]
-                        }
-                    },
-                    "start_timestamp": {"type": "string"},
-                    "stop_timestamp": {"type": "string"},
-                    "start_time": {"type": "string"},
-                    "stop_time": {"type": "string"}
-                },
-                "required": ["schedule_type"]
-            }
-        },
-        "required": ["schedule_id", "data"]
-    }
-
     def handle_request(self, message):
         print('message received', flush=True)
         self.uuid = message['uuid']
 
-        if self.check_request_params(message):
+        if self.check_schedule_request_params(message):
             return
 
         params = message['data']
@@ -334,6 +277,7 @@ class SchedulesDeleteMessage(ScheduleQueueEndpoint):
 
         if self.check_request_params(params):
             return
+
 
         schedule_id = params['schedule_id']
         try:

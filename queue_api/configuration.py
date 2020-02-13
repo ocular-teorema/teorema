@@ -269,7 +269,7 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
 
 
         organizations = data['organizations']
-        if len(organizations.keys()) > 1:
+        if len(organizations) > 1:
             org_error = ConfigImportOrgsCountError(self.uuid)
             self.send_error_response(org_error)
 
@@ -280,7 +280,7 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
             org.save()
 
             servers = org_dict['servers']
-            if len(servers.keys()) > 1:
+            if len(servers) > 1:
                 server_error = ConfigImportServerCountError(self.uuid)
                 self.send_error_response(server_error)
 
