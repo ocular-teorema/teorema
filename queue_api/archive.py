@@ -52,7 +52,7 @@ class ArchiveQueueEndpoint(QueueEndpoint):
                 "required": ["start_timestamp", "stop_timestamp", "cameras"]
             }
         },
-        "required": ["camera_id", "data"]
+        "required": ["data"]
     }
 
     def prepare_camera_query(self, column, data, no_prepend_cam=False):
