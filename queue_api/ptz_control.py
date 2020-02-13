@@ -365,7 +365,7 @@ class StopMoveMessage(PtzControlQueueEndpoint):
             "camera_id": {"type": "string"},
             "data": {"type": "object"}
         },
-        "required": ["camera_id", "object"]
+        "required": ["camera_id", "data"]
     }
 
     def handle_request(self, params):
@@ -420,7 +420,7 @@ class SetHomeMessage(PtzControlQueueEndpoint):
             "camera_id": {"type": "string"},
             "data": {"type": "object"}
         },
-        "required": ["camera_id", "object"]
+        "required": ["camera_id", "data"]
     }
 
     def handle_request(self, params):
@@ -695,7 +695,7 @@ class GetPresetsMessage(PtzControlQueueEndpoint):
             "camera_id": {"type": "string"},
             "data": {"type": "object"}
         },
-        "required": ["camera_id", "object"]
+        "required": ["camera_id", "data"]
     }
 
     def handle_request(self, params):

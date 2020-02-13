@@ -272,6 +272,7 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
         if len(organizations) > 1:
             org_error = ConfigImportOrgsCountError(self.uuid)
             self.send_error_response(org_error)
+            return
 
         for org_dict in organizations:
 
@@ -283,17 +284,20 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
             if len(servers) > 1:
                 server_error = ConfigImportServerCountError(self.uuid)
                 self.send_error_response(server_error)
+                return
 
             for server_dict in servers:
                 server_id = server_dict['server_id']
                 if server_id != self.default_serv.mac_address:
                     mac_error = ConfigImportServerMacError(self.uuid)
                     self.send_error_response(mac_error)
+                    return
 
                 server_name = server_dict['server_name']
                 if str(server_name) != str(server_id):
                     name_mac_error = ConfigImportServerNameError(self.uuid)
                     self.send_error_response(name_mac_error)
+                    return
 
                 storage_id_map = {}
 
@@ -303,6 +307,7 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
                     if not os.access(path, os.W_OK):
                         path_error = ConfigImportInvalidPathError(storage['name'], path, self.uuid)
                         self.send_error_response(path_error)
+                        return
 
                     if storage['name'] == 'default' and path != self.default_storage.path:
                         imported_storage = self.default_storage
@@ -311,7 +316,7 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
                         imported_storage = Storage(name=storage['name'], path=path)
 
                     imported_storage.save()
-                    storage_id_map[storage.id] = imported_storage.id
+                    storage_id_map[storage['id']] = imported_storage.id
 
                 schedules = server_dict['schedules']
                 for schedule in schedules:
@@ -326,9 +331,9 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
                         schedule_type=schedule_type,
                         weekdays=days,
                         start_timestamp=start_timestamp,
-                        stop_itmestamp=stop_itmestamp,
-                        start_time=start_time,
-                        stop_time=stop_time
+                        stop_timestamp=stop_itmestamp,
+                        start_daytime=start_time,
+                        stop_daytime=stop_time
                     )
 
                     schedule.save()
@@ -342,7 +347,7 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
                     if 'storage_id' in camera:
                         old_storage_id = camera['storage_id']
                         linked_storage_id = storage_id_map[old_storage_id]
-                        storage = Storage.objects.filter(id=linked_storage_id)
+                        storage = Storage.objects.filter(id=linked_storage_id).first()
                         if not storage:
                             error = ConfigImportCameraStorageInvalidError(camera['id'], linked_storage_id, self.uuid)
                             self.send_error_response(error)
@@ -357,7 +362,7 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
                         'camera_group': 'default',
                         'address': camera['address_primary'],
                         'address_secondary': camera['address_secondary'] if 'address_secondary' in camera else None,
-                        'analysis': camera['analysis'],
+                        'analysis_type': camera['analysis_type'],
                         'storage_life': camera['storage_days'],
                         'indefinitely': storage_indefinitely,
                         'compress_level': compress_level,
@@ -378,7 +383,7 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
                         imported_camera.save()
                     else:
                         errors = camera_serializer.errors
-                        error_str = 'Validation error: "err"'.format(err=errors)
+                        error_str = 'Validation error: {err}'.format(err=errors)
                         msg = RequestParamValidationError(error_str, self.uuid, self.response_message_type)
                         print(msg, flush=True)
                         self.send_error_response(msg)
