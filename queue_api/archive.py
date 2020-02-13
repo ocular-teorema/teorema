@@ -38,8 +38,8 @@ class ArchiveQueueEndpoint(QueueEndpoint):
             "data": {
                 "type": "object",
                 "properties": {
-                    "start_timestamp": {"type": "string"},
-                    "stop_timestamp": {"type": "string"},
+                    "start_timestamp": {"type": "number"},
+                    "stop_timestamp": {"type": "number"},
                     "cameras": {
                         "type": "array",
                         "items": {

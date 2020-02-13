@@ -112,7 +112,7 @@ class ScheduleQueueEndpoint(QueueEndpoint):
                 print(message, flush=True)
                 self.send_error_response(message)
                 return True
-            if type(actual['stop_timestamp']) != str or type(actual['start_timestamp']) != str:
+            if type(actual['stop_timestamp']) != int or type(actual['start_timestamp']) != int:
                 message = RequiredParamError('stop_timestamp', self.uuid, self.response_message_type)
                 print(message, flush=True)
                 self.send_error_response(message)
@@ -166,8 +166,8 @@ class SchedulesAddMessage(ScheduleQueueEndpoint):
         if schedule_type == 'weekdays':
             days = str(params['days'])[1:-1] if 'days' in params else None
         elif schedule_type == 'timestamp':
-            start_timestamp = params['start_timestamp'] if 'start_timestamp' in params else None
-            stop_timestamp = params['stop_timestamp'] if 'stop_timestamp' in params else None
+            start_timestamp = str(params['start_timestamp']) if 'start_timestamp' in params else None
+            stop_timestamp = str(params['stop_timestamp']) if 'stop_timestamp' in params else None
         elif schedule_type == 'time_period':
             start_time = params['start_time'] if 'start_time' in params else None
             stop_time = params['stop_time'] if 'stop_time' in params else None
@@ -245,9 +245,10 @@ class SchedulesUpdateMessage(ScheduleQueueEndpoint):
     schema = {
         "type": "object",
         "properties": {
+            "schedule_id": {"type": "number"},
             "data": {"type": "object"}
         },
-        "required": ["data"]
+        "required": ["schedule_id", "data"]
     }
 
     def handle_request(self, message):
@@ -282,8 +283,8 @@ class SchedulesUpdateMessage(ScheduleQueueEndpoint):
             schedule.start_daytime = None
             schedule.stop_timestamp = None
         elif schedule_type == 'timestamp':
-            schedule.start_timestamp = params['start_timestamp'] if 'start_time in params' else schedule.start_timestamp
-            schedule.stop_timestamp = params['stop_timestamp'] if 'stop_timestamp' in params else schedule.stop_timestamp
+            schedule.start_timestamp = str(params['start_timestamp']) if 'start_time in params' else schedule.start_timestamp
+            schedule.stop_timestamp = str(params['stop_timestamp']) if 'stop_timestamp' in params else schedule.stop_timestamp
             schedule.weekdays = None
             schedule.start_daytime =None
             schedule.stop_daytime = None
