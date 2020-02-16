@@ -5,7 +5,7 @@ from theorema.cameras.models import Server, Storage
 DEFAULT_ORG_NAME = 'STALT'
 DEFAULT_ADDRESS = '0.0.0.0'
 DEFAULT_STORAGE_NAME = 'default'
-DEFAULT_STORAGE_PATH = '/home_VideoArchive'
+DEFAULT_STORAGE_PATH = '/home/_VideoArchive'
 
 
 class Command(BaseCommand):
