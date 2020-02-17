@@ -43,7 +43,10 @@ class CamListener(Protocol):
         print(self.camera_id, data, flush=True)
         if 'Hello from DataDirectory' not in data.decode():
             try:
-                event_message.cameras_event({'data': data})
+                if 'reaction' in data.decode():
+                    event_message.cameras_event({'data': data})
+                else:
+                    event_message.cameras_log({'data': data})
                 print('message sent to queue', flush=True)
             except:
                print('fail in sending to api', flush=True)
