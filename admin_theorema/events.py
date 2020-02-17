@@ -41,15 +41,15 @@ class CamListener(Protocol):
 
     def dataReceived(self, data):
         print(self.camera_id, data, flush=True)
-        if 'Hello from DataDirectory' not in data.decode():
-            try:
-                if 'reaction' in data.decode():
-                    event_message.cameras_event({'data': data})
-                else:
-                    event_message.cameras_log({'data': data})
-                print('message sent to queue', flush=True)
-            except:
-               print('fail in sending to api', flush=True)
+        decoded_data = data.decode()
+        try:
+            if 'reaction' in decoded_data:
+                event_message.cameras_event({'data': data})
+            elif 'ERROR' in decoded_data:
+                event_message.cameras_log({'data': data})
+            print('message sent to queue', flush=True)
+        except:
+           print('fail in sending to api', flush=True)
         [x for x in cams if str(x['id']) == str(self.camera_id)][0]['connection'] = self # kill me
         try:
             j = json.loads(data.strip(b'\0').decode())
