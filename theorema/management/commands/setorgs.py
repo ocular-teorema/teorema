@@ -31,11 +31,13 @@ class Command(BaseCommand):
         server_name = server_id
 
         existing_org = Organization.objects.all().first()
+        org_created = False
         if existing_org:
             existing_org.name = org_name
             org = existing_org
         else:
             org = Organization(name=str(org_name))
+            org_created = True
 
         existing_server = Server.objects.all().first()
         if existing_server:
@@ -65,6 +67,9 @@ class Command(BaseCommand):
             storage = Storage(name=DEFAULT_STORAGE_NAME, path=DEFAULT_STORAGE_PATH)
 
         org.save()
+        if org_created:
+            server.organization = org
+
         server.save()
         storage.save()
 
