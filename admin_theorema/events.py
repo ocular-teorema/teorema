@@ -14,6 +14,7 @@ import sys
 sys.path.append(os.path.abspath(".."))
 
 from queue_api.pika_handler import PikaThread
+from theorema.cameras.models import CameraLog
 
 config = configparser.ConfigParser()
 config.read(SUPERVISOR_CAMERAS_CONF)
@@ -41,25 +42,39 @@ class CamListener(Protocol):
 
     def dataReceived(self, data):
         print(self.camera_id, data, flush=True)
-        decoded_data = data.decode()
-        try:
-            if 'reaction' in decoded_data:
-                event_message.cameras_event({'data': data})
-            elif 'ERROR' in decoded_data:
-                event_message.cameras_log({'data': data})
-            print('message sent to queue', flush=True)
-        except:
-           print('fail in sending to api', flush=True)
+        # decoded_data = data.decode()
+        # try:
+        #     if 'reaction' in decoded_data:
+        #         event_message.cameras_event({'data': data})
+        #     elif 'ERROR' in decoded_data:
+        #         log_info = json.loads(data.strip(b'\0').decode())
+        #         log = CameraLog(**log_info)
+        #         log.save()
+        #         event_message.cameras_log({'data': data})
+        #     print('message sent to queue', flush=True)
+        # except:
+        #    print('fail in sending to api', flush=True)
         [x for x in cams if str(x['id']) == str(self.camera_id)][0]['connection'] = self # kill me
         try:
-            j = json.loads(data.strip(b'\0').decode())
-            j['camera_id'] = self.camera_id
+            decoded_data = json.loads(data.strip(b'\0').decode())
+            if 'reaction' in decoded_data:
+                event_message.cameras_event({'data': data})
+                print('message sent to queue', flush=True)
+                decoded_data['camera_id'] = self.camera_id
+                if sender:
+                    sender.transport.write(json.dumps(decoded_data).encode())
+                    print('sent', flush=True)
+            elif 'error_code' in decoded_data:
+                log = CameraLog(**decoded_data)
+                log.save(using='error_logs')
+                event_message.cameras_log({'data': data})
+                print('error log saved and sent to queue', flush=True)
         except json.decoder.JSONDecodeError:
             pass
-        else:
-            if sender:
-                sender.transport.write(json.dumps(j).encode())
-                print('sent', flush=True)
+        # else:
+        #     if sender:
+        #         sender.transport.write(json.dumps(decoded_data).encode())
+        #         print('sent', flush=True)
 
 
 class CamListenerClientFactory(ReconnectingClientFactory):

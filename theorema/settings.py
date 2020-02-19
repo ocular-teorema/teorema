@@ -94,7 +94,16 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': 5432,
         'CONN_MAX_AGE': None
-    }   
+    },
+    'error_logs': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'error_logs',
+        'USER': 'postgres',
+        'PASSWORD': 'Blizzard',
+        'HOST': 'localhost',
+        'PORT': 5432,
+        'CONN_MAX_AGE': None
+    }
 }
 
 
