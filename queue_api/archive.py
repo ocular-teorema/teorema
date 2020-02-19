@@ -238,20 +238,3 @@ class ArchiveEventsMessage(ArchiveQueueEndpoint):
 
         self.send_data_response(result)
         return
-
-
-class LogsGetMessage(ArchiveQueueEndpoint):
-    response_topic = '/archive/logs'
-    response_message_type = 'archive_logs'
-
-    def handle_request(self, params):
-        print('message received', flush=True)
-        self.uuid = params['uuid']
-        print('request uid', self.uuid, flush=True)
-
-        if self.check_request_params(params):
-            return
-
-        data = params['data']
-        print('params', data, flush=True)
-

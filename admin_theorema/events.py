@@ -57,17 +57,17 @@ class CamListener(Protocol):
         [x for x in cams if str(x['id']) == str(self.camera_id)][0]['connection'] = self # kill me
         try:
             decoded_data = json.loads(data.strip(b'\0').decode())
+            decoded_data['camera_id'] = self.camera_id
             if 'reaction' in decoded_data:
-                event_message.cameras_event({'data': data})
+                event_message.cameras_event({'data': decoded_data})
                 print('message sent to queue', flush=True)
-                decoded_data['camera_id'] = self.camera_id
                 if sender:
                     sender.transport.write(json.dumps(decoded_data).encode())
                     print('sent', flush=True)
             elif 'error_code' in decoded_data:
                 log = CameraLog(**decoded_data)
                 log.save(using='error_logs')
-                event_message.cameras_log({'data': data})
+                event_message.cameras_log({'data': decoded_data})
                 print('error log saved and sent to queue', flush=True)
         except json.decoder.JSONDecodeError:
             pass

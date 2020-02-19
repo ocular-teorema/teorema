@@ -137,7 +137,8 @@ class Camera2Quadrator(models.Model):
 #     error_message = models.TextField()
 
 class CameraLog(models.Model):
-    camera = models.ForeignKey(Camera, on_delete=models.CASCADE)
+    # camera = models.ForeignKey(Camera, on_delete=models.CASCADE)
+    camera_id = models.CharField(max_length=50)
     add_time = models.DateTimeField(auto_now_add=True)
     error_code = models.IntegerField()
     error_type = models.CharField(max_length=200)
