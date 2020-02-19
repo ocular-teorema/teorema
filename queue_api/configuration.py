@@ -54,16 +54,17 @@ class ConfigExportMessage(ConfigurationQueueEndpoint):
                 camera_list = []
                 for camera in cameras:
 
-                    stream_address = 'rtmp://{host}:1935/vasrc/{id}'.format(host=serv.address, id=camera.uid)
+                    stream_address = 'rtmp://{host}:1935/vasrc/{id}'.format(host=serv.address, id=camera.time_uid)
                     status = None
 
                     try:
-                        status = supervisor_cameras[camera.uid]['status']
+                        status = supervisor_cameras[camera.time_uid]['status']
                     except KeyError:
                         status = 'DISABLED'
 
                     camera_data = {
-                        'id': camera.uid,
+                        'camera_id': camera.time_uid,
+                        'camera_digit': camera.uid,
                         'name': camera.name,
                         'address_primary': camera.address,
                         'address_secondary': camera.address_secondary,
@@ -181,6 +182,7 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
                                                 "items": {
                                                     "type": "object",
                                                     "properties": {
+                                                        "camera_digit": {"type": "number"},
                                                         "name": {"type": "string"},
                                                         "address_primary": {"type": "string"},
                                                         "address_secondary": {"type": "string"},
@@ -205,7 +207,7 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
                                                             "required": ["port"]
                                                         }
                                                     },
-                                                    "required": ["name", "address_primary", "analysis_type",
+                                                    "required": ["camera_digit", "name", "address_primary", "analysis_type",
                                                                  "storage_days", "onvif_settings"]
                                                 }
                                             },
@@ -356,6 +358,7 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
                         storage = self.default_storage
 
                     serializer_params = {
+                        'uid': camera['camera_digit'],
                         'name': camera['name'],
                         'organization': org,
                         'server': self.default_serv,

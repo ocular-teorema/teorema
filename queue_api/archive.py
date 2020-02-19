@@ -2,7 +2,7 @@ import requests
 import json
 import psycopg2
 
-from theorema.cameras.models import Server
+from theorema.cameras.models import Camera
 
 from queue_api.common import QueueEndpoint
 from queue_api.messages import RequestParamValidationError
@@ -43,7 +43,7 @@ class ArchiveQueueEndpoint(QueueEndpoint):
                     "cameras": {
                         "type": "array",
                         "items": {
-                            "type": "string"
+                            "type": "number"
                         }
                     },
                     "skip": {"type": "number"},
@@ -65,14 +65,16 @@ class ArchiveQueueEndpoint(QueueEndpoint):
 
         cameras = []
         for x in range(len(camera_list)):
-            if no_prepend_cam:
-                cameras.append("'cam{}'".format(camera_list[x]))
-            else:
-                cameras.append("'{}'".format(camera_list[x]))
+            camera = Camera.objects.filter(uid=camera_list[x]).first()
+            # if no_prepend_cam:
+            #     cameras.append("'cam{}'".format(camera_list[x]))
+            # else:
+            cameras.append("'{}'".format(camera.time_uid))
 
         #        cameras_database = 'events.cam in ' + '({})'.format(', '.join(cameras))
 
         cameras_database = '{column}.cam in '.format(column=column) + '({})'.format(', '.join(cameras))
+        print(cameras_database, flush=True)
         return cameras_database
 
 
@@ -94,8 +96,9 @@ class VideosGetMessage(ArchiveQueueEndpoint):
         camera_list = data['cameras']
         camera_list_query = []
         for camera in camera_list:
-            camera = camera[3:]
-            camera_list_query.append(camera)
+            camera = Camera.objects.filter(uid=camera).first()
+            if camera:
+                camera_list_query.append(camera.time_uid)
 
         camera_query = ','.join(camera_list_query)
 
@@ -111,6 +114,8 @@ class VideosGetMessage(ArchiveQueueEndpoint):
             'skip': 0 if 'skip' not in data.keys() else data['skip'],
             'limit': 10000 if 'limit' not in data.keys() else data['limit']
         }
+
+        print(query_params, flush=True)
 
         response = requests.get('http://{}:5005/archive_video'.format(self.default_serv.address), params=query_params)
 

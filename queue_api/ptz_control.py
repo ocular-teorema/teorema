@@ -18,6 +18,7 @@ def address_parse(camera):
     address = camera.address
     ip = re.findall(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', address)[0]
     port = camera.onvif_port
+    port = camera.onvif_port
 
     if camera.onvif_username:
         user = camera.onvif_username
@@ -72,7 +73,7 @@ class AbsoluteMoveMessage(PtzControlQueueEndpoint):
     schema = {
         "type": "object",
         "properties": {
-            "camera_id": {"type": "string"},
+            "camera_digit": {"type": "number"},
             "data": {
                 "type": "object",
                 "properties": {
@@ -98,7 +99,7 @@ class AbsoluteMoveMessage(PtzControlQueueEndpoint):
                 "required": ["position"]
             }
         },
-        "required": ["camera_id", "data"]
+        "required": ["camera_digit", "data"]
     }
 
     def handle_request(self, params):
@@ -110,7 +111,7 @@ class AbsoluteMoveMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera = Camera.objects.filter(uid=params['camera_id']).first()
+        camera = Camera.objects.filter(uid=params['camera_digit']).first()
         if camera:
             try:
                 ptz, media_profile = self.camera_initialization(camera)
@@ -150,12 +151,12 @@ class AbsoluteMoveMessage(PtzControlQueueEndpoint):
                 print('some error', flush=True)
                 print('Exception on camera:', e, flush=True)
                 error = RequestParamValidationError('camera with id {id} can not move, cause: {exception}'
-                                                    .format(id=params['camera_id'], exception=e)
+                                                    .format(id=params['camera_digit'], exception=e)
                                                     )
                 self.send_error_response(error)
                 return
         else:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_digit']))
             self.send_error_response(error)
             return
 
@@ -170,7 +171,7 @@ class ContinuousMoveMessage(PtzControlQueueEndpoint):
     schema = {
         "type": "object",
         "properties": {
-            "camera_id": {"type": "string"},
+            "camera_digit": {"type": "number"},
             "data": {
                 "type": "object",
                 "properties": {
@@ -188,7 +189,7 @@ class ContinuousMoveMessage(PtzControlQueueEndpoint):
                 "required": ["speed"]
             }
         },
-        "required": ["camera_id", "data"]
+        "required": ["camera_digit", "data"]
     }
 
     def handle_request(self, params):
@@ -200,7 +201,7 @@ class ContinuousMoveMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera = Camera.objects.filter(uid=params['camera_id']).first()
+        camera = Camera.objects.filter(uid=params['camera_digit']).first()
         if camera:
             try:
                 ptz, media_profile = self.camera_initialization(camera)
@@ -226,12 +227,12 @@ class ContinuousMoveMessage(PtzControlQueueEndpoint):
                 print('some error', flush=True)
                 print('Exception on camera:', e, flush=True)
                 error = RequestParamValidationError('camera with id {id} can not move, cause: {exception}'
-                                                    .format(id=params['camera_id'], exception=e)
+                                                    .format(id=params['camera_digit'], exception=e)
                                                     )
                 self.send_error_response(error)
                 return
         else:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_digit']))
             self.send_error_response(error)
             return
 
@@ -246,7 +247,7 @@ class RelativeMoveMessage(PtzControlQueueEndpoint):
     schema = {
         "type": "object",
         "properties": {
-            "camera_id": {"type": "string"},
+            "camera_digit": {"type": "number"},
             "data": {
                 "type": "object",
                 "properties": {
@@ -272,7 +273,7 @@ class RelativeMoveMessage(PtzControlQueueEndpoint):
                 "required": ["position"]
             }
         },
-        "required": ["camera_id", "data"]
+        "required": ["camera_digit", "data"]
     }
 
     def handle_request(self, params):
@@ -284,7 +285,7 @@ class RelativeMoveMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera = Camera.objects.filter(uid=params['camera_id']).first()
+        camera = Camera.objects.filter(uid=params['camera_digit']).first()
         if camera:
             try:
                 ptz, media_profile = self.camera_initialization(camera)
@@ -342,12 +343,12 @@ class RelativeMoveMessage(PtzControlQueueEndpoint):
                 print('some error', flush=True)
                 print('Exception on camera:', e, flush=True)
                 error = RequestParamValidationError('camera with id {id} can not move, cause: {exception}'
-                                                    .format(id=params['camera_id'], exception=e)
+                                                    .format(id=params['camera_digit'], exception=e)
                                                     )
                 self.send_error_response(error)
                 return
         else:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_digit']))
             self.send_error_response(error)
             return
 
@@ -362,10 +363,10 @@ class StopMoveMessage(PtzControlQueueEndpoint):
     schema = {
         "type": "object",
         "properties": {
-            "camera_id": {"type": "string"},
+            "camera_digit": {"type": "number"},
             "data": {"type": "object"}
         },
-        "required": ["camera_id", "data"]
+        "required": ["camera_digit", "data"]
     }
 
     def handle_request(self, params):
@@ -377,7 +378,7 @@ class StopMoveMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera = Camera.objects.filter(uid=params['camera_id']).first()
+        camera = Camera.objects.filter(uid=params['camera_digit']).first()
         if camera:
             try:
                 ptz, media_profile = self.camera_initialization(camera)
@@ -397,12 +398,12 @@ class StopMoveMessage(PtzControlQueueEndpoint):
                 print('some error', flush=True)
                 print('Exception on camera:', e, flush=True)
                 error = RequestParamValidationError('camera with id {id} can not move, cause: {exception}'
-                                                    .format(id=params['camera_id'], exception=e)
+                                                    .format(id=params['camera_digit'], exception=e)
                                                     )
                 self.send_error_response(error)
                 return
         else:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_digit']))
             self.send_error_response(error)
             return
 
@@ -417,10 +418,10 @@ class SetHomeMessage(PtzControlQueueEndpoint):
     schema = {
         "type": "object",
         "properties": {
-            "camera_id": {"type": "string"},
+            "camera_digit": {"type": "number"},
             "data": {"type": "object"}
         },
-        "required": ["camera_id", "data"]
+        "required": ["camera_digit", "data"]
     }
 
     def handle_request(self, params):
@@ -432,7 +433,7 @@ class SetHomeMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera = Camera.objects.filter(uid=params['camera_id']).first()
+        camera = Camera.objects.filter(uid=params['camera_digit']).first()
         if camera:
             try:
                 ptz, media_profile = self.camera_initialization(camera)
@@ -443,12 +444,12 @@ class SetHomeMessage(PtzControlQueueEndpoint):
                 print('some error', flush=True)
                 print('Exception on camera:', e, flush=True)
                 error = RequestParamValidationError('camera with id {id} can not set home position, cause: {exception}'
-                                                    .format(id=params['camera_id'], exception=e)
+                                                    .format(id=params['camera_digit'], exception=e)
                                                     )
                 self.send_error_response(error)
                 return
         else:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_digit']))
             self.send_error_response(error)
             return
 
@@ -463,7 +464,7 @@ class SetPresetMessage(PtzControlQueueEndpoint):
     schema = {
         "type": "object",
         "properties": {
-            "camera_id": {"type": "string"},
+            "camera_digit": {"type": "number"},
             "data": {
                 "type": "object",
                 "properties": {
@@ -472,7 +473,7 @@ class SetPresetMessage(PtzControlQueueEndpoint):
                 },
             }
         },
-        "required": ["camera_id", "data"]
+        "required": ["camera_digit", "data"]
     }
 
     def handle_request(self, params):
@@ -484,7 +485,7 @@ class SetPresetMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera = Camera.objects.filter(uid=params['camera_id']).first()
+        camera = Camera.objects.filter(uid=params['camera_digit']).first()
         if camera:
             try:
                 ptz, media_profile = self.camera_initialization(camera)
@@ -505,12 +506,12 @@ class SetPresetMessage(PtzControlQueueEndpoint):
                 print('some error', flush=True)
                 print('Exception on camera:', e, flush=True)
                 error = RequestParamValidationError('camera with id {id} can not set preset, cause: {exception}'
-                                                    .format(id=params['camera_id'], exception=e)
+                                                    .format(id=params['camera_digit'], exception=e)
                                                     )
                 self.send_error_response(error)
                 return
         else:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_digit']))
             self.send_error_response(error)
             return
 
@@ -525,7 +526,7 @@ class GotoHomeMessage(PtzControlQueueEndpoint):
     schema = {
         "type": "object",
         "properties": {
-            "camera_id": {"type": "string"},
+            "camera_digit": {"type": "number"},
             "data": {
                 "type": "object",
                 "properties": {
@@ -541,7 +542,7 @@ class GotoHomeMessage(PtzControlQueueEndpoint):
                 },
             }
         },
-        "required": ["camera_id", "data"]
+        "required": ["camera_digit", "data"]
     }
 
     def handle_request(self, params):
@@ -553,7 +554,7 @@ class GotoHomeMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera = Camera.objects.filter(uid=params['camera_id']).first()
+        camera = Camera.objects.filter(uid=params['camera_digit']).first()
         if camera:
             try:
                 ptz, media_profile = self.camera_initialization(camera)
@@ -587,12 +588,12 @@ class GotoHomeMessage(PtzControlQueueEndpoint):
                 print('some error', flush=True)
                 print('Exception on camera:', e, flush=True)
                 error = RequestParamValidationError('camera with id {id} can not move, cause: {exception}'
-                                                    .format(id=params['camera_id'], exception=e)
+                                                    .format(id=params['camera_digit'], exception=e)
                                                     )
                 self.send_error_response(error)
                 return
         else:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_digit']))
             self.send_error_response(error)
             return
 
@@ -607,7 +608,7 @@ class GotoPresetMessage(PtzControlQueueEndpoint):
     schema = {
         "type": "object",
         "properties": {
-            "camera_id": {"type": "string"},
+            "camera_digit": {"type": "number"},
             "data": {
                 "type": "object",
                 "properties": {
@@ -625,7 +626,7 @@ class GotoPresetMessage(PtzControlQueueEndpoint):
                 "required": ["preset_token"]
             }
         },
-        "required": ["camera_id", "data"]
+        "required": ["camera_digit", "data"]
     }
 
     def handle_request(self, params):
@@ -637,7 +638,7 @@ class GotoPresetMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera = Camera.objects.filter(uid=params['camera_id']).first()
+        camera = Camera.objects.filter(uid=params['camera_digit']).first()
         if camera:
             try:
                 ptz, media_profile = self.camera_initialization(camera)
@@ -672,12 +673,12 @@ class GotoPresetMessage(PtzControlQueueEndpoint):
                 print('some error', flush=True)
                 print('Exception on camera:', e, flush=True)
                 error = RequestParamValidationError('camera with id {id} can not move, cause: {exception}'
-                                                    .format(id=params['camera_id'], exception=e)
+                                                    .format(id=params['camera_digit'], exception=e)
                                                     )
                 self.send_error_response(error)
                 return
         else:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_digit']))
             self.send_error_response(error)
             return
 
@@ -692,10 +693,10 @@ class GetPresetsMessage(PtzControlQueueEndpoint):
     schema = {
         "type": "object",
         "properties": {
-            "camera_id": {"type": "string"},
+            "camera_digit": {"type": "number"},
             "data": {"type": "object"}
         },
-        "required": ["camera_id", "data"]
+        "required": ["camera_digit", "data"]
     }
 
     def handle_request(self, params):
@@ -707,7 +708,7 @@ class GetPresetsMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera = Camera.objects.filter(uid=params['camera_id']).first()
+        camera = Camera.objects.filter(uid=params['camera_digit']).first()
         if camera:
             try:
                 ptz, media_profile = self.camera_initialization(camera)
@@ -730,12 +731,12 @@ class GetPresetsMessage(PtzControlQueueEndpoint):
                 print('some error', flush=True)
                 print('Exception on camera:', e, flush=True)
                 error = RequestParamValidationError('camera with id {id} can not move, cause: {exception}'
-                                                    .format(id=params['camera_id'], exception=e)
+                                                    .format(id=params['camera_digit'], exception=e)
                                                     )
                 self.send_error_response(error)
                 return
         else:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_digit']))
             self.send_error_response(error)
             return
 

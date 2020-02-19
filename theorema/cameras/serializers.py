@@ -84,7 +84,8 @@ class CameraSerializer(M2MHelperSerializer):
                 'notify_phone', 'notify_events', 'notify_time_start',
                 'notify_time_stop', 'notify_alert_level', 'notify_send_email',
                 'notify_send_sms', 'indefinitely', 'archive_path', 'from_queue_api',
-                'onvif_port', 'onvif_username', 'onvif_password', 'address_secondary'
+                'onvif_port', 'onvif_username', 'onvif_password', 'address_secondary',
+                'uid', 'time_uid'
         )
         extra_kwargs = {
             'port': {'read_only': True}
@@ -116,7 +117,7 @@ class CameraSerializer(M2MHelperSerializer):
         # validated_data['server'] = Server.objects.get(id = validated_data['server']).parent_server_id
         validated_data['add_time'] = '_' + str(datetime.now()).replace(' ', '_').replace(':', '-')
         res = super().create(validated_data)
-        res.uid = 'cam' + str(res.id) + res.add_time
+        res.time_uid = 'cam' + str(res.id) + res.add_time
         res.save()
 
         try:
@@ -155,8 +156,8 @@ class CameraSerializer(M2MHelperSerializer):
             if not camera.add_time:
                 camera.add_time = '_' + str(datetime.now()).replace(' ', '_').replace(':', '-')
                 camera.save()
-            if not camera.uid:
-                camera.uid = 'cam' + str(camera.id) + camera.add_time
+            if not camera.time_uid:
+                camera.time_uid = 'cam' + str(camera.id) + camera.add_time
                 camera.save()
             if isinstance(validated_data['server'], int):
                 data_server = Server.objects.get(id=validated_data['server'])

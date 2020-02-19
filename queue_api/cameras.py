@@ -27,6 +27,7 @@ class CameraAddMessages(CameraQueueEndpoint):
     schema = {
         "type": "object",
         "properties": {
+            "camera_digit": {"type": "number"},
             "data": {
                 "type": "object",
                 "properties": {
@@ -57,7 +58,7 @@ class CameraAddMessages(CameraQueueEndpoint):
                 "required": ["name", "address_primary", "analysis_type", "storage_days", "onvif_settings"]
             }
         },
-        "required": ["data"]
+        "required": ["camera_digit", "data"]
     }
 
     def handle_request(self, message):
@@ -79,6 +80,7 @@ class CameraAddMessages(CameraQueueEndpoint):
         onvif_username = params['onvif_settings']['username'] if 'username' in params['onvif_settings'] else None
         onvif_password = params['onvif_settings']['password'] if 'password' in params['onvif_settings'] else None
         enabled = params['enabled'] if 'enabled' in params else True
+        uid = params['camera_digit']
 
         # for backward compatibility
         storage_indefinitely = True if storage_days == 1000 else False
@@ -126,7 +128,8 @@ class CameraAddMessages(CameraQueueEndpoint):
             'from_queue_api': True,
             'onvif_port': onvif_port,
             'onvif_username': onvif_username,
-            'onvif_password': onvif_password
+            'onvif_password': onvif_password,
+            'uid': uid
             # 'storage'
         }
 
@@ -176,7 +179,7 @@ class CameraAddMessages(CameraQueueEndpoint):
             self.send_error_response(msg)
             return
 
-        self.send_data_response({'camera_id': camera.uid, 'success': True})
+        self.send_data_response({'camera_id': camera.time_uid, 'camera_digit': camera.uid, 'success': True})
 
 
 class CameraUpdateMessages(CameraQueueEndpoint):
@@ -185,7 +188,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
     schema = {
         "type": "object",
         "properties": {
-            "camera_id": {"type": "string"},
+            "camera_digit": {"type": "number"},
             "data": {
                 "type": "object",
                 "properties": {
@@ -214,7 +217,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
                 },
             }
         },
-        "required": ["camera_id", "data"]
+        "required": ["camera_digit", "data"]
     }
 
     def handle_request(self, message):
@@ -224,7 +227,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
         if self.check_request_params(message):
             return
 
-        camera_id = message['camera_id']
+        camera_id = message['camera_digit']
 
         try:
             camera = Camera.objects.get(uid=camera_id)
@@ -243,13 +246,18 @@ class CameraUpdateMessages(CameraQueueEndpoint):
 
         name = params['name'] if 'name' in params else camera_repr['name']
         address_primary = params['address_primary'] if 'address_primary' in params else camera_repr['address']
-        address_secondary = params['address_secondary'] if 'address_secondary' in params else camera_repr['address_secondary']
+        address_secondary = params['address_secondary'] if 'address_secondary' in params else camera_repr[
+            'address_secondary']
         analysis_type = params['analysis_type'] if 'analysis_type' in params else camera_repr['analysis']
         enabled = params['enabled'] if 'enabled' in params else camera_repr['is_active']
+        uid = params['camera_digit'] if 'camera_digit' in params else camera_repr['uid']
         if 'onvif_settings' in params:
-            onvif_port = params['onvif_settings']['port'] if 'port' in params['onvif_settings'] else camera_repr['onvif_port']
-            onvif_username = params['onvif_settings']['username'] if 'username' in params['onvif_settings'] else camera_repr['onvif_username']
-            onvif_password = params['onvif_settings']['password'] if 'password' in params['onvif_settings'] else camera_repr['onvif_password']
+            onvif_port = params['onvif_settings']['port'] if 'port' in params['onvif_settings'] else camera_repr[
+                'onvif_port']
+            onvif_username = params['onvif_settings']['username'] if 'username' in params['onvif_settings'] else \
+                camera_repr['onvif_username']
+            onvif_password = params['onvif_settings']['password'] if 'password' in params['onvif_settings'] else \
+                camera_repr['onvif_password']
         else:
             onvif_port = camera_repr['onvif_port']
             onvif_username = camera_repr['onvif_username']
@@ -348,6 +356,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
         camera_repr['onvif_username'] = onvif_username
         camera_repr['onvif_password'] = onvif_password
         camera_repr['is_active'] = enabled
+        camera_repr['uid'] = uid
 
         CameraSerializer().update(camera, camera_repr)
 
@@ -357,7 +366,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
         #            self.send_error_response(msg)
         #            return
 
-        self.send_data_response({'camera_id': camera.uid, 'success': True})
+        self.send_data_response({'camera_digit': camera.uid, 'camera_id': camera.time_uid, 'success': True})
 
 
 class CameraListMessages(QueueEndpoint):
@@ -395,7 +404,8 @@ class CameraListMessages(QueueEndpoint):
             #         status = 'DISABLED'
 
             camera_list.append({
-                'id': cam.uid,
+                'camera_id': cam.time_uid,
+                'camera_digit': cam.uid,
                 'name': cam.name,
                 'address_primary': cam.address,
                 # 'address_secondary': cam.address_secondary,
@@ -424,10 +434,10 @@ class CameraSetRecordingMessages(CameraQueueEndpoint):
     schema = {
         "type": "object",
         "properties": {
-            "camera_id": {"type": "string"},
+            "camera_digit": {"type": "number"},
             "data": {"type": "boolean"}
         },
-        "required": ["camera_id", "data"]
+        "required": ["camera_digit", "data"]
     }
 
     def handle_request(self, params):
@@ -437,7 +447,7 @@ class CameraSetRecordingMessages(CameraQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera_id = params['camera_id']
+        camera_id = params['camera_digit']
 
         try:
             camera = Camera.objects.get(uid=camera_id)
@@ -470,10 +480,10 @@ class CameraDeleteMessages(CameraQueueEndpoint):
     schema = {
         "type": "object",
         "properties": {
-            "camera_id": {"type": "string"},
+            "camera_digit": {"type": "number"},
             "data": {"type": "object"}
         },
-        "required": ["camera_id", "data"]
+        "required": ["camera_digit", "data"]
     }
 
     def handle_request(self, params):
@@ -485,11 +495,10 @@ class CameraDeleteMessages(CameraQueueEndpoint):
 
         print('params', params, flush=True)
 
-
-        camera = Camera.objects.filter(uid=params['camera_id']).first()
+        camera = Camera.objects.filter(uid=params['camera_digit']).first()
 
         if not camera:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_id']))
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_digit']))
             self.send_error_response(error)
             return
         else:
@@ -527,13 +536,14 @@ class CameraDeleteMessages(CameraQueueEndpoint):
                     stop_job_id=str(camera.schedule_job_stop)
                 )
 
-            camera_id = camera.uid
+            camera_digit = camera.uid
+            camera_id = camera.time_uid
             camera.delete()
 
             if camera_group_to_delete:
                 camera_group_to_delete.delete()
 
-        self.send_data_response({'camera_id': camera_id, 'success': True})
+        self.send_data_response({'camera_id': camera_id, 'camera_digit': camera_digit, 'success': True})
 
 
 def set_camera_recording(camera, recording):

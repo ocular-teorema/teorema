@@ -1,6 +1,7 @@
 from queue_api.common import QueueEndpoint
 import json
 from queue_api.common import base_send_in_queue
+from theorema.cameras.models import Camera
 
 
 class EventQueueEndpoint(QueueEndpoint):
@@ -21,9 +22,12 @@ class EventsSendMessage(EventQueueEndpoint):
 
         is_finished = data['isFinished'] if 'isFinished' in data else False
 
+        camera = Camera.objects.filter(time_uid=data['archiveStartHint'].split('/')[1]).first()
+
         message = {
             'type': self.response_message_type,
-            'camera_id': data['archiveStartHint'].split('/')[1],
+            'camera_id': camera.time_uid,
+            'camera_digit': camera.uid,
             'data': {
                 'event_id': data['id'],
                 'event_start_timestamp': data['start_timestamp'],
@@ -36,5 +40,3 @@ class EventsSendMessage(EventQueueEndpoint):
         }
 
         base_send_in_queue(self.response_exchange, json.dumps(message))
-
-

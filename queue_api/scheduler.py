@@ -323,7 +323,7 @@ class SchedulesDeleteMessage(ScheduleQueueEndpoint):
         try:
             schedule = CameraSchedule.objects.get(id=schedule_id)
         except ObjectDoesNotExist:
-            error = RequestParamValidationError('camera with id {id} not found'.format(id=schedule_id))
+            error = RequestParamValidationError('schedule with id {id} not found'.format(id=schedule_id))
             print(error, flush=True)
             self.send_error_response(error)
             return
