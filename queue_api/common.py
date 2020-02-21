@@ -147,5 +147,5 @@ def get_default_cgroup():
 def set_cameras_uuid():
     for camera in Camera.objects.all():
         camera.time_uuid = 'cam' + str(camera.id) + camera.add_time
-        camera.uuid = random.getrandbits(64)
+        camera.uuid = random.randint(1000, 10000000)
         camera.save()

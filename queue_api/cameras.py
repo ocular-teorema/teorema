@@ -27,10 +27,10 @@ class CameraAddMessages(CameraQueueEndpoint):
     schema = {
         "type": "object",
         "properties": {
-            "camera_digit": {"type": "number"},
             "data": {
                 "type": "object",
                 "properties": {
+                    "camera_digit": {"type": "number"},
                     "name": {"type": "string"},
                     "address_primary": {"type": "string"},
                     "address_secondary": {"type": "string"},
@@ -55,10 +55,10 @@ class CameraAddMessages(CameraQueueEndpoint):
                         "required": ["port"]
                     }
                 },
-                "required": ["name", "address_primary", "analysis_type", "storage_days", "onvif_settings"]
+                "required": ["camera_digit", "name", "address_primary", "analysis_type", "storage_days", "onvif_settings"]
             }
         },
-        "required": ["camera_digit", "data"]
+        "required": ["data"]
     }
 
     def handle_request(self, message):
@@ -173,7 +173,7 @@ class CameraAddMessages(CameraQueueEndpoint):
 
         else:
             errors = camera_serializer.errors
-            error_str = 'Validation error: "err"'.format(err=errors)
+            error_str = 'Validation error: {err}'.format(err=errors)
             msg = RequestParamValidationError(error_str, self.uuid, self.response_message_type)
             print(msg, flush=True)
             self.send_error_response(msg)
@@ -250,7 +250,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
             'address_secondary']
         analysis_type = params['analysis_type'] if 'analysis_type' in params else camera_repr['analysis']
         enabled = params['enabled'] if 'enabled' in params else camera_repr['is_active']
-        uuid = params['camera_digit'] if 'camera_digit' in params else camera_repr['uuid']
+        # uuid = params['camera_digit'] if 'camera_digit' in params else camera_repr['uuid']
         if 'onvif_settings' in params:
             onvif_port = params['onvif_settings']['port'] if 'port' in params['onvif_settings'] else camera_repr[
                 'onvif_port']
@@ -356,7 +356,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
         camera_repr['onvif_username'] = onvif_username
         camera_repr['onvif_password'] = onvif_password
         camera_repr['is_active'] = enabled
-        camera_repr['uuid'] = uuid
+        # camera_repr['uuid'] = uuid
 
         CameraSerializer().update(camera, camera_repr)
 
@@ -392,7 +392,7 @@ class CameraListMessages(QueueEndpoint):
             supervisor_cameras = get_supervisor_processes()['cameras']
 
             try:
-                status = supervisor_cameras[cam.uuid]['status']
+                status = supervisor_cameras[cam.time_uuid]['status']
             except KeyError:
                 status = 'DISABLED'
             # for x in supervisor_cameras:

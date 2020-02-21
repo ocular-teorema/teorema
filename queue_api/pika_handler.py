@@ -58,7 +58,7 @@ class PikaMaster:
         print('Number of threads: {}'.format(len(self.camera_list) + self.prefetch_count), flush=True)
 
     def get_camera_list(self):
-        return Camera.objects.values_list('uid', flat=True)
+        return Camera.objects.values_list('time_uuid', flat=True)
 
     def start(self):
         for cam in self.camera_list:
@@ -144,9 +144,11 @@ class PikaThread(threading.Thread):
                 return
             message_type = message['type']
             if message_type in self.get_all_commands()['synchronous']:
-                if ('camera_id' in message) and (message['camera_id'] == self.ptz_cam):
-                    print('Received PTZ control message on cam:', message['camera_id'], flush=True)
-                    getattr(self, message_type, self.unknown_handler)(message)
+                if 'camera_digit' in message:
+                    camera = Camera.objects.get(uuid=message['camera_digit'])
+                    if (camera.time_uuid == self.ptz_cam):
+                        print('Received PTZ control message on cam:', camera.time_uuid, flush=True)
+                        getattr(self, message_type, self.unknown_handler)(message)
                 else:
                     # print('skipping command on another thread', flush=True)
                     pass

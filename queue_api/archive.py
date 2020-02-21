@@ -98,7 +98,7 @@ class VideosGetMessage(ArchiveQueueEndpoint):
         for camera in camera_list:
             camera = Camera.objects.filter(uuid=camera).first()
             if camera:
-                camera_list_query.append(camera.time_uuid)
+                camera_list_query.append(camera.time_uuid[3:])
 
         camera_query = ','.join(camera_list_query)
 
