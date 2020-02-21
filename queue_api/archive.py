@@ -124,7 +124,8 @@ class VideosGetMessage(ArchiveQueueEndpoint):
         for video in response_data:
             video_data = {
                 'id': video['id'],
-                'camera': video['cam'],
+                'camera_id': video['cam'],
+                'camera_digit': Camera.objects.get(time_uuid=video['cam']).uuid,
                 'start_timestamp': video['start_posix_time'],
                 'stop_timestamp': video['end_posix_time'],
                 'file_size': video['fileSize'],
@@ -229,6 +230,7 @@ class ArchiveEventsMessage(ArchiveQueueEndpoint):
                 {
                     'event_id': event[0],
                     'event_camera_id': event[1],
+                    'event_camera_digit': Camera.objects.get(time_uuid=event[1]).uuid,
                     # 'archiveStartHint': event[2],
                     # 'archiveEndHint': event[3],
                     'event_start_timestamp': event[4],
