@@ -8,7 +8,7 @@ from theorema.users.models import CamSet
 from theorema.cameras.models import Camera, Storage, CameraSchedule
 from theorema.cameras.serializers import CameraSerializer
 
-from queue_api.common import QueueEndpoint, get_supervisor_processes, get_default_cgroup
+from queue_api.common import QueueEndpoint, get_supervisor_processes, get_default_cgroup, set_cameras_uuid
 from queue_api.messages import RequestParamValidationError
 
 
@@ -192,6 +192,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
             "data": {
                 "type": "object",
                 "properties": {
+                    "camera_digit": {"type": "number"},
                     "name": {"type": "string"},
                     "address_primary": {"type": "string"},
                     "address_secondary": {"type": "string"},
@@ -250,7 +251,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
             'address_secondary']
         analysis_type = params['analysis_type'] if 'analysis_type' in params else camera_repr['analysis']
         enabled = params['enabled'] if 'enabled' in params else camera_repr['is_active']
-        # uuid = params['camera_digit'] if 'camera_digit' in params else camera_repr['uuid']
+        uuid = params['camera_digit'] if 'camera_digit' in params else camera_repr['uuid']
         if 'onvif_settings' in params:
             onvif_port = params['onvif_settings']['port'] if 'port' in params['onvif_settings'] else camera_repr[
                 'onvif_port']
@@ -356,7 +357,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
         camera_repr['onvif_username'] = onvif_username
         camera_repr['onvif_password'] = onvif_password
         camera_repr['is_active'] = enabled
-        # camera_repr['uuid'] = uuid
+        camera_repr['uuid'] = uuid
 
         CameraSerializer().update(camera, camera_repr)
 
@@ -388,6 +389,9 @@ class CameraListMessages(QueueEndpoint):
                 host=cam.server.address,
                 cam=cam.time_uuid
             )
+
+            if not cam.uuid:
+                cam.uuid = set_cameras_uuid()
 
             supervisor_cameras = get_supervisor_processes()['cameras']
 
