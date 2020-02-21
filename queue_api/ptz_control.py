@@ -111,7 +111,7 @@ class AbsoluteMoveMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera = Camera.objects.filter(uid=params['camera_digit']).first()
+        camera = Camera.objects.filter(uuid=params['camera_digit']).first()
         if camera:
             try:
                 ptz, media_profile = self.camera_initialization(camera)
@@ -201,7 +201,7 @@ class ContinuousMoveMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera = Camera.objects.filter(uid=params['camera_digit']).first()
+        camera = Camera.objects.filter(uuid=params['camera_digit']).first()
         if camera:
             try:
                 ptz, media_profile = self.camera_initialization(camera)
@@ -285,7 +285,7 @@ class RelativeMoveMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera = Camera.objects.filter(uid=params['camera_digit']).first()
+        camera = Camera.objects.filter(uuid=params['camera_digit']).first()
         if camera:
             try:
                 ptz, media_profile = self.camera_initialization(camera)
@@ -378,7 +378,7 @@ class StopMoveMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera = Camera.objects.filter(uid=params['camera_digit']).first()
+        camera = Camera.objects.filter(uuid=params['camera_digit']).first()
         if camera:
             try:
                 ptz, media_profile = self.camera_initialization(camera)
@@ -433,7 +433,7 @@ class SetHomeMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera = Camera.objects.filter(uid=params['camera_digit']).first()
+        camera = Camera.objects.filter(uuid=params['camera_digit']).first()
         if camera:
             try:
                 ptz, media_profile = self.camera_initialization(camera)
@@ -485,7 +485,7 @@ class SetPresetMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera = Camera.objects.filter(uid=params['camera_digit']).first()
+        camera = Camera.objects.filter(uuid=params['camera_digit']).first()
         if camera:
             try:
                 ptz, media_profile = self.camera_initialization(camera)
@@ -554,7 +554,7 @@ class GotoHomeMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera = Camera.objects.filter(uid=params['camera_digit']).first()
+        camera = Camera.objects.filter(uuid=params['camera_digit']).first()
         if camera:
             try:
                 ptz, media_profile = self.camera_initialization(camera)
@@ -638,7 +638,7 @@ class GotoPresetMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera = Camera.objects.filter(uid=params['camera_digit']).first()
+        camera = Camera.objects.filter(uuid=params['camera_digit']).first()
         if camera:
             try:
                 ptz, media_profile = self.camera_initialization(camera)
@@ -708,7 +708,7 @@ class GetPresetsMessage(PtzControlQueueEndpoint):
         if self.check_request_params(params):
             return
 
-        camera = Camera.objects.filter(uid=params['camera_digit']).first()
+        camera = Camera.objects.filter(uuid=params['camera_digit']).first()
         if camera:
             try:
                 ptz, media_profile = self.camera_initialization(camera)

@@ -65,11 +65,11 @@ class ArchiveQueueEndpoint(QueueEndpoint):
 
         cameras = []
         for x in range(len(camera_list)):
-            camera = Camera.objects.filter(uid=camera_list[x]).first()
+            camera = Camera.objects.filter(uuid=camera_list[x]).first()
             # if no_prepend_cam:
             #     cameras.append("'cam{}'".format(camera_list[x]))
             # else:
-            cameras.append("'{}'".format(camera.time_uid))
+            cameras.append("'{}'".format(camera.time_uuid))
 
         #        cameras_database = 'events.cam in ' + '({})'.format(', '.join(cameras))
 
@@ -96,9 +96,9 @@ class VideosGetMessage(ArchiveQueueEndpoint):
         camera_list = data['cameras']
         camera_list_query = []
         for camera in camera_list:
-            camera = Camera.objects.filter(uid=camera).first()
+            camera = Camera.objects.filter(uuid=camera).first()
             if camera:
-                camera_list_query.append(camera.time_uid)
+                camera_list_query.append(camera.time_uuid)
 
         camera_query = ','.join(camera_list_query)
 

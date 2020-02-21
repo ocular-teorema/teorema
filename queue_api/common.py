@@ -9,7 +9,8 @@ import jsonschema
 from supervisor.xmlrpc import SupervisorTransport
 from xmlrpc import client as xmlrpc_client
 from theorema.orgs.models import Organization
-from theorema.cameras.models import CameraGroup, Server, Storage
+from theorema.cameras.models import CameraGroup, Server, Storage, Camera
+import random
 
 from queue_api.messages import QueueMessage, QueueSuccessMessage, QueueErrorMessage, RequiredParamError
 from queue_api.settings import *
@@ -143,3 +144,8 @@ def get_default_cgroup():
     return cgroup
 
 
+def set_cameras_uuid():
+    for camera in Camera.objects.all():
+        camera.time_uuid = 'cam' + str(camera.id) + camera.add_time
+        camera.uuid = random.getrandbits(64)
+        camera.save()

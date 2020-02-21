@@ -54,17 +54,17 @@ class ConfigExportMessage(ConfigurationQueueEndpoint):
                 camera_list = []
                 for camera in cameras:
 
-                    stream_address = 'rtmp://{host}:1935/vasrc/{id}'.format(host=serv.address, id=camera.time_uid)
+                    stream_address = 'rtmp://{host}:1935/vasrc/{id}'.format(host=serv.address, id=camera.time_uuid)
                     status = None
 
                     try:
-                        status = supervisor_cameras[camera.time_uid]['status']
+                        status = supervisor_cameras[camera.time_uuid]['status']
                     except KeyError:
                         status = 'DISABLED'
 
                     camera_data = {
-                        'camera_id': camera.time_uid,
-                        'camera_digit': camera.uid,
+                        'camera_id': camera.time_uuid,
+                        'camera_digit': camera.uuid,
                         'name': camera.name,
                         'address_primary': camera.address,
                         'address_secondary': camera.address_secondary,
@@ -358,7 +358,7 @@ class ConfigImportMessage(ConfigurationQueueEndpoint):
                         storage = self.default_storage
 
                     serializer_params = {
-                        'uid': camera['camera_digit'],
+                        'uuid': camera['camera_digit'],
                         'name': camera['name'],
                         'organization': org,
                         'server': self.default_serv,

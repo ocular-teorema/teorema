@@ -80,7 +80,7 @@ class CameraAddMessages(CameraQueueEndpoint):
         onvif_username = params['onvif_settings']['username'] if 'username' in params['onvif_settings'] else None
         onvif_password = params['onvif_settings']['password'] if 'password' in params['onvif_settings'] else None
         enabled = params['enabled'] if 'enabled' in params else True
-        uid = params['camera_digit']
+        uuid = params['camera_digit']
 
         # for backward compatibility
         storage_indefinitely = True if storage_days == 1000 else False
@@ -129,7 +129,7 @@ class CameraAddMessages(CameraQueueEndpoint):
             'onvif_port': onvif_port,
             'onvif_username': onvif_username,
             'onvif_password': onvif_password,
-            'uid': uid
+            'uuid': uuid
             # 'storage'
         }
 
@@ -179,7 +179,7 @@ class CameraAddMessages(CameraQueueEndpoint):
             self.send_error_response(msg)
             return
 
-        self.send_data_response({'camera_id': camera.time_uid, 'camera_digit': camera.uid, 'success': True})
+        self.send_data_response({'camera_id': camera.time_uuid, 'camera_digit': camera.uuid, 'success': True})
 
 
 class CameraUpdateMessages(CameraQueueEndpoint):
@@ -230,7 +230,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
         camera_id = message['camera_digit']
 
         try:
-            camera = Camera.objects.get(uid=camera_id)
+            camera = Camera.objects.get(uuid=camera_id)
             if not camera.from_queue_api:
                 camera.from_queue_api = True
                 camera.save()
@@ -250,7 +250,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
             'address_secondary']
         analysis_type = params['analysis_type'] if 'analysis_type' in params else camera_repr['analysis']
         enabled = params['enabled'] if 'enabled' in params else camera_repr['is_active']
-        uid = params['camera_digit'] if 'camera_digit' in params else camera_repr['uid']
+        uuid = params['camera_digit'] if 'camera_digit' in params else camera_repr['uuid']
         if 'onvif_settings' in params:
             onvif_port = params['onvif_settings']['port'] if 'port' in params['onvif_settings'] else camera_repr[
                 'onvif_port']
@@ -356,7 +356,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
         camera_repr['onvif_username'] = onvif_username
         camera_repr['onvif_password'] = onvif_password
         camera_repr['is_active'] = enabled
-        camera_repr['uid'] = uid
+        camera_repr['uuid'] = uuid
 
         CameraSerializer().update(camera, camera_repr)
 
@@ -366,7 +366,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
         #            self.send_error_response(msg)
         #            return
 
-        self.send_data_response({'camera_digit': camera.uid, 'camera_id': camera.time_uid, 'success': True})
+        self.send_data_response({'camera_digit': camera.uuid, 'camera_id': camera.time_uuid, 'success': True})
 
 
 class CameraListMessages(QueueEndpoint):
@@ -386,13 +386,13 @@ class CameraListMessages(QueueEndpoint):
         for cam in all_cameras:
             stream_address = 'rtmp://{host}:1935/vasrc/{cam}'.format(
                 host=cam.server.address,
-                cam=cam.uid
+                cam=cam.time_uuid
             )
 
             supervisor_cameras = get_supervisor_processes()['cameras']
 
             try:
-                status = supervisor_cameras[cam.uid]['status']
+                status = supervisor_cameras[cam.uuid]['status']
             except KeyError:
                 status = 'DISABLED'
             # for x in supervisor_cameras:
@@ -404,8 +404,8 @@ class CameraListMessages(QueueEndpoint):
             #         status = 'DISABLED'
 
             camera_list.append({
-                'camera_id': cam.time_uid,
-                'camera_digit': cam.uid,
+                'camera_id': cam.time_uuid,
+                'camera_digit': cam.uuid,
                 'name': cam.name,
                 'address_primary': cam.address,
                 # 'address_secondary': cam.address_secondary,
@@ -450,7 +450,7 @@ class CameraSetRecordingMessages(CameraQueueEndpoint):
         camera_id = params['camera_digit']
 
         try:
-            camera = Camera.objects.get(uid=camera_id)
+            camera = Camera.objects.get(uuid=camera_id)
             if not camera.from_queue_api:
                 camera.from_queue_api = True
                 camera.save()
@@ -495,7 +495,7 @@ class CameraDeleteMessages(CameraQueueEndpoint):
 
         print('params', params, flush=True)
 
-        camera = Camera.objects.filter(uid=params['camera_digit']).first()
+        camera = Camera.objects.filter(uuid=params['camera_digit']).first()
 
         if not camera:
             error = RequestParamValidationError('camera with id {id} not found'.format(id=params['camera_digit']))
@@ -536,8 +536,8 @@ class CameraDeleteMessages(CameraQueueEndpoint):
                     stop_job_id=str(camera.schedule_job_stop)
                 )
 
-            camera_digit = camera.uid
-            camera_id = camera.time_uid
+            camera_digit = camera.uuid
+            camera_id = camera.time_uuid
             camera.delete()
 
             if camera_group_to_delete:

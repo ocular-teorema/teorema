@@ -26,8 +26,8 @@ class EventsSendMessage(EventQueueEndpoint):
 
         message = {
             'type': self.response_message_type,
-            'camera_id': camera.time_uid,
-            'camera_digit': camera.uid,
+            'camera_id': camera.time_uuid,
+            'camera_digit': camera.uuid,
             'data': {
                 'event_id': data['id'],
                 'event_start_timestamp': data['start_timestamp'],
