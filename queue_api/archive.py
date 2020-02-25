@@ -1,6 +1,8 @@
 import requests
 import json
 import psycopg2
+import datetime
+import os
 
 from theorema.cameras.models import Server
 
@@ -79,6 +81,7 @@ class ArchiveQueueEndpoint(QueueEndpoint):
 class VideosGetMessage(ArchiveQueueEndpoint):
     response_topic = '/archive/video'
     response_message_type = 'archive_video'
+    VIDEO_DIR = '/home/_VideoArchive'
 
     def handle_request(self, params):
         print('message received', flush=True)
@@ -105,27 +108,59 @@ class VideosGetMessage(ArchiveQueueEndpoint):
             data['stop_timestamp']) + 600
 
         query_params = {
-            'startTs': startTs * 1000,
-            'endTs': endTs * 1000,
-            'cameras': camera_query,
             'skip': 0 if 'skip' not in data.keys() else data['skip'],
-            'limit': 10000 if 'limit' not in data.keys() else data['limit']
+            'limit': 0 if 'limit' not in data.keys() else data['limit']
         }
 
-        response = requests.get('http://{}:5005/archive_video'.format(self.default_serv.address), params=query_params)
+        start_time = startTs * 1000
+        end_time = endTs * 1000
+        cameras_list = camera_query.split(',')
+        skip = query_params['skip'] if query_params['skip'] else 0
+        limit = query_params['limit'] if query_params['limit'] else 'ALL'
 
-        response_data = json.loads(response.content.decode())
-        data = {'videos': []}
-        for video in response_data:
-            video_data = {
-                'id': video['id'],
-                'camera': video['cam'],
-                'start_timestamp': video['start_posix_time'],
-                'stop_timestamp': video['end_posix_time'],
-                'file_size': video['fileSize'],
-                'path': video['archivePostfix'],
-            }
-            data['videos'].append(video_data)
+
+        start_posix_time = ' and  start_posix_time >=' + str(start_time)[:-3]
+        end_posix_time = ' and end_posix_time <=' + str(end_time)[:-3]
+
+        conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
+        cur = conn.cursor()
+
+        cameras = []
+        for x in range(len(cameras_list)):
+            cameras.append("'cam{}'".format(cameras_list[x]))
+
+        cameras_database = 'records.cam in ' + '({})'.format(', '.join(cameras))
+
+        db_query_str = (
+                    "select start_time,end_time,date,video_archive,cam,id,start_posix_time,end_posix_time from records where {cam}"
+                    .format(cam=cameras_database) + str(start_posix_time) + str(end_posix_time)
+                    + ' order by start_posix_time offset {offset_int} limit {limit_int};'.format(offset_int=skip,
+                                                                                           limit_int=limit))
+        print(db_query_str, flush=True)
+
+        cur.execute(db_query_str)
+        rows = cur.fetchall()
+        conn.close()
+
+        result = []
+        for record in rows:
+            archive_path = record[3]
+            full_path = os.path.join(self.VIDEO_DIR, archive_path[1:])
+            try:
+                fs = os.stat(full_path).st_size
+            except FileNotFoundError:
+                fs = 0
+
+            result.append({
+                'path': archive_path,
+                'camera': record[4],
+                'id': record[5],
+                'file_size': fs,
+                'start_timestamp': record[6],
+                'stop_timestamp': record[7]
+            })
+
+        data = {'videos': result}
 
         self.send_data_response(data)
         return
