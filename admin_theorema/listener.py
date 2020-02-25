@@ -7,7 +7,7 @@ import time
 import json
 from subprocess import Popen, PIPE
 from flask import Flask, request
-from flask_restful import Resource, Api
+from flask_restful import Resource, Api, reqparse
 import socket
 import datetime
 import requests
@@ -44,6 +44,7 @@ SUPERVISOR_ERROR_TEXT = '''
 
 CAM_PREFIX = 'cam'
 QUAD_PREFIX = 'quad'
+VIDEO_DIR = '/home/_VideoArchive'
 
 def get_obj_name(numeric_id, obj_type):
     return obj_type + str(numeric_id)
@@ -67,12 +68,16 @@ def save_cam_config(path, req):
         f.write(TEMPLATE.format(
             port = req['port'],
             id = req['id'],
+            full_id=req['rtmp_video_url'].split('/')[-1],
             name = req['name'],
             address = req['address'],
+            ws_address=req['ws_video_url'],
+            rmtp_address=req['rtmp_video_url'],
+            server_address=req['server_address'][:-5],
             fps = 0, # req['fps']
             storage_life = req['storage_life'] if not req['indefinitely'] else 1000,
             compress_level = req['compress_level'] + 27,
-            downscale_coeff = 0.25, #[0.5, 0.3, 0.25, 0.15, 0.15, 0.15][req['resolution'] - 1],
+            downscale_coeff = 0, #[0.5, 0.3, 0.25, 0.15, 0.15, 0.15][req['resolution'] - 1],
             global_scale = 0.5, #[0.5, 0.5, 0.5, 0.5, 0.25, 0.125][req['resolution'] - 1],
             motion_analysis = 'true' if req['analysis'] > 2 else 'false',
             diff_analysis = 'true' if req['analysis'] > 1 else 'false',
@@ -93,12 +98,15 @@ def save_quad_config(path, req):
                 "borderWidth":  4,
                 "camList": [
                         {
-                                "name": cam['name'],
+                                "name": cam['name'] + cam['add_time'],
+                                # "name": cam['name'],
                                 "posX": float(cam['posX']),
                                 "posY": float(cam['posY']),
                                 "width": float(cam['width']),
                                 "height": float(cam['height']),
-                                "streamUrl": 'rtmp://localhost:1935/vasrc/cam%s' % cam['port']
+                                "streamUrl": 'rtmp://%s:1935/vasrc/cam%s' % (cam['server_address'], str(cam['port']) + cam['add_time']),
+                            # "streamUrl": 'rtmp://%s:1935/vasrc/cam%s' % (
+                            # cam['server_address'], str(cam['port']))
                         } for cam in req['cameras']
                 ]
         }, indent=4))
@@ -136,8 +144,14 @@ class Cam(Resource):
     @with_lock
     def post(self):
         req = request.get_json()
+        req['server_address'] = request.host
         obj_type = req.get('type', 'cam')
-        obj_name = get_obj_name(req['id'], obj_type)
+        # obj_name = get_obj_name(req['id'], obj_type, req['add_time'])
+        if obj_type != 'cam':
+            obj_name = get_obj_name(req['id'], obj_type)
+        else:
+            obj_name = get_obj_name(str(req['id']) + req['add_time'], obj_type)
+        # obj_name = get_obj_name(req['id'], obj_type)
         path = get_path(obj_name)
         try:
             os.makedirs(path)
@@ -156,26 +170,39 @@ class Cam(Resource):
     def delete(self):
         req = request.get_json()
         obj_type = req.get('type', 'cam')
-        obj_name = get_obj_name(req['id'], obj_type)
+        # obj_name = get_obj_name(req['id'], obj_type, req['add_time'])
+        if obj_type != 'cam':
+            obj_name = get_obj_name(req['id'], obj_type)
+        else:
+            obj_name = get_obj_name(str(req['id']) + req['add_time'], obj_type)
+        # obj_name = get_obj_name(req['id'], obj_type)
         path = get_path(obj_name)
         try:
             del_autostart(obj_name)
         except Exception as e:
             print('\n'.join(traceback.format_exception(*sys.exc_info())), flush=True)
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
-        try: 
+        try:
             delete_path(path)
         except FileNotFoundError as e:
-            pass 
+            pass
         return {'status': 0}
 
     @with_lock
     def patch(self):
         req = request.get_json()
+        req['server_address'] = request.host
         obj_type = req.get('type', 'cam')
-        obj_name = get_obj_name(req['id'], obj_type)
+        # obj_name = get_obj_name(req['id'], obj_type, req['add_time'])
+        if obj_type != 'cam':
+            obj_name = get_obj_name(req['id'], obj_type)
+        else:
+            obj_name = get_obj_name(str(req['id']) + req['add_time'], obj_type)
+        # obj_name = get_obj_name(req['id'], obj_type)
         path = get_path(obj_name)
         try:
+            if not os.path.exists(path):
+                os.makedirs(path)
             save_config(obj_type, path, req)
             is_active = req.get('is_active', 1)
             if is_active and 'program:%s'%obj_name in config.sections():
@@ -192,7 +219,7 @@ class Cam(Resource):
         return {'status': 0}
 
 
-class Stat(Resource):
+class Stat_fs(Resource):
     def get(self):
         try:
             return {
@@ -201,6 +228,62 @@ class Stat(Resource):
             }
         except Exception as e:
             return {'status': 1, 'message': '\n'.join(traceback.format_exception(*sys.exc_info()))}
+
+
+class Stat(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('startTs', type=str)
+        parser.add_argument('endTs', type=str)
+        parser.add_argument('cameras', type=str)
+        args = parser.parse_args()
+        print(args, flush=True)
+
+        start_time = args['startTs']
+        end_time = args['endTs']
+        cameras_list = args['cameras'].split(',')
+        conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
+        cur = conn.cursor()
+
+        cameras = []
+        for x in range(len(cameras_list)):
+            cameras.append("'cam{}'".format(cameras_list[x]))
+
+        cameras_database = 'events.cam in ' + '({})'.format(', '.join(cameras))
+
+        cur.execute("select type, confidence, reaction  from events where {cam}".format(cam=cameras_database)
+                    + ' and  start_timestamp >=' + str(start_time) + ' and ' + 'end_timestamp <=' + str(end_time) + ';')
+
+        rows = cur.fetchall()
+        conn.close()
+
+        react_stat = {'-1': 0, '1': 0, '2': 0}
+        types_stat = {'1': 0, '2': 0, '4': 0, '8': 0}
+        confidence_stat = {'low': 0, 'medium': 0, 'high': 0}
+
+        for event in rows:
+            event_type = event[0]
+            confidence = event[1]
+            reaction = event[2]
+
+            types_stat[str(event_type)] += 1
+            react_stat[str(reaction)] += 1
+
+            if confidence >= 80:
+                confidence_stat['high'] += 1
+            elif confidence >= 50:
+                confidence_stat['medium'] += 1
+            else:
+                confidence_stat['low'] += 1
+
+        result = {
+            "react": react_stat,
+            "types": types_stat,
+            "confidence": confidence_stat
+        }
+        print(result)
+        return result
+
 
 def get_time(mill):
     hours = mill//3600000
@@ -296,7 +379,168 @@ class DatabaseEventsData(Resource):
             list.append({'id':event[0], 'cam':event[1], 'archiveStartHint':event[2], 'archiveEndHint':event[3], 'startTimeMS':event[4],'endTimeMS':event[5],'eventType':event[6], 'confidence':event[7], 'reaction': event[8], 'date': event[9], 'offset': event[10]})
         conn.close()
         return list
-        
+
+
+class ArchiveEvents(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('startTs', type=str)
+        parser.add_argument('endTs', type=str)
+        parser.add_argument('cameras', type=str)
+        parser.add_argument('react', type=str)
+        parser.add_argument('types', type=str)
+        parser.add_argument('conf_low', type=int)
+        parser.add_argument('conf_medium', type=int)
+        parser.add_argument('conf_high', type=int)
+        parser.add_argument('skip', type=int)
+        parser.add_argument('limit', type=int)
+        args = parser.parse_args()
+        print(args, flush=True)
+
+        start_time = args['startTs']
+        end_time = args['endTs']
+        cameras_list = args['cameras'].split(',')
+        reactions = args['react']
+        event_types = args['types']
+        conf_low = args['conf_low']
+        conf_medium = args['conf_medium']
+        conf_high = args['conf_high']
+        skip = args['skip'] if args['skip'] else 0
+        limit = args['limit'] if args['limit'] else 100
+
+        conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
+        cur = conn.cursor()
+
+        cameras = []
+        for x in range(len(cameras_list)):
+            cameras.append("'cam{}'".format(cameras_list[x]))
+
+        cameras_database = 'events.cam in ' + '({})'.format(', '.join(cameras))
+        types_db = ' and type in ({})'.format(event_types)
+        reacts_db = ' and reaction in ({})'.format(reactions)
+
+        confidence_db = ' and confidence '
+
+        if conf_low:
+            if conf_medium:
+                if not conf_high:
+                    confidence_db += '< 80 '
+                else:
+                    confidence_db = ''
+            else:
+                confidence_db += '< 50 ' if not conf_high else 'not between 50 and 79 '
+        else:
+            if conf_medium:
+                confidence_db += 'between 50 and 79 ' if not conf_high else '>= 59'
+            else:
+                if conf_high:
+                    confidence_db += '>= 80 '
+                else:
+                    return {'status': 1, 'message': 'at least one confidence level must be passed'}
+
+        db_query_str = ("select id,cam,archive_file1,archive_file2,start_timestamp,end_timestamp,type,confidence,reaction,date,file_offset_sec from events where {cam}"
+                        .format(cam=cameras_database) + ' and  start_timestamp >=' + str(start_time) + ' and ' + 'end_timestamp <=' + str(end_time)
+                        + confidence_db + types_db + reacts_db + 'order by start_timestamp desc offset {offset_int} limit {limit_int};'
+                        .format(offset_int=skip, limit_int=limit))
+
+        cur.execute(db_query_str)
+        rows = cur.fetchall()
+        conn.close()
+
+
+        result = []
+        for event in rows:
+            result.append({'id': event[0],
+                           'cam': event[1],
+                           'archiveStartHint': event[2],
+                           'archiveEndHint': event[3],
+                           'startTs': event[4],
+                           'endTs': event[5],
+                           'type': event[6],
+                           'conf': event[7],
+                           'react': event[8],
+                           'date': event[9],
+                           'offset': event[10]
+                           }
+                          )
+        return result
+
+
+class ArchiveVideo(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('startTs', type=str)
+        parser.add_argument('endTs', type=str)
+        parser.add_argument('cameras', type=str)
+        parser.add_argument('skip', type=int)
+        parser.add_argument('limit', type=int)
+        args = parser.parse_args()
+        print(args, flush=True)
+
+        start_time = args['startTs']
+        end_time = args['endTs']
+        cameras_list = args['cameras'].split(',')
+        skip = args['skip'] if args['skip'] else 0
+        limit = args['limit'] if args['limit'] else 100
+
+        start_dt = datetime.datetime.fromtimestamp(int(start_time[:-3]))
+        end_dt = datetime.datetime.fromtimestamp(int(end_time[:-3]))
+        start_dt_time = start_dt.time().strftime('%H:%M')
+        end_dt_time = end_dt.time().strftime('%H:%M')
+        start_dt_date = start_dt.date().strftime('%Y-%m-%d')
+        end_dt_date = end_dt.date().strftime('%Y-%m-%d')
+
+        start_time_db = ' and start_time >=' + str((int(start_dt_time[0:2]) * 60 + int(start_dt_time[3:])) * 60 * 999)\
+            if start_dt_time != '00:00' else ''
+        end_time_db = ' and end_time <=' + str((int(end_dt_time[0:2]) * 60 + int(end_dt_time[3:])) * 60 * 1001) \
+            if end_dt_time != '00:00' else ''
+
+        start_date_db = ' and date >= ' + str(DateTime(start_dt_date.replace('-', '/') + ' UTC').JulianDay())
+        end_date_db = ' and date <= ' + str(DateTime(end_dt_date.replace('-', '/') + ' UTC').JulianDay())
+
+        start_posix_time = ' and  start_posix_time >=' + str(start_time)[:-3]
+        end_posix_time = ' and end_posix_time <=' + str(end_time)[:-3]
+
+        conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
+        cur = conn.cursor()
+
+        cameras = []
+        for x in range(len(cameras_list)):
+            cameras.append("'cam{}'".format(cameras_list[x]))
+
+        cameras_database = 'records.cam in ' + '({})'.format(', '.join(cameras))
+
+        db_query_str = ("select start_time,end_time,date,video_archive,cam,id,start_posix_time,end_posix_time from records where {cam}"
+                        .format(cam=cameras_database) + str(start_posix_time) + str(end_posix_time)
+                        + ' order by start_time offset {offset_int} limit {limit_int};'.format(offset_int=skip, limit_int=limit))
+        print(db_query_str, flush=True)
+
+        cur.execute(db_query_str)
+        rows = cur.fetchall()
+        conn.close()
+
+        result = []
+        for record in rows:
+            archive_path = record[3]
+            full_path = os.path.join(VIDEO_DIR, archive_path[1:])
+            try:
+                fs = os.stat(full_path).st_size
+            except FileNotFoundError:
+                fs = 0
+
+            result.append({
+                'start': record[0],
+                'end': record[1],
+                'date': record[2],
+                'archivePostfix': archive_path,
+                'cam': record[4],
+                'id': record[5],
+                'fileSize': fs
+            })
+
+        return result
+
+
 def save_supervisor_config():
     with open(SUPERVISOR_CAMERAS_CONF, 'w') as f:
         config.write(f)
@@ -335,7 +579,10 @@ app = Flask(__name__)
 api = Api(app)
 #api = CORS(api)
 api.add_resource(Cam, '/')
-api.add_resource(Stat, '/stat')
+api.add_resource(Stat_fs, '/stat_fs')
+api.add_resource(Stat, '/stat', endpoint='events_stat')
+api.add_resource(ArchiveEvents, '/archive', endpoint='events_archive')
+api.add_resource(ArchiveVideo, '/archive_video', endpoint='video_archive')
 api.add_resource(DatabaseData, '/db/<string:data>', endpoint='db_data')
 api.add_resource(DatabaseEventsData, '/archivedb/<string:data>', endpoint='db_arhcive_data')
 api.add_resource(Thumb, '/thumb/<int:cam_id>/<int:time>/')

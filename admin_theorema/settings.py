@@ -23,18 +23,19 @@ Valid%20motion%20bin%20height=8
 Use%20virtual%20date=false
 DebugImageIndex=0
 Debug%20objects=false
-Produce%20Debug=false
+Produce%20debug=false
 
 Motion%20based%20analysis={motion_analysis}
 Difference%20based%20analysis={diff_analysis}
+False%20event%20coeff=20.0
 
 [PipelineParams]
 
-Pipeline%20Name=cam{id}
+Pipeline%20Name={full_id}
 Camera%20name={name}
 Input%20Stream%20Url={address}
-Output%20Url=ws://localhost:{output_port}
-Source%20Output%20Url=rtmp://localhost:1935/vasrc/cam{id}
+Output%20Url={ws_address}
+Source%20Output%20Url={rmtp_address}
 
 Archive%20Path={archive_path}
 Database%20Path=video_analytics
@@ -47,7 +48,7 @@ Processing%20Interval%20Sec=600
 Statistic%20Interval%20Sec=600
 
 
-Server%20address=127.0.0.1
+Server%20address={server_address}
 Notification%20smtp%20address=
 Notification%20smtp%20login=
 Notification%20smtp%20password=

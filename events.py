@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import datetime
 
 from twisted.internet import reactor, protocol, defer, task, defer
 from twisted.python import log
@@ -58,10 +59,30 @@ class WSP(WebSocketServerProtocol):
             self.cameras = set(message['subscribe'])
             print('subscribe ok', flush=True)
         if 'reaction' in message:
-            server_address = Camera.objects.get(id=message['camera_id']).server.address
+            server_address = Camera.objects.get(id=int(message['camera_id'].split('_')[0])).server.address
             if server_address in worker_servers:
                 worker_servers[server_address].transport.write(payload)
                 print('reaction sent to worker server', flush=True)
+        if 'quad_id' in message:
+            quad = Quadrator.objects.filter(id=message['quad_id']).first()
+            if quad:
+                if not quad.is_active:
+                    not_started = os.system('supervisorctl start quad' + str(quad.id))
+                    # if not_started:
+                    #     print(not_started, flush=True)
+                    #     print('quad' + str(quad.id), 'did not start', flush=True)
+                    # else:
+                    quad.is_active = True
+                    print('quad' + str(quad.id), 'started', flush=True)
+                quad.last_ping_time = datetime.datetime.now().timestamp()
+                quad.save()
+            # try:
+            #     for c in factory.connections_list:
+            #         print('sending pong', flush=True)
+            #         c.sendMessage(payload, False)
+            #         print('sent pong', flush=True)
+            # except:
+            #     print('fail in pong', flush=True)
         return
 
     def doPing(self):

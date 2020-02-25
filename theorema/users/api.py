@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import User, CamSet
 from .serializers import UserSerializer, CamSetSerializer
 from theorema.cameras.models import Camera, CameraGroup
-from theorema.cameras.serializers import CameraSerializer, CameraGroupSerializer
+from theorema.cameras.serializers import CameraSerializer, CameraGroupSerializer,QuadratorSerializer
 
 class UserViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -77,6 +77,7 @@ def user_cameras(request):
             camera_repr['output_url'] = 'rtmp://{}:1935/videoanalytic/'.format(serv_addr)
             camera_repr['output_vascaled_url'] = 'rtmp://{}:1935/vascaled/'.format(serv_addr)
             camera_repr['output_vasrc_url'] = 'rtmp://{}:1935/vasrc/'.format(serv_addr)
+            camera_repr['unique_id'] = str(camera_object.id) + camera_object.add_time
 #            camera_repr['events_url'] = 'http://{}:{}/'.format(camera_object.server.address, camera_object.port)
 
 #            camera_repr['http_output_url'] = '/videoanalytic/cam{}/index.m3u8'.format(camera_object.id)

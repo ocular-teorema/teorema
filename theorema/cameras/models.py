@@ -3,6 +3,7 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.postgres.fields import JSONField
 from theorema.orgs.models import Organization
+import datetime
 
 SERVER_TYPES = [
     ('full', 'full'),
@@ -19,12 +20,15 @@ class Server(models.Model):
 
 
 class CameraGroup(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    organization = models.ForeignKey(Organization)    
-    
+    name = models.CharField(max_length=100)
+    organization = models.ForeignKey(Organization)
+
+
+
+
 CameraAnalysisTypes = [
     (1, 'Full'),
-    (2, 'Move'), 
+    (2, 'Move'),
     (3, 'Record'),
 ]
 
@@ -60,6 +64,7 @@ class Camera(models.Model):
     notify_send_sms = models.BooleanField(default=False)
     indefinitely = models.BooleanField(default=False)
     archive_path=models.CharField(max_length=512, blank=True, null=True)
+    add_time = models.CharField(max_length=50, default='')
 
 
 class Camera2CameraGroup(models.Model):
@@ -89,6 +94,8 @@ class Quadrator(models.Model):
     port = models.IntegerField()
     organization = models.ForeignKey(Organization)
     server = models.ForeignKey(Server)
+    last_ping_time = models.IntegerField(default=datetime.datetime.now().timestamp())
+    is_active = models.BooleanField(default=True)
 
 
 class Camera2Quadrator(models.Model):
@@ -98,4 +105,3 @@ class Camera2Quadrator(models.Model):
     y = models.IntegerField(default=0)
     cols = models.IntegerField(default=1)
     rows = models.IntegerField(default=1)
-

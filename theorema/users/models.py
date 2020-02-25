@@ -17,6 +17,7 @@ class User(AbstractUser):
     cameras_access = JSONField(null=True)
     phone=models.CharField(max_length=30, blank=True)
     timezone = models.CharField(max_length=256, blank=True, choices=TIMEZONES)
+    quadrator_access = JSONField(null=True)
 
 
 #https://stackoverflow.com/questions/26786512/how-to-see-if-a-field-changed-in-model-save-method
