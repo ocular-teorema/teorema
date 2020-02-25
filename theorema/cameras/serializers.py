@@ -3,6 +3,8 @@ import sys
 import requests
 import json
 import random
+from math import floor
+
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
 from .models import Server, Camera, CameraGroup, NotificationCamera, Quadrator, Camera2Quadrator
@@ -220,10 +222,10 @@ class QuadratorSerializer(serializers.ModelSerializer):
                 cam['quadrator'] = res;
                 worker_data['cameras'].append({
                     'name': 'cam%s' % c.id,
-                    'posX': int(round(cam['x'] * res.output_width / res.num_cam_x)),
-                    'posY': int(round(cam['y'] * res.output_height / res.num_cam_y)),
-                    'width': int(round(cam['cols'] * res.output_width / res.num_cam_x)),
-                    'height': int(round(cam['rows'] * res.output_height / res.num_cam_y)),
+                    'posX': floor(cam['x'] * res.output_width / res.num_cam_x),
+                    'posY': floor(cam['y'] * res.output_height / res.num_cam_y),
+                    'width': floor(cam['cols'] * res.output_width / res.num_cam_x),
+                    'height': floor(cam['rows'] * res.output_height / res.num_cam_y),
                     'port': c.id
                 })
             print('worker_data cameras:', worker_data['cameras']);
@@ -278,10 +280,10 @@ class QuadratorSerializer(serializers.ModelSerializer):
                 cam['quadrator'] = res;
                 worker_data['cameras'].append({
                     'name': 'cam%s' % c.id,
-                    'posX': int(round(cam['x'] * res.output_width / res.num_cam_x)),
-                    'posY': int(round(cam['y'] * res.output_height / res.num_cam_y)),
-                    'width': int(round(cam['cols'] * res.output_width / res.num_cam_x)),
-                    'height': int(round(cam['rows'] * res.output_height / res.num_cam_y)),
+                    'posX': floor(cam['x'] * res.output_width / res.num_cam_x),
+                    'posY': floor(cam['y'] * res.output_height / res.num_cam_y),
+                    'width': floor(cam['cols'] * res.output_width / res.num_cam_x),
+                    'height': floor(cam['rows'] * res.output_height / res.num_cam_y),
                     'port': c.id})
             print('worker_data cameras:', worker_data['cameras']);
             worker_data['port'] = quadrator.port
