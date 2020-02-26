@@ -294,10 +294,10 @@ class QuadratorSerializer(serializers.ModelSerializer):
                 cam['quadrator'] = res;
                 worker_data['cameras'].append({
                     'name': 'cam%s' % c.id,
-                    'posX': floor(cam['x'] * res.output_width / res.num_cam_x),
-                    'posY': floor(cam['y'] * res.output_height / res.num_cam_y),
-                    'width': floor(cam['cols'] * res.output_width / res.num_cam_x),
-                    'height': floor(cam['rows'] * res.output_height / res.num_cam_y),
+                    'posX': cam['x'] * floor(res.output_width / res.num_cam_x),
+                    'posY': cam['y'] * floor(res.output_height / res.num_cam_y),
+                    'width': cam['cols'] * floor(res.output_width / res.num_cam_x),
+                    'height': cam['rows'] * floor(res.output_height / res.num_cam_y),
                     'port': c.id,
                     'server_address': c.server.address,
                     'add_time': c.add_time})
@@ -366,10 +366,10 @@ class QuadratorSerializer(serializers.ModelSerializer):
                 cam['quadrator'] = res;
                 worker_data['cameras'].append({
                     'name': 'cam%s' % c.id,
-                    'posX': floor(cam['x'] * res.output_width / res.num_cam_x),
-                    'posY': floor(cam['y'] * res.output_height / res.num_cam_y),
-                    'width': floor(cam['cols'] * res.output_width / res.num_cam_x),
-                    'height': floor(cam['rows'] * res.output_height / res.num_cam_y),
+                    'posX': cam['x'] * floor(res.output_width / res.num_cam_x),
+                    'posY': cam['y'] * floor(res.output_height / res.num_cam_y),
+                    'width': cam['cols'] * floor(res.output_width / res.num_cam_x),
+                    'height': cam['rows'] * floor(res.output_height / res.num_cam_y),
                     'port': c.id,
                     'server_address': c.server.address,
                     'add_time': c.add_time})
