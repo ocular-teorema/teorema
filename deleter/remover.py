@@ -25,7 +25,7 @@ def deleter_main():
         return
     # return list
 
-    # deleter_old([i['path'] for i in videos])
+    deleter_old([i['path'] for i in videos])
 
     files_by_hour = map(find_size, [i['path'] for i in videos])
     total_by_hour = (sum(filter(None, files_by_hour)))
@@ -76,18 +76,18 @@ def find_all_files(_PATH):
 def get_video_date(video):
     video_name = video[:-4]
     date = {
-        'day': video_name.split('_')[3],
-        'month': video_name.split('_')[4],
-        'year': video_name.split('_')[5],
-        'hour': video_name.split('_')[8],
-        'minute': video_name.split('_')[9],
-        'second': video_name.split('_')[10]
+        'day': int(video_name.split('_')[3]),
+        'month': int(video_name.split('_')[4]),
+        'year': int(video_name.split('_')[5]),
+        'hour': int(video_name.split('_')[8]),
+        'minute': int(video_name.split('_')[9]),
+        'second': int(video_name.split('_')[10])
     }
     return datetime.datetime(**date)
 
 
 def deleter_old(videos):
-    videos = ['/' + '/'.join(i['path'].split('/')[3:]) for i in videos]
+    videos = ['/' + '/'.join(i.split('/')[3:]) for i in videos]
     conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
     cur = conn.cursor()
 
