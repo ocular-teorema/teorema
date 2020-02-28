@@ -91,6 +91,6 @@ def deleter_old(videos):
     conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
     cur = conn.cursor()
 
-    cur.execute('delete from records where video_archive not in %s;', (videos,))
+    cur.execute('delete from records where video_archive not in %s;', (tuple(videos),))
     conn.commit()
     conn.close()
