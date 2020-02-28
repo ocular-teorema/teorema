@@ -4,6 +4,7 @@ from deleter.lib.file_size import find_size
 from deleter.lib.delete_handler import find_free_space, delete_handler
 import datetime
 import configparser
+import psycopg2
 
 
 # bite
@@ -24,6 +25,7 @@ def deleter_main():
         return
     # return list
 
+    # deleter_old([i['path'] for i in videos])
 
     files_by_hour = map(find_size, [i['path'] for i in videos])
     total_by_hour = (sum(filter(None, files_by_hour)))
@@ -82,3 +84,13 @@ def get_video_date(video):
         'second': video_name.split('_')[10]
     }
     return datetime.datetime(**date)
+
+
+def deleter_old(videos):
+    videos = ['/' + '/'.join(i['path'].split('/')[3:]) for i in videos]
+    conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
+    cur = conn.cursor()
+
+    cur.execute('delete from records where video_archive not in %s;', (videos,))
+    conn.commit()
+    conn.close()
