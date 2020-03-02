@@ -6,7 +6,6 @@ import datetime
 import configparser
 import psycopg2
 
-
 # bite
 ratio = 1000000000
 # basic file weigth file in directory
@@ -35,7 +34,6 @@ def deleter_main():
     limit_for_delete = total_by_hour * 7
     print('limit today is' + str(limit_for_delete / ratio) + 'gb', 'at',
           str(datetime.datetime.isoformat(datetime.datetime.now(), sep='_'))[:19], flush=True)
-
 
     sorted_videos = sort_by_storage(videos)
 
@@ -92,5 +90,7 @@ def deleter_old(videos):
     cur = conn.cursor()
 
     cur.execute('delete from records where video_archive not in %s;', (tuple(videos),))
+    cur.execute('delete from events where archive_file1 not in %s or archive_file2 not in %s',
+                (tuple(videos), tuple(videos)))
     conn.commit()
     conn.close()
