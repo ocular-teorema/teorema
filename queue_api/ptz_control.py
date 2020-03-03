@@ -220,7 +220,13 @@ class ContinuousMoveMessage(PtzControlQueueEndpoint):
 
                 print('move request', move_request, flush=True)
 
-                ptz.ContinuousMove(move_request)
+                try:
+                    ptz.ContinuousMove(move_request)
+                except zeep.exceptions.Fault:
+                    move_request.Velocity.PanTilt.space = None
+                    move_request.Velocity.Zoom.space = None
+
+                    ptz.ContinuousMove(move_request)
 
             except Exception as e:
                 print('some error', flush=True)
@@ -325,7 +331,14 @@ class RelativeMoveMessage(PtzControlQueueEndpoint):
 
                 print('move request', move_request, flush=True)
 
-                ptz.AbsoluteMove(move_request)
+                try:
+                    ptz.AbsoluteMove(move_request)
+                except zeep.exceptions.Fault:
+                    move_request.Velocity.PanTilt.space = None
+                    move_request.Velocity.Zoom.space = None
+
+                    ptz.AbsoluteMove(move_request)
+
                 time.sleep(3)
                 ptz.Stop({'ProfileToken': move_request.ProfileToken})
 
