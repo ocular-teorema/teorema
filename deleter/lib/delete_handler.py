@@ -9,7 +9,7 @@ def delete_file(filename):
     os.remove(filename)
 
 
-def find_free_space():
+def find_free_space(all_directories):
     # values on some machine possible some devert
     # free size in bites
     st = os.statvfs('/home/_VideoArchive')
@@ -17,24 +17,25 @@ def find_free_space():
     return free
 
 
-def delete_handler(files, limit, middle_file, ratio, free_space=1, ):
+def delete_handler(files, limit, middle_file, ratio, all_directories, free_space=1, ):
     # count how many files need deleted
     conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
     cur = conn.cursor()
     counter = 0
-    delete_paths = [i['path'] for i in files]
+    # delete_paths = [i['path'] for i in files]
+    delete_paths = files
     print(str(len(files)) + ' files for delete', 'at', str(datetime.isoformat(datetime.now(), sep='_'))[:19],
           flush=True)
-    free_space = find_free_space()
+    free_space = find_free_space(all_directories)
     try:
         while free_space < limit:
-            free_space = find_free_space()
-            delete_file(delete_paths[counter])
-            video = '/' + '/'.join(delete_paths[counter].split('/')[3:])
+            free_space = find_free_space(all_directories)
+            delete_file(delete_paths[counter]['path'])
+            video = delete_paths[counter]['path'].split(delete_paths[counter]['root_path'])[-1]
             cur.execute("delete from records where video_archive=%s;", (video, ))
             cur.execute("delete from events where archive_file1=%s or archive_file2=%s;", (video, video))
             conn.commit()
-            print('success deleted', delete_paths[counter], flush=True)
+            print('success deleted', delete_paths[counter]['path'], flush=True)
             counter += 1
         else:
             conn.close()

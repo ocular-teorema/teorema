@@ -5,6 +5,16 @@ from deleter.lib.delete_handler import find_free_space, delete_handler
 import datetime
 import configparser
 import psycopg2
+import sys
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'theorema.settings')
+import django
+
+django.setup()
+
+from theorema.cameras.models import Camera
 
 # bite
 ratio = 1000000000
@@ -18,13 +28,14 @@ PROCESS_DIR = '/home/_processInstances'
 
 def deleter_main():
     # each func must me for single and call with map)
-    videos = find_all_files(VIDEO_DIR)
+    all_directories = list(Camera.objects.distinct('archive_path').values_list('archive_path', flat=True))
+    videos = find_all_files(all_directories)
     if videos == []:
         print('no videos', flush=True)
         return
     # return list
 
-    deleter_old([i['path'] for i in videos])
+    deleter_old(videos)
 
     files_by_hour = map(find_size, [i['path'] for i in videos])
     total_by_hour = (sum(filter(None, files_by_hour)))
@@ -37,11 +48,11 @@ def deleter_main():
 
     sorted_videos = sort_by_storage(videos)
 
-    free_space = find_free_space()
+    free_space = find_free_space(all_directories)
     print('free is' + str(free_space / ratio) + 'gb', 'at',
           str(datetime.datetime.isoformat(datetime.datetime.now(), sep='_'))[:19], flush=True)
 
-    delete_handler(sorted_videos, limit_for_delete, middle_file, ratio)
+    delete_handler(sorted_videos, limit_for_delete, middle_file, ratio, all_directories)
 
 
 def sort_by_storage(videos):
@@ -58,16 +69,18 @@ def get_storage_value(camera_name):
         return 1000
 
 
-def find_all_files(_PATH):
+def find_all_files(_PATHS):
     files = []
     # r=root, d=directories, f = files
-    for r, d, f in os.walk(_PATH):
-        for file in f:
-            if re.match(r'\w{1,3}.{1,30}_\d\d_\d\d_\d{4}___\d\d_\d\d_\d\d.mp4', file):
-                camera_name = r.split('/')[-1]
-                files.append({'path': os.path.join(r, file),
-                              'storage_days': get_storage_value(camera_name),
-                              'record_date': get_video_date(file)})
+    for _PATH in _PATHS:
+        for r, d, f in os.walk(_PATH):
+            for file in f:
+                if re.match(r'\w{1,3}.{1,30}_\d\d_\d\d_\d{4}___\d\d_\d\d_\d\d.mp4', file):
+                    camera_name = r.split('/')[-1]
+                    files.append({'path': os.path.join(r, file),
+                                  'root_path': _PATH,
+                                  'storage_days': get_storage_value(camera_name),
+                                  'record_date': get_video_date(file)})
     return files
 
 
@@ -85,7 +98,7 @@ def get_video_date(video):
 
 
 def deleter_old(videos):
-    videos = ['/' + '/'.join(i.split('/')[3:]) for i in videos]
+    videos = [video['path'].split(video['root_path'])[-1] for video in videos]
     conn = psycopg2.connect(host='localhost', dbname='video_analytics', user='va', password='theorema')
     cur = conn.cursor()
 
