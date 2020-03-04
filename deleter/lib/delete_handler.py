@@ -30,24 +30,22 @@ def delete_handler(files, limit, middle_file, ratio, free_space=1, ):
         while free_space < limit:
             free_space = find_free_space()
             delete_file(delete_paths[counter])
-            cur.execute("delete from records where video_archive=%s;",
-                        ('/' + '/'.join(delete_paths[counter].split('/')[3:])))
-            cur.execute("delete from events where archive_file1=%s or archive_file2=%s;",
-                        ('/' + '/'.join(delete_paths[counter].split('/')[3:]),
-                         '/' + '/'.join(delete_paths[counter].split('/')[3:])))
+            video = '/' + '/'.join(delete_paths[counter].split('/')[3:])
+            cur.execute("delete from records where video_archive=%s;", (video, ))
+            cur.execute("delete from events where archive_file1=%s or archive_file2=%s;", (video, video))
             conn.commit()
-            counter += 1
             print('success deleted', delete_paths[counter], flush=True)
+            counter += 1
         else:
             conn.close()
             print("you have enough space " + str(free_space / ratio) + 'gb', 'at',
                   str(datetime.isoformat(datetime.now(), sep='_'))[:19], flush=True)
             print('*' * 50, flush=True)
-            print('files' + str(counter) + 'deleted', 'at', str(datetime.isoformat(datetime.now(), sep='_'))[:19],
+            print(counter, 'files deleted at', str(datetime.isoformat(datetime.now(), sep='_'))[:19],
                   flush=True)
     except Exception as err:
         conn.close()
         print('error in deleting, message: {}'.format(str(err)), flush=True)
         print('*' * 50, flush=True)
-        print('files' + str(counter) + 'deleted', 'at', str(datetime.isoformat(datetime.now(), sep='_'))[:19],
+        print(counter, 'files deleted at', str(datetime.isoformat(datetime.now(), sep='_'))[:19],
               flush=True)
