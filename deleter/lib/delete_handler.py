@@ -32,7 +32,15 @@ def delete_handler(files, limit, middle_file, ratio, all_directories, free_space
             free_space = find_free_space(all_directories)
             delete_file(delete_paths[counter]['path'])
             video = delete_paths[counter]['path'].split(delete_paths[counter]['root_path'])[-1]
-            cur.execute("delete from records where video_archive=%s;", (video, ))
+            cur.execute("delete from records where video_archive=%s;", (video,))
+            cur.execute("select file_offset_sec from events where archive_file1=%s or archive_file2=%s;",
+                        (video, video))
+            for event in cur.fetchall():
+                event_file = os.path.join('/'.join(delete_paths[counter]['path'].split('/')[:-1]), 'alertFragments',
+                                   'alert' + str(event[0]) + '.mp4')
+                if os.path.isfile(event_file):
+                    delete_file(event_file)
+                    print(event_file, 'event deleted', flush=True)
             cur.execute("delete from events where archive_file1=%s or archive_file2=%s;", (video, video))
             conn.commit()
             print('success deleted', delete_paths[counter]['path'], flush=True)
