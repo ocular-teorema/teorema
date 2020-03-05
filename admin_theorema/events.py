@@ -64,9 +64,9 @@ class CamListener(Protocol):
                 if sender:
                     sender.transport.write(json.dumps(decoded_data).encode())
                     print('sent', flush=True)
-            elif 'error_code' in decoded_data:
-                log = CameraLog(**decoded_data)
-                log.save(using='error_logs')
+            elif 'errorMessage' in decoded_data:
+                # log = CameraLog(**decoded_data)
+                # log.save(using='error_logs')
                 event_message.cameras_log({'data': decoded_data})
                 print('error log saved and sent to queue', flush=True)
         except json.decoder.JSONDecodeError:
