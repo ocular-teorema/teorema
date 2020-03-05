@@ -2,7 +2,7 @@ from queue_api.common import QueueEndpoint
 import json
 from queue_api.common import base_send_in_queue
 from queue_api.messages import RequestParamValidationError
-from theorema.cameras.models import CameraLog
+from theorema.cameras.models import CameraLog, Camera
 import datetime
 
 
@@ -75,7 +75,7 @@ class LogsGetMessage(LogsQueueEndpoint):
         camera_logs = CameraLog.objects.using('error_logs').filter(error_time__gte=start_timestamp,
                                                                    error_time__lte=stop_timestamp,
                                                                    camera_id=camera_id).order_by('error_time')
-        if camera_logs.count() > 1:
+        if Camera.objects.filter(uid=camera_id).first():
             result = []
             for log in camera_logs:
                 result.append({
@@ -88,7 +88,6 @@ class LogsGetMessage(LogsQueueEndpoint):
             self.send_data_response(result)
             return {'message sent'}
         else:
-            error = RequestParamValidationError(
-                'errors from camera with id {id} not found'.format(id=camera_id))
+            error = RequestParamValidationError('camera with id {id} not found'.format(id=camera_id))
             self.send_error_response(error)
             return

@@ -1,5 +1,6 @@
 from queue_api.common import QueueEndpoint
 import json
+import os
 from queue_api.common import base_send_in_queue
 
 
@@ -28,7 +29,8 @@ class EventsSendMessage(EventQueueEndpoint):
                 'event_type': data['type'],
                 'confidence': data['confidence'],
                 'reaction': data['reaction'],
-                'is_finished': data['isFinished'] if 'isFinished' in data else False
+                'is_finished': data['isFinished'] if 'isFinished' in data else False,
+                'event_path': os.path.join('/', data['camera_id'], 'alertFragments', 'alert' + data['id'] + '.mp4')
             }
         }
 
