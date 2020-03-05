@@ -30,7 +30,7 @@ from queue_api.ptz_control import AbsoluteMoveMessage, ContinuousMoveMessage, Re
     SetHomeMessage, SetPresetMessage, GotoHomeMessage, GotoPresetMessage, GetPresetsMessage
 from queue_api.archive import VideosGetMessage
 from queue_api.events import EventsSendMessage
-from queue_api.cameras_logs import LogsSendMessage
+from queue_api.cameras_logs import LogsSendMessage, LogsGetMessage
 from queue_api.configuration import ConfigExportMessage, ConfigImportMessage, ConfigurationResetMessage
 from queue_api.scheduler import CameraScheduler
 from queue_api.messages import InvalidMessageStructureError, InvalidMessageTypeError
@@ -474,10 +474,17 @@ class PikaThread(threading.Thread):
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 
-    def cameras_log(self, message):
-        print('cameras log request', flush=True)
+    def cameras_log_event(self, message):
+        print('cameras log event', flush=True)
 
         cameras_request = LogsSendMessage()
+        cameras_request.handle_request(message)
+        print('message ok', flush=True)
+
+    def cameras_logs(self, message):
+        print('cameras logs request', flush=True)
+
+        cameras_request = LogsGetMessage()
         cameras_request.handle_request(message)
         print('message ok', flush=True)
 

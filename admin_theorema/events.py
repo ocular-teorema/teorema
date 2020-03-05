@@ -3,6 +3,8 @@ import os
 import json
 import configparser
 from functools import partial
+import re
+import datetime
 
 from twisted.internet.protocol import Protocol, ReconnectingClientFactory, Factory
 from twisted.internet import reactor
@@ -56,21 +58,25 @@ class CamListener(Protocol):
         #    print('fail in sending to api', flush=True)
         [x for x in cams if str(x['id']) == str(self.camera_id)][0]['connection'] = self # kill me
         try:
-            decoded_data = json.loads(data.strip(b'\0').decode())
-            decoded_data['camera_id'] = self.camera_id
-            if 'reaction' in decoded_data:
-                event_message.cameras_event({'data': decoded_data})
-                print('message sent to queue', flush=True)
-                if sender:
-                    sender.transport.write(json.dumps(decoded_data).encode())
-                    print('sent', flush=True)
-            elif 'errorMessage' in decoded_data:
-                # log = CameraLog(**decoded_data)
-                # log.save(using='error_logs')
-                event_message.cameras_log({'data': decoded_data})
-                print('error log saved and sent to queue', flush=True)
-        except json.decoder.JSONDecodeError:
-            pass
+            decoded_data = re.findall(r'{.*?}', data.decode())
+            for event in decoded_data:
+                event = json.loads(event)
+                # decoded_data = json.loads(data.strip(b'\0').decode())
+                event['camera_id'] = self.camera_id
+                if 'reaction' in event:
+                    event_message.cameras_event({'data': event})
+                    print('message sent to queue', flush=True)
+                    if sender:
+                        sender.transport.write(json.dumps(event).encode())
+                        print('sent', flush=True)
+                elif 'errorMessage' in event:
+                    event_message.cameras_log_event({'data': event})
+                    print('error log saved and sent to queue', flush=True)
+        except json.decoder.JSONDecodeError as err:
+            print(str(err), flush=True)
+        except Exception as err:
+            print(str(err), flush=True)
+
         # else:
         #     if sender:
         #         sender.transport.write(json.dumps(decoded_data).encode())

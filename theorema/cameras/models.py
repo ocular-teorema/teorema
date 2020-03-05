@@ -131,24 +131,9 @@ class Camera2Quadrator(models.Model):
     rows = models.IntegerField(default=1)
 
 
-# class LogMessage(models.Model):
-#     error_code = models.IntegerField()
-#     error_type = models.CharField(max_length=200)
-#     error_message = models.TextField()
-
 class CameraLog(models.Model):
-    # camera = models.ForeignKey(Camera, on_delete=models.CASCADE)
     camera_id = models.CharField(max_length=50)
-    add_time = models.DateTimeField(auto_now_add=True)
-    error_code = models.IntegerField()
+    error_time = models.DateTimeField(auto_now_add=True)
+    module_name = models.CharField(max_length=200, default='')
     error_type = models.CharField(max_length=200)
     error_message = models.TextField()
-    # error = models.ForeignKey(LogMessage, on_delete=models.CASCADE)
-
-    # def save(self, *args, **kwargs):
-    #     error = LogMessage.objects.filter(error_code=self.error_code).first()
-    #     if error:
-    #         self.error = error
-    #         super().save()
-    #     else:
-    #         pass
