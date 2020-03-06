@@ -135,5 +135,5 @@ class CameraLog(models.Model):
     camera_id = models.CharField(max_length=50)
     error_time = models.DateTimeField(auto_now_add=True)
     module_name = models.CharField(max_length=200, default='')
-    error_type = models.CharField(max_length=200)
+    error_type = models.IntegerField(default=0)
     error_message = models.TextField()

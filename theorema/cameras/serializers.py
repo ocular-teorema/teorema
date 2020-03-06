@@ -5,12 +5,13 @@ import json
 import random
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
-from .models import Server, Camera, CameraGroup, NotificationCamera, Quadrator, Camera2Quadrator, Storage
+from .models import Server, Camera, CameraGroup, NotificationCamera, Quadrator, Camera2Quadrator, Storage, CameraLog
 from theorema.m2mhelper import M2MHelperSerializer
 from theorema.orgs.models import OcularUser, Organization
 from rest_framework.response import Response
 from rest_framework import status
-from datetime import datetime
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 CAM_TYPES={1:'s', 2:'a', 3:'f'}
 
@@ -411,3 +412,34 @@ class QuadratorSerializer(serializers.ModelSerializer):
         for cam in cameras:
             Camera2Quadrator(**cam).save()
         return res
+
+
+class CameraLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CameraLog
+        fields = ('id', 'camera_id', 'module_name', 'error_type', 'error_message')
+
+    def create(self, new_log):
+        log = CameraLog(**new_log, error_time=timezone.now())
+        log.save(using='error_logs')
+        return log
+
+    def is_valid(self, new_log):
+        for log in CameraLog.objects.using('error_logs').filter(error_time__gte=timezone.now()-timedelta(minutes=5)):
+            log_record = self.to_representation(log)
+            log_record.pop('error_time')
+            if log_record == new_log:
+                return False
+        return True
+
+    def to_representation(self, log):
+        log_repr = {
+            'camera_id': log.camera_id,
+            'error_time': int(log.error_time.timestamp()),
+            'error_type': log.error_type,
+            'module_name': log.module_name,
+            'error_message': log.error_message
+        }
+
+        return log_repr
+

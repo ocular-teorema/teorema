@@ -3,6 +3,7 @@ import json
 from queue_api.common import base_send_in_queue
 from queue_api.messages import RequestParamValidationError
 from theorema.cameras.models import CameraLog, Camera
+from theorema.cameras.serializers import CameraLogSerializer
 import datetime
 
 
@@ -20,22 +21,19 @@ class LogsSendMessage(LogsQueueEndpoint):
 
         data = params['data']
 
-        error_time = datetime.datetime.now()
-
         event = {
             'camera_id': 'cam' + data['camera_id'],
-            'error_time': error_time,
             'module_name': data['moduleName'],
             'error_type': data['errorType'],
             'error_message': data['errorMessage']
         }
 
-        log = CameraLog(**event)
-        log.save(using='error_logs')
-
-        event['error_time'] = int(event['error_time'].timestamp())
-
-        base_send_in_queue(self.response_exchange, json.dumps(event))
+        if CameraLogSerializer().is_valid(event):
+            new_log = CameraLogSerializer().create(event)
+            event['error_time'] = int(new_log.error_time.timestamp())
+            base_send_in_queue(self.response_exchange, json.dumps(event))
+        else:
+            print('error message already exist in 5 minutes', flush=True)
 
 
 class LogsGetMessage(LogsQueueEndpoint):
@@ -76,15 +74,10 @@ class LogsGetMessage(LogsQueueEndpoint):
                                                                    error_time__lte=stop_timestamp,
                                                                    camera_id=camera_id).order_by('error_time')
         if Camera.objects.filter(uid=camera_id).first():
+            log_serializer = CameraLogSerializer()
             result = []
             for log in camera_logs:
-                result.append({
-                    'camera_id': log.camera_id,
-                    'error_time': int(log.error_time.timestamp()),
-                    'error_type': log.error_type,
-                    'module_name': log.module_name,
-                    'error_message': log.error_message
-                })
+                result.append(log_serializer.to_representation(log))
             self.send_data_response(result)
             return {'message sent'}
         else:
