@@ -22,7 +22,7 @@ from theorema.cameras.models import Camera
 from queue_api.status import StatusMessages
 from queue_api.storages import StorageListMessage, StorageDeleteMessage, StorageAddMessages, StorageUpdateMessage
 from queue_api.cameras import CameraAddMessages, CameraListMessages, CameraSetRecordingMessages, CameraDeleteMessages, \
-    CameraUpdateMessages
+    CameraUpdateMessages, CameraRestartMessages
 from queue_api.scheduler import SchedulesAddMessage, ScheduleListMessage, SchedulesDeleteMessage, SchedulesUpdateMessage
 from queue_api.common import pika_setup_connection, base_send_in_queue, get_server_name
 from queue_api.archive import VideosGetMessage, ArchiveEventsMessage
@@ -240,6 +240,13 @@ class PikaThread(threading.Thread):
         print('camera update request message received', flush=True)
 
         camera_message = CameraUpdateMessages(self.scheduler)
+        camera_message.handle_request(message)
+        print('message ok')
+
+    def cameras_restart(self, message):
+        print('camera update request message received', flush=True)
+
+        camera_message = CameraRestartMessages(self.scheduler)
         camera_message.handle_request(message)
         print('message ok')
 

@@ -8,8 +8,6 @@ import datetime
 import re
 
 
-
-
 def zeep_pythonvalue(self, xmlvalue):
     return xmlvalue
 
@@ -62,7 +60,6 @@ class PtzControlQueueEndpoint(QueueEndpoint):
         else:
             print('configuration already exist', flush=True)
             return cam_profile['ptz'], cam_profile['media_profile']
-
 
 
 class AbsoluteMoveMessage(PtzControlQueueEndpoint):
@@ -220,6 +217,16 @@ class ContinuousMoveMessage(PtzControlQueueEndpoint):
 
                 print('move request', move_request, flush=True)
 
+                # try:
+                #     ptz.ContinuousMove(move_request)
+                # except zeep.exceptions.Fault:
+                move_request.Velocity.PanTilt.space = \
+                    ptz.GetCompatibleConfigurations({'ProfileToken': media_profile.token})[0][
+                        'DefaultContinuousPanTiltVelocitySpace']
+                move_request.Velocity.Zoom.space = \
+                    ptz.GetCompatibleConfigurations({'ProfileToken': media_profile.token})[0][
+                        'DefaultContinuousZoomVelocitySpace']
+
                 ptz.ContinuousMove(move_request)
 
             except Exception as e:
@@ -325,7 +332,18 @@ class RelativeMoveMessage(PtzControlQueueEndpoint):
 
                 print('move request', move_request, flush=True)
 
+                # try:
+                #     ptz.AbsoluteMove(move_request)
+                # except zeep.exceptions.Fault:
+                move_request.Position.PanTilt.space = \
+                ptz.GetCompatibleConfigurations({'ProfileToken': media_profile.token})[0][
+                    'DefaultAbsolutePantTiltPositionSpace']
+                move_request.Position.Zoom.space = \
+                ptz.GetCompatibleConfigurations({'ProfileToken': media_profile.token})[0][
+                    'DefaultAbsoluteZoomPositionSpace']
+
                 ptz.AbsoluteMove(move_request)
+
                 time.sleep(3)
                 ptz.Stop({'ProfileToken': move_request.ProfileToken})
 

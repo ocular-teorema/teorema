@@ -24,8 +24,8 @@ class EventsSendMessage(EventQueueEndpoint):
             'camera_id': data['camera_id'],
             'data': {
                 'event_id': data['id'],
-                'event_start_timestamp': data['start_timestamp'],
-                'event_end_timestamp': data['end_timestamp'] if data['end_timestamp'] > 0 else 0,
+                'event_start_timestamp': data['start_timestamp'] // 1000,
+                'event_end_timestamp': data['end_timestamp'] // 1000 if data['end_timestamp'] > 0 else 0,
                 'event_type': data['type'],
                 'confidence': data['confidence'],
                 'reaction': data['reaction'],

@@ -1,5 +1,6 @@
 import requests
 import json
+import os
 
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -534,6 +535,38 @@ class CameraDeleteMessages(CameraQueueEndpoint):
                 camera_group_to_delete.delete()
 
         self.send_data_response({'camera_id': camera_id, 'success': True})
+
+
+class CameraRestartMessages(CameraQueueEndpoint):
+    response_message_type = 'cameras_restart_response'
+
+    schema = {
+        "type": "object",
+        "properties": {
+            "camera_id": {"type": "string"},
+            "data": {"type": "object"}
+        },
+        "required": ["camera_id", "data"]
+    }
+
+    def handle_request(self, params):
+        print('preparing response', flush=True)
+        self.uuid = params['uuid']
+
+        if self.check_request_params(params):
+            return
+
+        camera_id = params['camera_id']
+
+        not_restarted = os.system('supervisorctl restart {camera}'.format(camera=camera_id))
+        if not_restarted:
+            error = RequestParamValidationError('camera with id {id} can not restart'.format(id=camera_id))
+            print(error, flush=True)
+            self.send_error_response(error)
+            return
+
+        self.send_data_response({'camera_id': camera_id, 'success': True})
+
 
 
 def set_camera_recording(camera, recording):
