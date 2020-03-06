@@ -130,6 +130,13 @@ class AbsoluteMoveMessage(PtzControlQueueEndpoint):
 
                 print('move request', move_request, flush=True)
 
+                move_request.Position.PanTilt.space = \
+                    ptz.GetCompatibleConfigurations({'ProfileToken': media_profile.token})[0][
+                        'DefaultAbsolutePantTiltPositionSpace']
+                move_request.Position.Zoom.space = \
+                    ptz.GetCompatibleConfigurations({'ProfileToken': media_profile.token})[0][
+                        'DefaultAbsoluteZoomPositionSpace']
+
                 ptz.AbsoluteMove(move_request)
                 time.sleep(3)
                 ptz.Stop({'ProfileToken': move_request.ProfileToken})
