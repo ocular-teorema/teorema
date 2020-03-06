@@ -11,7 +11,7 @@ from theorema.cameras.models import Quadrator
 
 def stopper():
     for quad in Quadrator.objects.all():
-        if datetime.datetime.now().timestamp() - quad.last_ping_time > 60:
+        if datetime.datetime.now().timestamp() - quad.last_ping_time > 3 * 60:
             not_stopped = os.system('supervisorctl stop quad' + str(quad.id))
             # if not_stopped:
             #     print(not_stopped, flush=True)
