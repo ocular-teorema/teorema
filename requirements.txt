@@ -38,7 +38,7 @@ Jinja2==2.10
 julian==0.14
 kombu==4.1.0
 lxml==4.4.2
-MarkupSafe==1.0
+MarkupSafe==1.1.1
 oauthlib==2.0.2
 onvif-zeep==0.2.12
 parso==0.1.1

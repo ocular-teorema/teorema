@@ -265,7 +265,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
 
         if 'storage_id' in params:
             storage_id = params['storage_id']
-            if storage_id:
+            if storage_id is not None:
                 try:
                     storage = Storage.objects.get(id=storage_id)
                 except ObjectDoesNotExist:
@@ -278,16 +278,16 @@ class CameraUpdateMessages(CameraQueueEndpoint):
 
         schedule = None
         if 'schedule_id' in params:
-            if params['schedule_id']:
-                schedule_id = params['schedule_id']
-                if schedule_id:
-                    try:
-                        schedule = CameraSchedule.objects.get(id=schedule_id)
-                    except ObjectDoesNotExist:
-                        error = RequestParamValidationError('schedule with id {id} not found'.format(id=schedule_id))
-                        print(error, flush=True)
-                        self.send_error_response(error)
-                        return
+            # if params['schedule_id'] is not None:
+            schedule_id = params['schedule_id']
+            if schedule_id is not None:
+                try:
+                    schedule = CameraSchedule.objects.get(id=schedule_id)
+                except ObjectDoesNotExist:
+                    error = RequestParamValidationError('schedule with id {id} not found'.format(id=schedule_id))
+                    print(error, flush=True)
+                    self.send_error_response(error)
+                    return
             elif params['schedule_id'] is None:
                 if camera.schedule_job_start and camera.schedule_job_stop:
                     self.scheduler.delete_schedule(
@@ -335,6 +335,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
 
             camera.schedule_job_start = start_job.id
             camera.schedule_job_stop = stop_job.id
+            camera.schedule = schedule
 
         camera.save()
 
