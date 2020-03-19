@@ -280,7 +280,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
         if 'schedule_id' in params:
             # if params['schedule_id'] is not None:
             schedule_id = params['schedule_id']
-            if schedule_id is not None:
+            if schedule_id:
                 try:
                     schedule = CameraSchedule.objects.get(id=schedule_id)
                 except ObjectDoesNotExist:
@@ -288,7 +288,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
                     print(error, flush=True)
                     self.send_error_response(error)
                     return
-            elif params['schedule_id'] is None:
+            else:
                 if camera.schedule_job_start and camera.schedule_job_stop:
                     self.scheduler.delete_schedule(
                         start_job_id=str(camera.schedule_job_start),
@@ -297,7 +297,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
 
                     camera.schedule_job_start = None
                     camera.schedule_job_stop = None
-
+                    camera.schedule = None
                     camera.save()
 
         start_job = None
@@ -342,7 +342,7 @@ class CameraUpdateMessages(CameraQueueEndpoint):
         camera_repr['name'] = name
         camera_repr['address'] = address_primary
         camera_repr['address_secondary'] = address_secondary
-        camera_repr['analysis_type'] = analysis_type
+        camera_repr['analysis'] = analysis_type
         camera_repr['storage_life'] = storage_days
         camera_repr['indefinitely'] = storage_indefinitely
         camera_repr['camera_group'] = self.default_camera_group
