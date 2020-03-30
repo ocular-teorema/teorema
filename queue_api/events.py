@@ -30,7 +30,7 @@ class EventsSendMessage(EventQueueEndpoint):
                 'confidence': data['confidence'],
                 'reaction': data['reaction'],
                 'is_finished': data['isFinished'] if 'isFinished' in data else False,
-                'event_path': os.path.join('/', data['camera_id'], 'alertFragments', 'alert' + data['id'] + '.mp4')
+                'event_path': os.path.join('/', data['camera_id'], 'alertFragments', 'alert' + str(data['id']) + '.mp4')
             }
         }
 
