@@ -1,5 +1,6 @@
 import time
 import os
+import re
 import json
 import configparser
 from functools import partial
@@ -35,16 +36,37 @@ class CamListener(Protocol):
 
     def dataReceived(self, data):
         print(self.camera_id, data, flush=True)
-        [x for x in cams if str(x['id']) == str(self.camera_id)][0]['connection'] = self # kill me
+        [x for x in cams if str(x['id']) == str(self.camera_id)][0]['connection'] = self  # kill me
+        # try:
+        #    j = json.loads(data.strip(b'\0').decode())
+        #    j['camera_id'] = self.camera_id
+        # except json.decoder.JSONDecodeError:
+        #    pass
+        # else:
+        #    if sender:
+        #        sender.transport.write(json.dumps(j).encode())
+        #        print('sent', flush=True)
+        [x for x in cams if str(x['id']) == str(self.camera_id)][0]['connection'] = self  # kill me
         try:
-            j = json.loads(data.strip(b'\0').decode())
-            j['camera_id'] = self.camera_id
-        except json.decoder.JSONDecodeError:
-            pass
-        else:
-            if sender:
-                sender.transport.write(json.dumps(j).encode())
-                print('sent', flush=True)
+            decoded_data = re.findall(r'{".*?"}', data.decode())
+            for event in decoded_data:
+                event = json.loads(event)
+                # decoded_data = json.loads(data.strip(b'\0').decode())
+                event['camera_id'] = self.camera_id
+                print('event', event, flush=True)
+                if 'reaction' in event:
+                    # event_message.cameras_event({'data': event})
+                    # print('message sent to queue', flush=True)
+                    if sender:
+                        sender.transport.write(json.dumps(event).encode())
+                        print('sent', flush=True)
+                # elif 'errorMessage' in event:
+                # event_message.cameras_log_event({'data': event})
+                # print('error log saved and sent to queue', flush=True)
+        except json.decoder.JSONDecodeError as err:
+            print(str(err), flush=True)
+        except Exception as err:
+            print(str(err), flush=True)
 
 
 class CamListenerClientFactory(ReconnectingClientFactory):
